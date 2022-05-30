@@ -13,6 +13,7 @@
 	<!-- ======= Sidebar ======= -->
 	<%@include file="./sidebar.jsp"%>
 	<!-- End Sidebar-->
+	<div class="page-flag" data="bill"></div>
 	<main id="main" class="main">
 		<div class="pagetitle">
 			<nav>
@@ -87,8 +88,8 @@
 					<div class="modal-body">
 						<form class="row g-3">
 							<div class="col-md-12">
-								<label for="input-id" class="form-label">Mã:
-									<span class="employeeId text-danger">HD000002</span>
+								<label for="input-id" class="form-label">Mã: <span
+									class="employeeId text-danger">HD000002</span>
 								</label>
 							</div>
 							<div class="col-md-12">
@@ -192,8 +193,8 @@
 
 							<div class="text-end mt-3">
 								<button type="button" class="btn btn-primary"
-									data-bs-target="#create" data-bs-toggle="modal">
-									Chỉnh sửa</button>
+									data-bs-target="#create" data-bs-toggle="modal">Chỉnh
+									sửa</button>
 								<button type="button" class="btn btn-secondary"
 									data-bs-dismiss="modal">Đóng</button>
 							</div>

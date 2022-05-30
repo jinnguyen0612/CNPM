@@ -8,7 +8,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.GymManager.Entity.AccountEntity;
 
-public class AdminInterceptor extends HandlerInterceptorAdapter {
+public class StaffInterceptor extends HandlerInterceptorAdapter {
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
@@ -16,6 +17,11 @@ public class AdminInterceptor extends HandlerInterceptorAdapter {
 		HttpSession ss = request.getSession();
 
 		if (ss.getAttribute("admin") == null) {
+			response.sendRedirect(request.getContextPath() + "/admin/login.htm");
+			return false;
+		}
+		AccountEntity accountEntity = (AccountEntity) ss.getAttribute("admin");
+		if (accountEntity.getPolicyId() == 2) {
 			response.sendRedirect(request.getContextPath() + "/admin/login.htm");
 			return false;
 		}

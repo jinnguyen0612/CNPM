@@ -5,8 +5,11 @@ $(function() {
 		window.location.protocol + "//" + window.location.host + "/",
 		""
 	);
+	let page = $(".page-flag").attr("data");
+	console.log(page)
 	var element = $(".nav-link").filter(function() {
-		return this.href === url || this.href === path; // || url.href.indexOf(this.href) === 0;
+
+		return this.getAttribute("data") === page
 	});
 
 	element.removeClass("collapsed");

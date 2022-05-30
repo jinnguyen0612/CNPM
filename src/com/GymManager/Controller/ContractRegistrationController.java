@@ -10,6 +10,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -26,8 +27,18 @@ public class ContractRegistrationController extends MethodAdminController {
 	@RequestMapping(method = RequestMethod.GET)
 	public String index(ModelMap model) {
 		model.addAttribute("registerList", getAllRegister());
-
 		return "admin/contract-registration";
+	}
+
+	// detail
+	@RequestMapping(value = "/detail/{id}.htm", method = RequestMethod.GET)
+	public String getDetail(ModelMap model, @PathVariable("id") String id) {
+
+		model.addAttribute("idModal", "modal-detail");
+		model.addAttribute("registerList", getAllRegister());
+		model.addAttribute("registerDetail", getRegister(id));
+		return "admin/contract-registration";
+
 	}
 
 	public List<RegisterEntity> getAllRegister() {
@@ -35,5 +46,10 @@ public class ContractRegistrationController extends MethodAdminController {
 		String hql = "FROM RegisterEntity";
 		Query query = session.createQuery(hql);
 		return query.list();
+	}
+
+	public RegisterEntity getRegister(String id) {
+		Session session = factory.getCurrentSession();
+		return (RegisterEntity) session.get(RegisterEntity.class, id);
 	}
 }

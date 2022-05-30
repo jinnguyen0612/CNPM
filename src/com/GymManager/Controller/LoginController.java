@@ -34,8 +34,8 @@ public class LoginController {
 	@RequestMapping(value = "admin/login", method = RequestMethod.POST)
 	public String handleLogin(ModelMap model, HttpSession ss, HttpServletRequest request) {
 		Session session = factory.getCurrentSession();
-		String hql = "FROM AccountEntity WHERE policyId = '0' AND username = '" + request.getParameter("username")
-				+ "' AND password = '" + request.getParameter("password") + "'";
+		String hql = "FROM AccountEntity WHERE (policyId = '0' or policyId = '2') AND username = '"
+				+ request.getParameter("username") + "' AND password = '" + request.getParameter("password") + "'";
 
 		Query query = session.createQuery(hql);
 		if (query.list().size() > 0) {
@@ -43,11 +43,20 @@ public class LoginController {
 			ss.setAttribute("admin", account);
 		} else {
 			model.addAttribute("matKhau", "Tài khoản hoặc mật khẩu không đúng");
+			model.addAttribute("userName", request.getParameter("username"));
+			model.addAttribute("password", request.getParameter("password"));
+
 			ss.removeAttribute("admin");
 			return "admin/login";
 		}
 
 		return "redirect:/admin/customer.htm";
+	}
+
+	@RequestMapping(value = "admin/logout")
+	public String handleLogout(HttpSession ss) {
+		ss.removeAttribute("admin");
+		return "admin/login";
 	}
 
 }

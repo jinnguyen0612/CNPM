@@ -47,6 +47,8 @@
 
 <link rel="stylesheet"
 	href="<c:url value='/resources/admin/font/css/all.min.css'/>" />
+	<link rel="stylesheet"
+	href="<c:url value='/resources/admin/css/alertify.min.css'/>" />
 
 
 <!-- =======================================================

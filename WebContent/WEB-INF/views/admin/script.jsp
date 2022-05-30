@@ -19,6 +19,9 @@
 <script src="<c:url value='/resources/admin/js/main.js'/>"></script>
 <script src="<c:url value='/resources/admin/js/switchElement.js'/>"></script>
 <script src="<c:url value='/resources/admin/js/openModal.js'/>"></script>
+<script src="<c:url value='/resources/admin/js/alertify.min.js'/>"></script>
+<script src="<c:url value='/resources/admin/js/showMessage.js'/>"></script>
+<script src="<c:url value='/resources/admin/js/sidebarmenu.js'/>"></script>
 
 
 
