@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import org.hibernate.Query;
@@ -17,6 +19,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -35,7 +39,9 @@ import com.GymManager.Entity.RegisterDetailEntity;
 import com.GymManager.Entity.RegisterEntity;
 import com.GymManager.Entity.ScheduleEntity;
 import com.GymManager.Entity.TrainingPackEntity;
+import com.GymManager.ExtraClass.FormAttribute;
 import com.GymManager.ExtraClass.Message;
+import com.GymManager.ExtraClass.RandomPassword;
 
 @Controller
 @RequestMapping("admin/customer")
@@ -43,33 +49,71 @@ import com.GymManager.ExtraClass.Message;
 public class CustomerController extends MethodAdminController {
 	@Autowired
 	SessionFactory factory;
+	@Autowired
+	public JavaMailSender mailer;
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String index(ModelMap model) {
 		CustomerEntity customer = newCustomer();
 		model.addAttribute("customer", customer);
-		model.addAttribute("customerUpdate", customer);
+		model.addAttribute("cFormAttribute",
+				new FormAttribute("Thêm mới khách hàng", "admin/customer.htm", "btnCreate"));
 		model.addAttribute("cList", getAllCustomer());
 		model.addAttribute("register", newRegister());
 		return "admin/customer";
 	}
 
+	// get view create customer
+
+	@RequestMapping(value = "add.htm", method = RequestMethod.GET)
+	public String getCreate(ModelMap model, RedirectAttributes redirectAttributes) {
+		redirectAttributes.addFlashAttribute("idModal", "modal-create");
+		return "redirect:/admin/customer.htm";
+
+	}
+
 	// create customer
 	@RequestMapping(method = RequestMethod.POST, params = "btnCreate")
 	public String createCustomer(ModelMap model, @Validated @ModelAttribute("customer") CustomerEntity customer,
-			BindingResult result, RedirectAttributes redirectAttributes) {
-		System.out.println(customer.getCustomerId());
+			BindingResult result, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+
+//		String isCreateAccount = request.getParameter("checkbox-create-account");
+//		String userName = request.getParameter("userName");
 		if (!result.hasErrors()) {
 			Session session = factory.openSession();
 
 			Transaction t = session.beginTransaction();
 			try {
 
+//				if (isCreateAccount != null) {
+//					if (!userName.equals("")) {
+//						RandomPassword radomPassword = new RandomPassword(8);
+//
+//						AccountEntity accountEntity = new AccountEntity(userName, radomPassword.getPassword(), 0,
+//								"1       ", new Date(), customer);
+//						session.save(accountEntity);
+//
+//						String mailMessage = "Mật khẩu cho tài khoản PTITGYM của bạn là: "
+//								+ radomPassword.getPassword();
+//
+//						MimeMessage mail = mailer.createMimeMessage();
+//						MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+//						helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
+//						helper.setTo(customer.getEmail());
+//						helper.setReplyTo("nguyenminhnhat301101@gmail.com");
+//						helper.setSubject("Tai khoản PTITGYM");
+//						helper.setText(mailMessage);
+//						mailer.send(mail);
+//
+//						customer.setAccount(accountEntity);
+//
+//					}
+
+//				}
 				session.save(customer);
 
 				t.commit();
 				redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
-
 				return "redirect:/admin/customer.htm";
 
 			} catch (Exception e) {
@@ -88,9 +132,11 @@ public class CustomerController extends MethodAdminController {
 				session.close();
 			}
 		}
+
 		model.addAttribute("idModal", "modal-create");
 		model.addAttribute("customerUpdate", customer);
 		return "admin/customer";
+
 	}
 
 	// update customer //
@@ -99,26 +145,30 @@ public class CustomerController extends MethodAdminController {
 	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.GET)
 	public String getUpdate(ModelMap model, @PathVariable("id") String id) {
 
-		model.addAttribute("customer", newCustomer());
-		model.addAttribute("customerUpdate", getCustomer(id));
-		model.addAttribute("idModal", "modal-update");
+		model.addAttribute("customer", getCustomer(id));
+		model.addAttribute("idModal", "modal-create");
 		model.addAttribute("cList", getAllCustomer());
+		model.addAttribute("cFormAttribute", new FormAttribute("Chỉnh sửa thông tin khách hàng",
+				"admin/customer/update/" + id + ".htm", "btnUpdate"));
 		return "admin/customer";
+
 	}
 
 	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
-	public String updatCustomer(ModelMap model, @Validated @ModelAttribute("customerUpdate") CustomerEntity customer,
+	public String updateCustomer(ModelMap model, @Validated @ModelAttribute("customer") CustomerEntity customer,
 			BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
 		if (!result.hasErrors()) {
+
 			Session session = factory.openSession();
 
 			Transaction t = session.beginTransaction();
 			try {
+				customer.setAccount(getCustomer(id).getAccount());
 
 				session.update(customer);
 
 				t.commit();
-				redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Cập nhật thành công !!!"));
 
 				return "redirect:/admin/customer.htm";
 
@@ -139,12 +189,72 @@ public class CustomerController extends MethodAdminController {
 			}
 		}
 		model.addAttribute("idModal", "modal-update");
-		model.addAttribute("customer", newCustomer());
 		model.addAttribute("cList", getAllCustomer());
 		return "admin/customer";
 	}
 
-	// register
+	// create account customer
+
+	@RequestMapping(value = "{id}/create-account.htm", method = RequestMethod.POST)
+	public String getCreateAccount(ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("id") String id,
+			HttpServletRequest request) {
+
+		Session session = factory.openSession();
+		Transaction t = session.beginTransaction();
+		String userName = request.getParameter("userName");
+		System.out.println(userName);
+
+		CustomerEntity customer = getCustomer(id);
+		redirectAttributes.addFlashAttribute("error", "Tên tài khoản không được bỏ trống");
+		if (!userName.equals("")) {
+			try {
+
+				RandomPassword radomPassword = new RandomPassword(8);
+
+				AccountEntity accountEntity = new AccountEntity(userName, radomPassword.getPassword(), 1, 1, new Date(),
+						customer);
+
+				session.save(accountEntity);
+
+//					String mailMessage = "Mật khẩu cho tài khoản PTITGYM của bạn là: " + radomPassword.getPassword();
+				//
+//					MimeMessage mail = mailer.createMimeMessage();
+//					MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+//					helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
+//					helper.setTo(customer.getEmail());
+//					helper.setReplyTo("nguyenminhnhat301101@gmail.com");
+//					helper.setSubject("Tai khoản PTITGYM");
+//					helper.setText(mailMessage);
+//					mailer.send(mail);
+				//
+				customer.setAccount(accountEntity);
+				session.merge(customer);
+				t.commit();
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Tạo tài khoản thành công !!!"));
+				return "redirect:/admin/customer.htm";
+			} catch (Exception e) {
+
+				t.rollback();
+				System.out.println(e);
+				if (e.getCause().toString().contains("duplicate key")) {
+					redirectAttributes.addFlashAttribute("error", "Tên tài khoản đã tồn tại");
+				}
+			} finally {
+				session.close();
+			}
+
+		}
+
+		redirectAttributes.addFlashAttribute("userName", userName);
+		redirectAttributes.addFlashAttribute("idModal", "modal-create-account");
+		redirectAttributes.addFlashAttribute("customerId", id);
+
+		return "redirect:/admin/customer.htm";
+	}
+
+	// --------------------------- Register
+	// -----------------------------------------------
+	// ++++++++++++++ Create
 
 	@RequestMapping(value = "register/{id}.htm", method = RequestMethod.GET)
 	public String getRegister(ModelMap model, @PathVariable("id") String id) {
@@ -153,22 +263,24 @@ public class CustomerController extends MethodAdminController {
 		model.addAttribute("pack", getAllPackAvailable());
 		model.addAttribute("register", register);
 		model.addAttribute("customer", newCustomer());
-		model.addAttribute("customerUpdate", getCustomer(id));
 		model.addAttribute("idModal", "modal-register");
 		model.addAttribute("cList", getAllCustomer());
+		model.addAttribute("formAttribute",
+				new FormAttribute("Đăng ký tập", "admin/customer/register/" + id + ".htm", "btnRegister"));
 		return "admin/customer";
 	}
 
 	@RequestMapping(value = "register/{id}.htm", method = RequestMethod.POST, params = "btnRegister")
 	public String comfirmRegister(HttpServletRequest request, ModelMap model, @PathVariable("id") String id,
-			RedirectAttributes redirectAttributes) throws ParseException {
+			RedirectAttributes redirectAttributes, HttpSession ss) throws ParseException {
 		String classId = request.getParameter("class");
 		RegisterEntity register = newRegister();
 		String typeRegister = request.getParameter("typeRegister");
 		register.setCustomer(getCustomer(id));
 		register.setRegisterDate(new Date());
 		register.setStatus(0);
-		register.setAccount(getAccount("Q"));
+		AccountEntity accountEntity = (AccountEntity) ss.getAttribute("admin");
+		register.setAccount(getAccount(accountEntity.getUsername()));
 		if (!typeRegister.equals("0")) {
 
 			Session session = factory.openSession();
@@ -213,7 +325,8 @@ public class CustomerController extends MethodAdminController {
 
 						String value = request.getParameter("T" + i);
 						if (value != null) {
-							ScheduleEntity schedule = new ScheduleEntity(personalClass.getClassId(),personalClass, i, Integer.parseInt(value));
+							ScheduleEntity schedule = new ScheduleEntity(personalClass.getClassId(), personalClass, i,
+									Integer.parseInt(value));
 							session.save(schedule);
 
 						}
@@ -241,8 +354,59 @@ public class CustomerController extends MethodAdminController {
 		model.addAttribute("pack", getAllPackAvailable());
 		model.addAttribute("register", register);
 		model.addAttribute("customer", newCustomer());
-		model.addAttribute("customerUpdate", newCustomer());
 		model.addAttribute("idModal", "modal-register");
+		model.addAttribute("cList", getAllCustomer());
+		model.addAttribute("message", new Message("error", "Vui lòng chọn lớp hoặc tạo đăng ký cá nhân"));
+		return "admin/customer";
+	}
+
+	// ++++++++++++++ Update
+	@RequestMapping(value = "register/update/{id}.htm", method = RequestMethod.GET)
+	public String getUpdateRegister(ModelMap model, @PathVariable("id") String id) {
+		model.addAttribute("pack", getAllPackAvailable());
+		model.addAttribute("register", getRegister(id));
+		model.addAttribute("customer", newCustomer());
+		model.addAttribute("idModal", "modal-register");
+		model.addAttribute("cList", getAllCustomer());
+		model.addAttribute("formAttribute", new FormAttribute("Chỉnh sửa thông tin đăng ký",
+				"admin/customer/register/update/" + id + ".htm", "btnUpdate"));
+		return "admin/customer";
+	}
+
+	@RequestMapping(value = "register/update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
+	public String updateRegister(ModelMap model, @Validated @ModelAttribute("customerUpdate") CustomerEntity customer,
+			BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
+		if (!result.hasErrors()) {
+			Session session = factory.openSession();
+
+			Transaction t = session.beginTransaction();
+			try {
+
+				session.update(customer);
+
+				t.commit();
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
+
+				return "redirect:/admin/customer.htm";
+
+			} catch (Exception e) {
+
+				t.rollback();
+				System.out.println(e.getCause());
+				if (e.getCause().toString().contains("duplicate key")) {
+					result.rejectValue("customerId", "customerUpdate", "Ma da ton tai");
+				}
+				if (e.getCause().toString().contains("String or binary data would be truncated")) {
+					result.rejectValue("customerId", "customerUpdate", "Ma phai co 8 ky tu");
+				}
+			}
+
+			finally {
+				session.close();
+			}
+		}
+		model.addAttribute("idModal", "modal-update");
+		model.addAttribute("customer", newCustomer());
 		model.addAttribute("cList", getAllCustomer());
 		return "admin/customer";
 	}
@@ -251,7 +415,6 @@ public class CustomerController extends MethodAdminController {
 	@RequestMapping(value = "/detail/{id}.htm", method = RequestMethod.GET)
 	public String getDetail(ModelMap model, @PathVariable("id") String id) {
 		model.addAttribute("customer", newCustomer());
-		model.addAttribute("customerUpdate", newCustomer());
 		model.addAttribute("customerDetail", getCustomer(id));
 		model.addAttribute("idModal", "modal-detail");
 		model.addAttribute("cList", getAllCustomer());
@@ -332,5 +495,15 @@ public class CustomerController extends MethodAdminController {
 	public ClassEntity getClass(String id) {
 		Session session = factory.getCurrentSession();
 		return (ClassEntity) session.get(ClassEntity.class, id);
+	}
+
+	public RegisterEntity getRegister(String id) {
+		Session session = factory.getCurrentSession();
+		return (RegisterEntity) session.get(RegisterEntity.class, id);
+	}
+
+	public AccountEntity getAccount(String userName) {
+		Session session = factory.getCurrentSession();
+		return (AccountEntity) session.get(AccountEntity.class, userName);
 	}
 }

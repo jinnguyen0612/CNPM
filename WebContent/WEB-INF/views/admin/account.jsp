@@ -13,7 +13,7 @@
 	<!-- ======= Sidebar ======= -->
 	<%@include file="./sidebar.jsp"%>
 	<!-- End Sidebar-->
-
+	<div class="page-flag" data="account"></div>
 	<main id="main" class="main">
 		<section class="section">
 			<div class="row">
@@ -37,45 +37,46 @@
 									</tr>
 								</thead>
 								<tbody>
-																	
+
 									<c:forEach var="a" items="${aList}" varStatus="count">
 										<tr>
 											<th scope="row" class="text-center">${count.index+1}</th>
 											<td>${a.username }</td>
-	
+
 											<td>${a.dateCreate }</td>
-											
+
 											<c:choose>
 												<c:when test="${a.status=='0' }">
-												<td class="account-state text-success"><span
-											class="badge rounded-pill bg-secondary">Khoá</span></td>
+													<td class="account-state text-success"><span
+														class="badge rounded-pill bg-secondary">Khoá</span></td>
 												</c:when>
 												<c:otherwise>
 													<td class="account-state text-success"><span
-												class="badge rounded-pill bg-success">Hoạt động</span></td>
+														class="badge rounded-pill bg-success">Hoạt động</span></td>
 												</c:otherwise>
 											</c:choose>
-											
+
 											<c:choose>
-												<c:when test="${a.policyId=='0       '}">
+												<c:when test="${a.policyId=='0'}">
 													<td class="account-state text-danger">Quản lý</td>
 												</c:when>
-												
-												<c:when test="${a.policyId=='2       '}">
+
+												<c:when test="${a.policyId=='2'}">
 													<td class="account-state text-primary">Nhân viên</td>
 												</c:when>
-												
+
 												<c:otherwise>
 													<td class="account-state text-success">Khách hàng</td>
 												</c:otherwise>
 											</c:choose>
-	
-											<td class="text-center">
-												<a href=""><button class="btn btn-outline-info btn-light btn-sm"
-													title="Chi tiết người sở hữu" data-bs-toggle="modal"
-													data-bs-target="#detail" data-bs-placement="top">
-													<i class="fa-solid fa-circle-exclamation"></i></a>
-												</button>
+
+											<td class="text-center"><a href=""><button
+														class="btn btn-outline-info btn-light btn-sm"
+														title="Chi tiết người sở hữu" data-bs-toggle="modal"
+														data-bs-target="#detail" data-bs-placement="top">
+														<i class="fa-solid fa-circle-exclamation"></i>
+													</button></a>
+
 												<button class="btn btn-outline-danger btn-light btn-sm"
 													title="Đặt lại mật khẩu" data-bs-toggle="modal"
 													data-bs-placement="top">
@@ -84,8 +85,7 @@
 												<button class="btn btn-outline-warning btn-light btn-sm"
 													title="Khoá tài khoản">
 													<i class="fa-solid fa-lock"></i>
-												</button>
-											</td>
+												</button></td>
 										</tr>
 									</c:forEach>
 								</tbody>

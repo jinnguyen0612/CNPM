@@ -1,5 +1,5 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>	
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -8,6 +8,7 @@
 <%@include file="./head.jsp"%>
 </head>
 <body>
+	<div class="page-flag" data="pack"></div>
 	<!-- ======= Header ======= -->
 	<%@include file="./header.jsp"%>
 	<!-- End Header -->
@@ -23,7 +24,7 @@
 						<div class="card-body pb-0">
 							<h5 class="card-title">Danh sách gói tập</h5>
 							<h3 class="success-message">${message}</h3>
-                   			<h3 class="fail-message">${fmessage}</h3>
+							<h3 class="fail-message">${fmessage}</h3>
 
 							<!-- Table with stripped rows -->
 							<table class="table" id="my-data-table">
@@ -40,39 +41,39 @@
 									</tr>
 								</thead>
 								<tbody>
-								<c:forEach var="Z" items="${pack}">														
-									<tr>
-										<td>${Z.packID}</td>
-										<td>${Z.packName}</td>
-										<td>${Z.packTypeID}</td>
-										<td>${Z.packDuration}</td>
-										<td>${Z.money}</td>
-										
-										
-										<c:choose>
-											 <c:when test="${Z.status=='0'}">
-		           								<td class="account-state"><span
-													class="badge rounded-pill bg-secondary">Khóa</span></td>
-											 </c:when>
-											 <c:otherwise>
-     											<td class="account-state"><span
-													class="badge rounded-pill bg-secondary">Kích hoạt</span></td>
-    										</c:otherwise>
-										</c:choose> 
+									<c:forEach var="Z" items="${pack}">
+										<tr>
+											<td>${Z.packID}</td>
+											<td>${Z.packName}</td>
+											<td>${Z.packTypeID}</td>
+											<td>${Z.packDuration}</td>
+											<td>${Z.money}</td>
 
-										
 
-										<td class="text-center">
-											<button class="btn btn-outline-warning btn-light btn-sm"
-												onclick="window.location.href = '${pageContext.request.contextPath}/admin/package/updateTrainingPack/${Z.packID}.htm'"
-												title="Chỉnh sửa">
-												<i class="fa-solid fa-pen-to-square"></i>
-											</button>
-										</td>
-									</tr>
+											<c:choose>
+												<c:when test="${Z.status=='0'}">
+													<td class="account-state"><span
+														class="badge rounded-pill bg-secondary">Khóa</span></td>
+												</c:when>
+												<c:otherwise>
+													<td class="account-state"><span
+														class="badge rounded-pill bg-secondary">Kích hoạt</span></td>
+												</c:otherwise>
+											</c:choose>
+
+
+
+											<td class="text-center">
+												<button class="btn btn-outline-warning btn-light btn-sm"
+													onclick="window.location.href = '${pageContext.request.contextPath}/admin/package/updateTrainingPack/${Z.packID}.htm'"
+													title="Chỉnh sửa">
+													<i class="fa-solid fa-pen-to-square"></i>
+												</button>
+											</td>
+										</tr>
 									</c:forEach>
 								</tbody>
-								
+
 							</table>
 
 							<!-- End Table with stripped rows -->
@@ -92,24 +93,26 @@
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form:form action="${pageContext.request.contextPath}/admin/package/insertP.htm" class="row g-3" id="form-package"
-						modelAttribute="insertPackage">
+						<form:form
+							action="${pageContext.request.contextPath}/admin/package/insertP.htm"
+							class="row g-3" id="form-package" modelAttribute="insertPackage">
 							<div class="col-md-12">
 								<label class="form-label">Mã:</label>
 								<form:input path="packID" type="text" class="form-control" />
 							</div>
 							<div class="col-md-6">
-								<label for="package-type" class="form-label">Loại gói</label> 
+								<label for="package-type" class="form-label">Loại gói</label>
 								<form:select path="packTypeID" class="form-control">
-				                    <c:forEach var="T" items="${trainingPackTypeEntity}">
-				                        <form:option value="${T.packTypeID}">${T.packTypeID}</form:option>
-				                    </c:forEach>
-				                </form:select>
+									<c:forEach var="T" items="${trainingPackTypeEntity}">
+										<form:option value="${T.packTypeID}">${T.packTypeID}</form:option>
+									</c:forEach>
+								</form:select>
 							</div>
 
 							<div class="col-md-6">
 								<label for="input-package-name" class="form-label">Tên
-									gói tập</label> <form:input type="text" class="form-control"
+									gói tập</label>
+								<form:input type="text" class="form-control"
 									id="input-package-name" path="packName" />
 							</div>
 
@@ -118,9 +121,9 @@
 									gói</label>
 								<div class="input-group col-md-6 mb-3">
 									<form:input id="input-package-limit-time" type="number"
-										class="form-control"  aria-label="Username"
-										aria-describedby="basic-addon1" path="packDuration"  /> <span
-										class="input-group-text" id="basic-addon1" >Tháng</span>
+										class="form-control" aria-label="Username"
+										aria-describedby="basic-addon1" path="packDuration" />
+									<span class="input-group-text" id="basic-addon1">Tháng</span>
 								</div>
 							</div>
 
@@ -131,18 +134,17 @@
 									<form:input id="iinput-package-price" type="number"
 										class="form-control" placeholder="vd: 50000"
 										aria-label="input-package-price"
-										aria-describedby="basic-addon1" path="money" /> <span
-										class="input-group-text" id="basic-addon1">VND</span>
+										aria-describedby="basic-addon1" path="money" />
+									<span class="input-group-text" id="basic-addon1">VND</span>
 								</div>
 							</div>
 							<fieldset class="col-md-12">
 								<legend class="col-form-label col-sm-2 pt-0"> Trạng
 									thái </legend>
-								 <form:select path="status" class="form-control">
-						                <form:option value="0">Khóa</form:option>
-						            </form:select>
+								<form:select path="status" class="form-control">
+									<form:option value="0">Khóa</form:option>
+								</form:select>
 							</fieldset>
-						
 					</div>
 					<div class="modal-footer">
 						<button type="submit" form="form-package" class="btn btn-primary">
@@ -155,7 +157,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- detail -->
 	</main>
 	<!-- End #main -->

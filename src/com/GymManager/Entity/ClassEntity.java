@@ -63,6 +63,14 @@ public class ClassEntity {
 	private Collection<ScheduleEntity> scheduleEntity;
 	
 
+	public Collection<ScheduleEntity> getScheduleEntity() {
+		return scheduleEntity;
+	}
+
+	public void setScheduleEntity(Collection<ScheduleEntity> scheduleEntity) {
+		this.scheduleEntity = scheduleEntity;
+	}
+
 	public TrainingPackEntity getTrainingPackEntity() {
 		return trainingPackEntity;
 	}

@@ -6,6 +6,8 @@
 <%@include file="./head.jsp"%>
 </head>
 <body>
+	<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+	<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 	<!-- ======= Header ======= -->
 	<%@include file="./header.jsp"%>
 	<!-- End Header -->
@@ -13,6 +15,7 @@
 	<!-- ======= Sidebar ======= -->
 	<%@include file="./sidebar.jsp"%>
 	<!-- End Sidebar-->
+	<div class="page-flag" data="index"></div>
 	<main id="main" class="main">
 		<div class="pagetitle">
 			<h1>Trang chủ</h1>
@@ -20,6 +23,10 @@
 		<!-- End Page Title -->
 
 		<section class="section dashboard">
+			<form action="admin/index.htm" class="invisible position-absolute"
+				method="get" id="index-filter">
+				<button name="btnFilter" class="btnFilter"></button>
+			</form>
 			<div class="row">
 				<!-- Left side columns -->
 				<div class="col-lg-12">
@@ -32,29 +39,44 @@
 										class="bi bi-three-dots"></i></a>
 									<ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
 										<li class="dropdown-header text-start">
-											<h6>Filter</h6>
+											<h6>Lọc</h6>
 										</li>
 
-										<li><a class="dropdown-item" href="#">Today</a></li>
-										<li><a class="dropdown-item" href="#">This Month</a></li>
-										<li><a class="dropdown-item" href="#">This Year</a></li>
+										<li><input type="radio" id="b-day"
+											class="invisible position-absolute"
+											${billFilter=="day"?'checked':''} form="index-filter"
+											name="bill" value="day"> <label class="dropdown-item"
+											for="b-day">Hôm nay</label></li>
+										<li><input type="radio"
+											class="invisible position-absolute"
+											${billFilter=="month"?'checked':''} id="b-month"
+											form="index-filter" name="bill" value="month"> <label
+											class="dropdown-item" for="b-month">Tháng này</label></li>
+										<li><input type="radio"
+											class="invisible position-absolute"
+											${billFilter=="year"?'checked':''} id="b-year"
+											form="index-filter" name="bill" value="year"> <label
+											class="dropdown-item" for="b-year">Năm này</label></li>
 									</ul>
 								</div>
 
 								<div class="card-body">
 									<h5 class="card-title">
-										Sales <span>| Today</span>
+										Hoá đơn <span>| <c:choose>
+												<c:when test="${billFilter=='day'}">Hôm nay</c:when>
+												<c:when test="${billFilter=='month'}">Tháng này</c:when>
+												<c:otherwise>Năm này</c:otherwise>
+											</c:choose>
+										</span>
 									</h5>
 
 									<div class="d-flex align-items-center">
 										<div
 											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-											<i class="bi bi-cart"></i>
+											<i class="fa-light fa-ballot"></i>
 										</div>
 										<div class="ps-3">
-											<h6>145</h6>
-											<span class="text-success small pt-1 fw-bold">12%</span> <span
-												class="text-muted small pt-2 ps-1">increase</span>
+											<h6>${numOfBill}</h6>
 										</div>
 									</div>
 								</div>
@@ -70,18 +92,33 @@
 										class="bi bi-three-dots"></i></a>
 									<ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
 										<li class="dropdown-header text-start">
-											<h6>Filter</h6>
+											<h6>Lọc</h6>
 										</li>
 
-										<li><a class="dropdown-item" href="#">Today</a></li>
-										<li><a class="dropdown-item" href="#">This Month</a></li>
-										<li><a class="dropdown-item" href="#">This Year</a></li>
+										<li><input type="radio"
+											class="invisible position-absolute"
+											${revenueFilter=="day"?'checked':''} id="r-day"
+											form="index-filter" name="revenue" value="day"> <label
+											class="dropdown-item" for="r-day">Hôm nay</label></li>
+										<li><input class="invisible position-absolute"
+											${revenueFilter=="month"?'checked':''} type="radio"
+											id="r-month" form="index-filter" name="revenue" value="month">
+											<label class="dropdown-item" for="r-month">Tháng này</label></li>
+										<li><input type="radio"
+											class="invisible position-absolute"
+											${revenueFilter=="year"?'checked':''} id="r-year"
+											form="index-filter" name="revenue" value="year"> <label
+											class="dropdown-item" for="r-year">Năm này</label></li>
 									</ul>
 								</div>
 
 								<div class="card-body">
 									<h5 class="card-title">
-										Revenue <span>| This Month</span>
+										Doanh thu <span>| <c:choose>
+												<c:when test="${revenueFilter=='day'}">Hôm nay</c:when>
+												<c:when test="${revenueFilter=='month'}">Tháng này</c:when>
+												<c:otherwise>Năm này</c:otherwise>
+											</c:choose></span>
 									</h5>
 
 									<div class="d-flex align-items-center">
@@ -90,9 +127,11 @@
 											<i class="bi bi-currency-dollar"></i>
 										</div>
 										<div class="ps-3">
-											<h6>$3,264</h6>
-											<span class="text-success small pt-1 fw-bold">8%</span> <span
-												class="text-muted small pt-2 ps-1">increase</span>
+											<h6>
+												<fmt:formatNumber pattern="###,### đ" value="${revenue}"
+													type="currency" />
+											</h6>
+
 										</div>
 									</div>
 								</div>
@@ -103,23 +142,9 @@
 						<!-- Customers Card -->
 						<div class="col-xxl-4 col-xl-12">
 							<div class="card info-card customers-card">
-								<div class="filter">
-									<a class="icon" href="#" data-bs-toggle="dropdown"><i
-										class="bi bi-three-dots"></i></a>
-									<ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-										<li class="dropdown-header text-start">
-											<h6>Filter</h6>
-										</li>
-
-										<li><a class="dropdown-item" href="#">Today</a></li>
-										<li><a class="dropdown-item" href="#">This Month</a></li>
-										<li><a class="dropdown-item" href="#">This Year</a></li>
-									</ul>
-								</div>
-
 								<div class="card-body">
 									<h5 class="card-title">
-										Customers <span>| This Year</span>
+										Khách hàng <span>| tất cả</span>
 									</h5>
 
 									<div class="d-flex align-items-center">
@@ -128,9 +153,8 @@
 											<i class="bi bi-people"></i>
 										</div>
 										<div class="ps-3">
-											<h6>1244</h6>
-											<span class="text-danger small pt-1 fw-bold">12%</span> <span
-												class="text-muted small pt-2 ps-1">decrease</span>
+											<h6>${numOfCustomer}</h6>
+
 										</div>
 									</div>
 								</div>
@@ -138,103 +162,7 @@
 						</div>
 						<!-- End Customers Card -->
 
-						<!-- Reports -->
-						<div class="col-12">
-							<div class="card">
-								<div class="filter">
-									<a class="icon" href="#" data-bs-toggle="dropdown"><i
-										class="bi bi-three-dots"></i></a>
-									<ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-										<li class="dropdown-header text-start">
-											<h6>Filter</h6>
-										</li>
 
-										<li><a class="dropdown-item" href="#">Today</a></li>
-										<li><a class="dropdown-item" href="#">This Month</a></li>
-										<li><a class="dropdown-item" href="#">This Year</a></li>
-									</ul>
-								</div>
-
-								<div class="card-body">
-									<h5 class="card-title">
-										Reports <span>/Today</span>
-									</h5>
-
-									<!-- Line Chart -->
-									<div id="reportsChart"></div>
-
-									<script>
-                      document.addEventListener("DOMContentLoaded", () => {
-                        new ApexCharts(
-                          document.querySelector("#reportsChart"),
-                          {
-                            series: [
-                              {
-                                name: "Sales",
-                                data: [31, 40, 28, 51, 42, 82, 56],
-                              },
-                              {
-                                name: "Revenue",
-                                data: [11, 32, 45, 32, 34, 52, 41],
-                              },
-                              {
-                                name: "Customers",
-                                data: [15, 11, 32, 18, 9, 24, 11],
-                              },
-                            ],
-                            chart: {
-                              height: 350,
-                              type: "area",
-                              toolbar: {
-                                show: false,
-                              },
-                            },
-                            markers: {
-                              size: 4,
-                            },
-                            colors: ["#4154f1", "#2eca6a", "#ff771d"],
-                            fill: {
-                              type: "gradient",
-                              gradient: {
-                                shadeIntensity: 1,
-                                opacityFrom: 0.3,
-                                opacityTo: 0.4,
-                                stops: [0, 90, 100],
-                              },
-                            },
-                            dataLabels: {
-                              enabled: false,
-                            },
-                            stroke: {
-                              curve: "smooth",
-                              width: 2,
-                            },
-                            xaxis: {
-                              type: "datetime",
-                              categories: [
-                                "2018-09-19T00:00:00.000Z",
-                                "2018-09-19T01:30:00.000Z",
-                                "2018-09-19T02:30:00.000Z",
-                                "2018-09-19T03:30:00.000Z",
-                                "2018-09-19T04:30:00.000Z",
-                                "2018-09-19T05:30:00.000Z",
-                                "2018-09-19T06:30:00.000Z",
-                              ],
-                            },
-                            tooltip: {
-                              x: {
-                                format: "dd/MM/yy HH:mm",
-                              },
-                            },
-                          },
-                        ).render();
-                      });
-                    </script>
-									<!-- End Line Chart -->
-								</div>
-							</div>
-						</div>
-						<!-- End Reports -->
 					</div>
 				</div>
 				<!-- End Left side columns -->
@@ -246,5 +174,14 @@
 	</main>
 	<!-- End #main -->
 	<%@include file="./script.jsp"%>
+	<script type="text/javascript">
+		$('input[name="bill"]').change(function() {
+			$('button[name="btnFilter"]').click()
+		})
+
+		$('input[name="revenue"]').change(function() {
+			$('button[name="btnFilter"]').click()
+		})
+	</script>
 </body>
 </html>

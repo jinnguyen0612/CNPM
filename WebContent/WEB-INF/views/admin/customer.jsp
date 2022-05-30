@@ -10,13 +10,9 @@
 </head>
 
 <body>
-	<!--  flag -->
-	<div class="modal-flag" idModal="${idModal}"></div>
-	<div class="page-flag" data="sale"></div>
-	<div class="alert-flag" aType='${message.type}'
-		aMessage="${message.message }"></div>
-	<!-- end flag  -->
+
 	<!-- initial customer data -->
+	<div class="page-flag" data="customer"></div>
 	<div class="initialCSId position-absolute"
 		data="${customer.customerId }"></div>
 	<!-- ======= Header ======= -->
@@ -55,7 +51,8 @@
 											<td>${c.customerId}</td>
 											<td>${c.name}</td>
 											<td>${c.gender? 'Nam':'Nữ'}</td>
-											<td>${c.birthday }</td>
+											<td><fmt:formatDate value="${c.birthday }"
+													pattern="dd/MM/yyyy" /></td>
 
 											<td class="account-state"><span
 												class="badge rounded-pill bg-success">Đang tập</span></td>
@@ -77,7 +74,29 @@
 														data-bs-target="#detail" data-bs-placement="top">
 														<i class="fa-solid fa-circle-exclamation"></i>
 													</button>
-											</a></td>
+
+											</a> <c:choose>
+													<c:when test="${c.account == null}">
+														<button
+															class="btn btn-outline-success btn-create-account btn-light btn-sm"
+															data=${c.customerId } title="Tạo tài khoản"
+															data-bs-toggle="modal"
+															data-bs-target="#modal-create-account"
+															data-bs-placement="top">
+															<i class="fa-solid fa-file-invoice"></i>
+														</button>
+													</c:when>
+													<c:otherwise>
+														<button disabled="disabled"
+															class="btn btn-secondary btn-create-account btn-sm"
+															data=${c.customerId } title="Đã có tài khoản"
+															data-bs-toggle="modal"
+															data-bs-target="#modal-create-account"
+															data-bs-placement="top">
+															<i class="fa-solid fa-file-invoice"></i>
+														</button>
+													</c:otherwise>
+												</c:choose></td>
 										</tr>
 									</c:forEach>
 								</tbody>
@@ -96,18 +115,18 @@
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
-						<h5 class="modal-title">Thêm mới khách hàng</h5>
+						<h5 class="modal-title">${cFormAttribute.formTitle}</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form:form action="admin/customer.htm" method="post"
+						<form:form action="${cFormAttribute.formAction}" method="post"
 							class="row g-3" modelAttribute="customer">
 							<div class="col-md-12">
 								<label for="input-id" class="form-label ">Mã: <span
 									class="employeeId text-danger customerId"></span> <form:input
 										path="customerId" type="text" class="form-control"
-										id="input-id" /> <span class="text-danger"><form:errors
+										id="input-id" readonly="true" /> <span class="text-danger"><form:errors
 											path="customerId"></form:errors></span>
 								</label>
 							</div>
@@ -161,7 +180,7 @@
 									id="input-address" placeholder="97 Man Thiện, ..." />
 								<span class="text-danger"><form:errors path="address"></form:errors></span>
 							</div>
-							<div class="col-12">
+							<!-- <div class="col-12">
 								<button type="button"
 									class="btn btn-outline-primary btn-create-account col-12"
 									data-bs-toggle="collapse" data-bs-target="#form-create-account"
@@ -171,22 +190,20 @@
 								</button>
 							</div>
 							<div class="collapse col-12" id="form-create-account">
+								<input type="checkbox" value="1" name="checkbox-create-account"
+									class="checkbox-create-account">
 								<div class="row">
-									<div class="col-6" data-link="account" data-n="2">
+									<div class="col-12" data-link="account" data-n="2">
 										<label for="input-username" class="form-label">Tên tài
-											khoản</label> <input type="text" class="form-control"
+											khoản</label> <input type="text" name="userName" class="form-control"
 											id="input-username" />
 									</div>
-									<div class="col-6">
-										<label for="input-password" class="form-label">Mật
-											khẩu</label> <input type="password" class="form-control"
-											id="input-password" />
-									</div>
+
 								</div>
-							</div>
+							</div> -->
 							<div class="text-end mt-3">
-								<button type="submit" name="btnCreate" class="btn btn-primary">Xác
-									nhận</button>
+								<button type="submit" name="${cFormAttribute.btnAction}"
+									class="btn btn-primary">Xác nhận</button>
 								<button type="button" class="btn btn-secondary close-form"
 									data-bs-dismiss="modal">Đóng</button>
 							</div>
@@ -196,105 +213,32 @@
 			</div>
 		</div>
 
-
-		<!-- Form chỉnh sủa thông tin khách hàng  -->
-
-		<div class="modal fade" id="modal-update" tabindex="-1">
+		<!-- form đăng ký tài khoản khách hàng -->
+		<div class="modal fade" id="modal-create-account" tabindex="-1">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
-						<h5 class="modal-title">Chỉnh sửa thông tin khách hàng</h5>
+						<h5 class="modal-title">Đăng ký tài khoản khách hàng</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form:form
-							action="admin/customer/update/${customerUpdate.customerId}.htm"
-							method="post" class="row g-3" modelAttribute="customerUpdate">
-							<div class="col-md-12">
-								<label for="input-id" class="form-label ">Mã: <span
-									class="employeeId text-danger customerId"></span> <form:input
-										path="customerId" readonly="true" type="text"
-										class="form-control" id="input-id" /> <span
-									class="text-danger"></span>
-								</label>
-							</div>
-
-							<div class="col-md-12">
-								<label for="input-name" class="form-label">Họ và tên</label>
-								<form:input path="name" type="text" class="form-control"
-									id="input-name" />
-								<span class="text-danger"><form:errors path="name"></form:errors></span>
-							</div>
-							<fieldset class="col-md-12">
-								<legend class="col-form-label col-sm-2 pt-0"> Giới tính
-								</legend>
-								<div class="col-sm-12 d-flex gap-4">
-									<div class="form-check">
-										<form:radiobutton path="gender" class="form-check-input"
-											name="input-gender" id="female" value="0" />
-										<label class="form-check-label" for="female"> Nữ </label>
-									</div>
-									<div class="form-check">
-										<form:radiobutton path="gender" class="form-check-input"
-											name="input-gender" id="male" value="1" />
-										<label class="form-check-label" for="male"> Nam </label>
-									</div>
-								</div>
-							</fieldset>
-
-							<div class="col-md-6">
-								<label for="input-birthday" class="form-label">Ngày sinh</label>
-								<form:input path="birthday" type="date" class="form-control"
-									id="input-birthday" />
-								<span class="text-danger"><form:errors path="birthday"></form:errors></span>
-							</div>
-
-							<div class="col-md-6">
-								<label for="input-phone" class="form-label">SDT</label>
-								<form:input path="phone" type="tel" class="form-control"
-									id="input-phone" />
-								<span class="text-danger"><form:errors path="phone"></form:errors></span>
-							</div>
-							<div class="col-md-12">
-								<label for="input-email" class="form-label">Email</label>
-								<form:input path="email" type="text" class="form-control"
-									id="input-email" />
-								<span class="text-danger"><form:errors path="email"></form:errors></span>
-							</div>
-
-							<div class="col-12">
-								<label for="input-address" class="form-label">Địa chỉ</label>
-								<form:input path="address" type="text" class="form-control"
-									id="input-address" placeholder="97 Man Thiện, ..." />
-								<span class="text-danger"><form:errors path="address"></form:errors></span>
-							</div>
-							<div class="col-12">
-								<button type="button"
-									class="btn btn-outline-primary btn-create-account col-12"
-									data-bs-toggle="collapse" data-bs-target="#form-create-account"
-									onClick="toggleBtnState(this, 'btn-outline-danger')">
-									<i class="bi bi-plus-circle"></i> <span class="">Tạo tài
-										khoản mới</span>
-								</button>
-							</div>
-							<div class="collapse col-12" id="form-create-account">
+						<form:form action="/create-account.htm" method="post"
+							class="row g-3">
+							<div class="col-12" id="form-create-account">
 								<div class="row">
-									<div class="col-6" data-link="account" data-n="2">
+									<div class="col-12" data-link="account" data-n="2">
 										<label for="input-username" class="form-label">Tên tài
-											khoản</label> <input type="text" class="form-control"
-											id="input-username" />
+											khoản</label> <input type="text" name="userName" value="${userName}"
+											class="form-control" id="input-username" />
 									</div>
-									<div class="col-6">
-										<label for="input-password" class="form-label">Mật
-											khẩu</label> <input type="password" class="form-control"
-											id="input-password" />
-									</div>
+
+									<span class="text-danger">${error}</span>
 								</div>
 							</div>
 							<div class="text-end mt-3">
-								<button type="submit" name="btnUpdate" class="btn btn-primary">Xác
-									nhận</button>
+								<button type="submit" name="${btnCreate}"
+									class="btn btn-primary">Xác nhận</button>
 								<button type="button" class="btn btn-secondary close-form"
 									data-bs-dismiss="modal">Đóng</button>
 							</div>
@@ -302,6 +246,7 @@
 					</div>
 				</div>
 			</div>
+		</div>
 		</div>
 
 		<!-- Form đăng ký tập -->
@@ -309,13 +254,12 @@
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
-						<h5 class="modal-title">Đăng ký tập</h5>
+						<h5 class="modal-title">${formAttribute.formTitle}</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form:form id="register"
-							action="admin/customer/register/${register.customer.customerId}.htm"
+						<form:form id="register" action="${formAttribute.formAction}"
 							class="row g-3" modelAttribute="${register}">
 							<div class="col-md-12">
 								<label class="form-label">Mã: <span
@@ -407,8 +351,8 @@
 								</button>
 							</div>
 							<div class="text-end mt-3">
-								<button type="submit" name="btnRegister" class="btn btn-primary">Xác
-									nhận</button>
+								<button type="submit" name="${formAttribute.btnAction}"
+									class="btn btn-primary">Xác nhận</button>
 								<button type="button" class="btn btn-secondary close-form"
 									data-bs-dismiss="modal">Đóng</button>
 							</div>
@@ -554,6 +498,11 @@
 				</div>
 			</div>
 		</div>
+
+
+
+
+
 		<!-- table detail -->
 		<div class="modal fade" id="modal-detail" tabindex="-1">
 			<div class="modal-dialog modal-lg modal-dialog-centered">
@@ -597,7 +546,10 @@
 													</div>
 													<div class="row">
 														<div class="col-lg-3 col-md-4 label">Ngày Sinh</div>
-														<div class="col-lg-9 col-md-8">${customerDetail.birthday}</div>
+														<div class="col-lg-9 col-md-8">
+															<fmt:formatDate value="${customerDetail.birthday}"
+																pattern="dd/MM/yyyy" />
+														</div>
 													</div>
 
 													<div class="row">
@@ -624,14 +576,17 @@
 														<div class="col-2">Mã</div>
 														<div class="col-2">Ngày đăng ký</div>
 														<div class="col-2">Trạng thái</div>
-														<div class="col-3">Người đăng ký</div>
+														<div class="col-3">Tài khoản đăng ký</div>
 													</div>
 
 													<c:forEach var="r" items="${customerDetail.registerList}">
 														<div
-															class="row bg-light p-2 rounded border border-secondary align-items-center mb-4">
-															<div class="col-2">${r.registerId}</div>
-															<div class="col-2">${r.registerDate}</div>
+															class="row bg-light p-2 rounded border ${r.status == 0?'border-danger':'border-info'}  align-items-center mb-4">
+															<div class="col-2 fw-bold">${r.registerId}</div>
+															<div class="col-2">
+																<fmt:formatDate value="${r.registerDate}"
+																	pattern="dd/MM/yyyy" />
+															</div>
 															<div class="col-2">
 																<c:if test="${r.status == 0}">
 																	<span class="badge rounded-pill bg-danger">Chưa
@@ -644,40 +599,95 @@
 
 															</div>
 															<div class="col-3">${r.account.username}</div>
-															<div class="col-3 text-primary" style="cursor: pointer">
-																<span data-bs-toggle="collapse" href="#${r.registerId}">
-																	Chi tiết <i class="fa-solid fa-angle-down"></i>
-																</span>
-																<button title="Chỉnh sửa"
-																	class="btn btn-outline-warning btn-sm btn-light">
-																	<i class="fa-solid fa-pen-to-square"></i>
+															<div class="col-3 text-primary text-end"
+																style="cursor: pointer">
+																<button class="btn btn-outline-info btn-light btn-sm"
+																	title="Chi tiết" data-bs-toggle="collapse"
+																	href="#${r.registerId}" data-bs-placement="top">
+																	<i class="fa-solid  fa-circle-exclamation"></i><i
+																		class="fa-solid ms-1 fa-angle-down"></i>
 																</button>
-																<c:if test="${r.status == 0}">
-																	<button title="Tạo hoá đơn"
-																		class="btn btn-outline-success btn-sm btn-light">
-																		<i class="fa-solid fa-ballot"></i>
-																	</button>
-																</c:if>
+																<c:choose>
+																	<c:when test="${r.status == 1}">
+																		<button title="Chỉnh sửa" disabled="disabled"
+																			class="btn btn-sm btn-secondary">
+																			<i class="fa-solid fa-pen-to-square"></i>
+																		</button>
+																	</c:when>
+																	<c:otherwise>
+																		<a
+																			href="admin/customer/register/update/${r.registerId}.htm"><button
+																				class="btn btn-outline-warning btn-light btn-sm"
+																				title="Chỉnh sửa">
+																				<i class="fa-solid fa-pen-to-square"></i>
+																			</button> </a>
+																	</c:otherwise>
+																</c:choose>
+
+																<c:choose>
+																	<c:when test="${r.status == 1}">
+																		<button title="Tạo hoá đơn" disabled="disabled"
+																			class="btn  btn-sm btn-secondary">
+																			<i class="fa-solid fa-ballot"></i>
+																		</button>
+																	</c:when>
+																	<c:otherwise>
+																		<button title="Tạo hoá đơn"
+																			class="btn btn-outline-success btn-sm">
+																			<i class="fa-solid fa-ballot"></i>
+																		</button>
+																	</c:otherwise>
+																</c:choose>
 
 															</div>
 
-															<div class="collapse" id="${r.registerId}">
-																<div class="my-4">
+															<div class="collapse bg-white rounded mt-2"
+																id="${r.registerId}">
+																<div class="row mt-2">
+																	<span class="label">Các gói đăng ký</span>
+																</div>
+
+																<div class="my-4 row justify-content-center">
+
 																	<c:forEach var="d" items="${r.registerDetailList}">
-																		<div class="p-2 bg-info mb-3 rounded">
-																			Gói tập <span class="text-primary">${d.classEntity.trainingPackEntity.packName}</span>
-																			- Ngày tập <span class="text-primary">${d.classEntity.dateStart}</span>
-																			- Thời hạn<span class="text-primary">
-																				${d.classEntity.trainingPackEntity.packDuration} tháng</span> -
-																			Hình thức <span class="text-primary">${d.classEntity.maxPP == 1?'Cá nhân':'Lớp' }</span>
-																			- TKB
-																			<button
-																				class="btn btn-outline-success btn-light btn-sm">
+																		<c:forEach var="t"
+																			items="${d.classEntity.scheduleEntity}">
+																			<input type="text"
+																				class="T-${d.classEntity.classId} invisible position-absolute"
+																				value='D-T${t.day}-${t.session}'>
+																		</c:forEach>
+																		<div
+																			class="p-2 bg-white shadow mb-3 rounded d-flex flex-column col-4">
+																			<div class="row">
+																				<div class="col-lg-5 col-md-6 label">Gói tập</div>
+																				<div class="col-lg-7 col-md-6">${d.classEntity.trainingPackEntity.packName}</div>
+																			</div>
+																			<div class="row mt-4">
+
+																				<div class="col-lg-5 col-md-4 label">Ngày tập</div>
+																				<div class="col-lg-7 col-md-8">
+																					<fmt:formatDate value="${d.classEntity.dateStart}"
+																						pattern="dd/MM/yyyy" />
+																				</div>
+																			</div>
+																			<div class="row mt-4">
+																				<div class="col-lg-5 col-md-4 label">Thời hạn</div>
+																				<div class="col-lg-7 col-md-8">${d.classEntity.trainingPackEntity.packDuration}
+																					tháng</div>
+																			</div>
+																			<div class="row mt-4">
+																				<div class="col-lg-5 col-md-4 label">Hình thức</div>
+																				<div class="col-lg-7 col-md-8">${d.classEntity.maxPP == 1?'Cá nhân':'Lớp' }
+																				</div>
+																			</div>
+
+																			<button type="button"
+																				data=".T-${d.classEntity.classId}"
+																				class="btn-show-time-table-detail btn btn-outline-success btn-light btn-sm mt-4">
 																				<i class="fa-regular fa-calendar-days"></i>
 																			</button>
 																		</div>
 																	</c:forEach>
-
 																</div>
 															</div>
 														</div>
@@ -697,6 +707,129 @@
 			</div>
 		</div>
 		<!-- end table detail -->
+
+
+
+		<!-- Time-table detail -->
+		<div class="modal fade" id="time-table-detail" tabindex="-1">
+			<div class="modal-dialog modal-xl modal-dialog-centered">
+				<div class="modal-content">
+					<section class="section">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="card mb-0">
+									<div class="card-body">
+										<h5
+											class="card-title align-items-center d-flex justify-content-between">
+											Thời Khoá Biểu</h5>
+
+										<!-- Table with stripped rows -->
+										<div class="my-time-table">
+											<div class="table-responsive">
+												<table class="table table-bordered text-center">
+													<thead>
+														<tr class="bg-light-gray">
+															<th class="text-uppercase col-1 label">Buổi</th>
+															<th class="text-uppercase col-1 label">Thứ hai</th>
+															<th class="text-uppercase col-1 label">Thứ ba</th>
+															<th class="text-uppercase col-1 label">Thư tư</th>
+															<th class="text-uppercase col-1 label">Thứ năm</th>
+															<th class="text-uppercase col-1 label">Thứ sáu</th>
+															<th class="text-uppercase col-1 label">Thứ bảy</th>
+															<th class="text-uppercase col-1 label">Chủ nhật</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr>
+															<td class="align-middle bg-light">Sáng</td>
+															<td class="td-time-table"><input type="radio"
+																name="T2" form="register" id="D-T2-0" value="0"
+																class="form-check-input" /> <label for="D-T2-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T3" id="D-T3-0" value="0"
+																class="form-check-input" /> <label for="D-T3-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T4" id="D-T4-0" value="0"
+																class="form-check-input" /> <label for="D-T4-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T5" id="D-T5-0" value="0"
+																class="form-check-input" /> <label for="D-T5-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T6" id="D-T6-0" value="0"
+																class="form-check-input" /> <label for="D-T6-0"></label></td>
+
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T7" id="D-T7-0" value="0"
+																class="form-check-input" /> <label for="D-T7-0"></label></td>
+
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T8" id="D-T8-0" value="0"
+																class="form-check-input" /> <label for="D-T8-0"></label></td>
+														</tr>
+
+														<tr>
+															<td class="align-middle bg-light">Chiều</td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T2" id="D-T2-1" value="1"
+																class="form-check-input" /> <label for="D-T2-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T3" id="D-T3-1" value="1"
+																class="form-check-input" /> <label for="D-T3-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T4" id="D-T4-1" value="1"
+																class="form-check-input" /> <label for="D-T4-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T5" id="D-T5-1" value="1"
+																class="form-check-input" /> <label for="D-T5-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T6" id="D-T6-1" value="1"
+																class="form-check-input" /> <label for="D-T6-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T7" id="D-T7-1" value="1"
+																class="form-check-input" /> <label for="D-T7-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T8" id="D-T8-1" value="1"
+																class="form-check-input" /> <label for="D-T8-1"></label></td>
+														</tr>
+
+														<tr>
+															<td class="align-middle bg-light">Tối</td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T2" id="D-T2-2" value="2"
+																class="form-check-input" /> <label for="D-T2-2E"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T3" id="D-T3-2" value="2"
+																class="form-check-input" /> <label for="D-T3-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T4" id="D-T4-2" value="2"
+																class="form-check-input" /> <label for="D-T4-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T5" id="D-T5-2" value="2"
+																class="form-check-input" /> <label for="D-T5-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T6" id="D-T6-2" value="2"
+																class="form-check-input" /> <label for="D-T6-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T7" id="D-T7-2" value="2"
+																class="form-check-input" /> <label for="D-T7-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T8" id="D-T8-2" value="2"
+																class="form-check-input" /> <label for="D-T8-2"></label></td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<!-- End Table with stripped rows -->
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+
 	</main>
 	<!-- End #main -->
 	<!-- common script -->
@@ -704,8 +837,16 @@
 	<script type="text/javascript">
 		
       $(document).ready(function () {
+    	  // wrap create c btn 
+    	  $(".btn-create").wrap("<a href='admin/customer/add.htm'></a>")
+    	  $(".btn-create").removeAttr("data-bs-toggle");
+    	  $(".btn-create").removeAttr("data-bs-target");
+    	  
+    	  
+    	  
+    	  
+    	  
     	  // show class
-    	 
     	 let personalChosen = $(".personal-chosen");
     	 personalChosen.attr('disabled', true);
     	 let inputType = $(".type")
@@ -775,6 +916,39 @@
     	  if(id) {
     	  $("#"+id).modal("show");
     	  }
+    	  
+    	  $(".btn-show-time-table-detail").click(function() {
+    		  $("#time-table-detail :input").prop( "checked", false );
+    		  $(this.getAttribute("data")).each(function() {
+    			  $("#"+this.value).prop( "checked", true );
+    		  })
+    		  $("#time-table-detail").modal("show");
+    	  })
+    	  
+    	  // create account
+    	  const cId = $(".customerId-flag").attr("data")
+    	 if(cId !== "") {
+    		 $("#modal-create-account form").attr("action", "admin/customer/"+ cId + "/create-account.htm");
+    		 $(".customerId-flag").attr("data", "")
+    	 }
+    	  const btnCreateAccount = $(".btn-create-account");
+    	  
+    	 	 btnCreateAccount.click(function() {
+    	 		
+    	 		 $("#modal-create-account form").attr("action", "admin/customer/"+this.getAttribute("data") + "/create-account.htm");
+    	 		
+    	 		 
+    		 /*  const aCheckbox = $(".checkbox-create-account")
+    		  aCheckbox.prop("checked", !aCheckbox.prop("checked"))
+    		  if(aCheckbox.prop("checked")) {
+    			  btnCreateAccount.addClass("btn-outline-danger")
+    			  btnCreateAccount.text("Huỷ tạo tài khoản")
+    		  }
+    		  else {
+    			  btnCreateAccount.removeClass("btn-outline-danger")
+    			  btnCreateAccount.text("Tạo tài khoản mới")
+    		  } */
+    	  })
     	
         $(
           "#my-data-table_filter",

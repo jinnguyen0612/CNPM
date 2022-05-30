@@ -13,7 +13,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @Table(name = "NHANVIEN")
 public class StaffEntity {
-	
+
 	@Id
 	@NotEmpty(message = "MaNV khong duoc bo trong")
 	@Column(name = "MaNV")
@@ -22,10 +22,10 @@ public class StaffEntity {
 	@NotEmpty(message = "Ho ten ko duoc bo trong")
 	@Column(name = "HoTen")
 	private String name;
-	
+
 	@Column(name = "Phai")
-	private int gender;
-	@NotEmpty(message = "cmnd khong duoc bo trong")	
+	private boolean gender;
+	@NotEmpty(message = "cmnd khong duoc bo trong")
 	@Column(name = "CMND")
 	private String identityCard;
 	@NotEmpty(message = "dia chi khong duoc bo trong")
@@ -41,83 +41,101 @@ public class StaffEntity {
 	private Date birthday;
 	@Column(name = "SDT")
 	private String phone;
-	@Column(name="TrangThai")
+	@Column(name = "TrangThai")
 	private int status;
-	
 	@OneToOne
 	@JoinColumn(name = "TaiKhoan")
 	private AccountEntity account;
 	@OneToMany(mappedBy = "staff")
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private Collection<BillEntity> billList;
-	
-	
+
 	public String getStaffId() {
 		return staffId;
 	}
+
 	public void setStaffId(String staffId) {
 		this.staffId = staffId;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	public int getGender() {
+
+	public boolean getGender() {
 		return gender;
 	}
-	public void setGender(int gender) {
+
+	public void setGender(Boolean gender) {
 		this.gender = gender;
 	}
+
 	public String getIdentityCard() {
 		return identityCard;
 	}
+
 	public void setIdentityCard(String identityCard) {
 		this.identityCard = identityCard;
 	}
+
 	public String getAddress() {
 		return address;
 	}
+
 	public void setAddress(String address) {
 		this.address = address;
 	}
+
 	public String getEmail() {
 		return email;
 	}
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
 	public Date getBirthday() {
 		return birthday;
 	}
+
 	public void setBirthday(Date birthday) {
 		this.birthday = birthday;
 	}
+
 	public String getphone() {
 		return phone;
 	}
+
 	public void setphone(String phone) {
 		this.phone = phone;
 	}
+
 	public int getStatus() {
 		return status;
 	}
+
 	public void setStatus(int status) {
 		this.status = status;
 	}
+
 	public AccountEntity getAccount() {
 		return account;
 	}
+
 	public void setAccount(AccountEntity account) {
 		this.account = account;
 	}
+
 	public Collection<BillEntity> getBillList() {
 		return billList;
 	}
+
 	public void setBillList(Collection<BillEntity> billList) {
 		this.billList = billList;
 	}
-	
-		
+
 }

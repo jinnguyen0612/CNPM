@@ -6,6 +6,7 @@ import java.util.Collection;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Future;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
@@ -35,7 +36,8 @@ public class CustomerEntity {
 	@Email(message = "Vui long nhap dung dinh dang email")
 	@Column(name = "Email")
 	private String email;
-	@PastOrPresent(message = "Ngay sinh phai nho hon ngay hien tai")
+	@NotNull(message = "Ngay sinh khong duoc de trong")
+//	@PastOrPresent(message = "Ngay sinh phai nho hon ngay hien tai")
 	@Column(name = "NgaySinh")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")

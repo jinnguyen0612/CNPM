@@ -23,7 +23,7 @@ public class AccountEntity {
 	private int status;
 
 	@Column(name = "MaQuyen")
-	private String policyId;
+	private int policyId;
 
 	@Column(name = "NgayTao")
 	@Temporal(TemporalType.DATE)
@@ -33,6 +33,10 @@ public class AccountEntity {
 	@OneToOne(mappedBy = "account")
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private CustomerEntity customer;
+
+	@OneToOne(mappedBy = "account")
+	@LazyCollection(LazyCollectionOption.FALSE)
+	private StaffEntity staff;
 	@OneToMany(mappedBy = "account")
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private Collection<RegisterEntity> registerEntityList;
@@ -61,11 +65,11 @@ public class AccountEntity {
 		this.status = status;
 	}
 
-	public String getPolicyId() {
+	public int getPolicyId() {
 		return policyId;
 	}
 
-	public void setPolicyId(String policyId) {
+	public void setPolicyId(int policyId) {
 		this.policyId = policyId;
 	}
 
@@ -91,6 +95,30 @@ public class AccountEntity {
 
 	public void setRegisterEntityList(Collection<RegisterEntity> registerEntityList) {
 		this.registerEntityList = registerEntityList;
+	}
+
+	public StaffEntity getStaff() {
+		return staff;
+	}
+
+	public void setStaff(StaffEntity staff) {
+		this.staff = staff;
+	}
+
+	public AccountEntity() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public AccountEntity(String username, String password, int status, int policyId, Date dateCreate,
+			CustomerEntity customer) {
+		super();
+		this.username = username;
+		this.password = password;
+		this.status = status;
+		this.policyId = policyId;
+		this.dateCreate = dateCreate;
+		this.customer = customer;
 	}
 
 }
