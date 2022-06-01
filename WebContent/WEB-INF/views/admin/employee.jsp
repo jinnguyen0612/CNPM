@@ -10,18 +10,17 @@
 </head>
 <body>
 
-	<!--  flag -->
-	<div class="modal-flag" idModal="${idModal}"></div>
-	<div class="alert-flag" aType='${message.type}'
-		aMessage="${message.message }"></div>
-	<div class="page-flag" data="employee"></div>
-	<!-- end flag  -->
-	<!-- initial staff data -->
-	<div class="initialCSId position-absolute" data="${staff.staffId }"></div>
+	<!-- initial customer data -->
+	<div class="page-flag" data="staff"></div>
+	<div class="initialCSId position-absolute"
+		data="${staff.staffId }"></div>
+		
 
 	<!-- ======= Header ======= -->
 	<%@include file="./header.jsp"%>
 	<!-- End Header -->
+		<div class="staffId-flag" data="${staffId}"></div>
+	
 
 	<!-- ======= Sidebar ======= -->
 	<%@include file="./sidebar.jsp"%>
@@ -57,9 +56,9 @@
 										<tr>
 											<td>${i.staffId}</td>
 											<td>${i.name}</td>
-											<td>${i.gender? 'Nữ':'Nam'}</td>
-											<td>${i.birthday }</td>
-
+											<td>${i.gender? 'Nam':'Nữ'}</td>
+											<td><fmt:formatDate value="${i.birthday }"
+													pattern="dd/MM/yyyy" /></td>
 											<c:choose>
 												<c:when test="${empty i.account}">
 													<td class="account-state"><span
@@ -100,11 +99,29 @@
 														<i class="fa-solid fa-circle-exclamation"></i>
 													</button></a>
 
-												<button class="btn btn-outline-danger btn-light btn-sm"
-													title="Đặt lại mật khẩu" data-bs-toggle="modal"
-													data-bs-placement="top">
-													<i class="fa-solid fa-rotate"></i>
-												</button></td>
+												<c:choose>
+													<c:when test="${i.account == null}">
+														<button
+															class="btn btn-outline-success btn-create-account btn-light btn-sm"
+															data=${i.staffId } title="Tạo tài khoản"
+															data-bs-toggle="modal"
+															data-bs-target="#modal-create-account"
+															data-bs-placement="top">
+															<i class="fa-solid fa-file-invoice"></i>
+														</button>
+													</c:when>
+													<c:otherwise>
+														<button disabled="disabled"
+															class="btn btn-secondary btn-create-account btn-sm"
+															data=${i.staffId } title="Đã có tài khoản"
+															data-bs-toggle="modal"
+															data-bs-target="#modal-create-account"
+															data-bs-placement="top">
+															<i class="fa-solid fa-file-invoice"></i>
+														</button>
+													</c:otherwise>
+												</c:choose>
+												</td>
 										</tr>
 									</c:forEach>
 
@@ -119,17 +136,17 @@
 		</section>
 
 		<!-- modal  -->
-		<!-- Form thêm nhan vien -->
+		<!-- Form thêm + sua nhan vien -->
 		<div class="modal fade" id="modal-create" tabindex="-1">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
-						<h5 class="modal-title">Thêm mới nhân viên</h5>
+						<h5 class="modal-title">${cFormAttribute.formTitle}</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form:form action="admin/employee.htm" method="post"
+						<form:form action="${cFormAttribute.formAction}" method="post"
 							class="row g-3" modelAttribute="staff">
 							<div class="col-md-12">
 								<label for="input-id" class="form-label ">Mã: <span
@@ -213,31 +230,8 @@
 								</div>
 							</fieldset>
 
-							<div class="col-12">
-								<button type="button"
-									class="btn btn-outline-primary btn-create-account col-12"
-									data-bs-toggle="collapse" data-bs-target="#form-create-account"
-									onClick="toggleBtnState(this, 'btn-outline-danger')">
-									<i class="bi bi-plus-circle"></i> <span class="">Tạo tài
-										khoản mới</span>
-								</button>
-							</div>
-							<div class="collapse col-12" id="form-create-account">
-								<div class="row">
-									<div class="col-6" data-link="account" data-n="2">
-										<label for="input-username" class="form-label">Tên tài
-											khoản</label> <input type="text" class="form-control"
-											id="input-username" />
-									</div>
-									<div class="col-6">
-										<label for="input-password" class="form-label">Mật
-											khẩu</label> <input type="password" class="form-control"
-											id="input-password" />
-									</div>
-								</div>
-							</div>
 							<div class="text-end mt-3">
-								<button type="submit" name="btnCreate" class="btn btn-primary">Xác
+								<button type="submit" name="${cFormAttribute.btnAction}" class="btn btn-primary">Xác
 									nhận</button>
 								<button type="button" class="btn btn-secondary close-form"
 									data-bs-dismiss="modal">Đóng</button>
@@ -247,127 +241,34 @@
 				</div>
 			</div>
 		</div>
-		<!-- Form update nhan vien -->
-		<div class="modal fade" id="modal-update" tabindex="-1">
+				
+		<!-- Account -->
+		
+		<div class="modal fade" id="modal-create-account" tabindex="-1">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
-						<h5 class="modal-title">Sửa thông tin nhân viên</h5>
+						<h5 class="modal-title">Đăng ký tài khoản khách hàng</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form:form
-							action="admin/employee/update/${staffUpdate.staffId}.htm"
-							method="post" class="row g-3" modelAttribute="staffUpdate">
-							<div class="col-md-12">
-								<label for="input-id" class="form-label ">Mã: <span
-									class="employeeId text-danger customerId"></span> <form:input
-										path="staffId" type="text" class="form-control" id="input-id" />
-									<span class="text-danger"><form:errors path="staffId"></form:errors></span>
-								</label>
-							</div>
-
-							<div class="col-md-12">
-								<label for="input-name" class="form-label">Họ và tên</label>
-								<form:input path="name" type="text" class="form-control"
-									id="input-name" />
-								<span class="text-danger"><form:errors path="name"></form:errors></span>
-							</div>
-							<fieldset class="col-md-12">
-								<legend class="col-form-label col-sm-2 pt-0"> Giới tính
-								</legend>
-								<div class="col-sm-12 d-flex gap-4">
-									<div class="form-check">
-										<form:radiobutton path="gender" class="form-check-input"
-											name="input-gender" id="female" value="0" />
-										<label class="form-check-label" for="female"> Nữ </label>
-									</div>
-									<div class="form-check">
-										<form:radiobutton path="gender" class="form-check-input"
-											name="input-gender" id="male" value="1" />
-										<label class="form-check-label" for="male"> Nam </label>
-									</div>
-								</div>
-							</fieldset>
-
-							<div class="col-md-6">
-								<label for="input-birthday" class="form-label">Ngày sinh</label>
-								<form:input path="birthday" type="date" class="form-control"
-									id="input-birthday" />
-								<span class="text-danger"><form:errors path="birthday"></form:errors></span>
-							</div>
-
-							<div class="col-md-6">
-								<label for="input-phone" class="form-label">SDT</label>
-								<form:input path="phone" type="tel" class="form-control"
-									id="input-phone" />
-								<span class="text-danger"><form:errors path="phone"></form:errors></span>
-							</div>
-							<div class="col-md-12">
-								<label for="input-email" class="form-label">Email</label>
-								<form:input path="email" type="text" class="form-control"
-									id="input-email" />
-								<span class="text-danger"><form:errors path="email"></form:errors></span>
-							</div>
-							<div class="col-md-12">
-								<label for="input-email" class="form-label">CMND</label>
-								<form:input path="identityCard" type="text" class="form-control"
-									id="input-email" />
-								<span class="text-danger"><form:errors
-										path="identityCard"></form:errors></span>
-							</div>
-							<div class="col-12">
-								<label for="input-address" class="form-label">Địa chỉ</label>
-								<form:input path="address" type="text" class="form-control"
-									id="input-address" placeholder="97 Man Thiện, ..." />
-								<span class="text-danger"><form:errors path="address"></form:errors></span>
-							</div>
-
-							<fieldset class="col-md-12">
-								<legend class="col-form-label col-sm-2 pt-0"> Trạng
-									thái </legend>
-								<div class="col-sm-12 d-flex gap-4">
-									<div class="form-check">
-										<form:radiobutton path="status" class="form-check-input"
-											name="input-gender" id="unact" value="0" />
-										<label class="form-check-label" for="unact"> Nghỉ việc
-										</label>
-									</div>
-									<div class="form-check">
-										<form:radiobutton path="status" class="form-check-input"
-											name="input-gender" id="act" value="1" />
-										<label class="form-check-label" for="act"> Đang làm </label>
-									</div>
-								</div>
-							</fieldset>
-
-							<div class="col-12">
-								<button type="button"
-									class="btn btn-outline-primary btn-create-account col-12"
-									data-bs-toggle="collapse" data-bs-target="#form-create-account"
-									onClick="toggleBtnState(this, 'btn-outline-danger')">
-									<i class="bi bi-plus-circle"></i> <span class="">Tạo tài
-										khoản mới</span>
-								</button>
-							</div>
-							<div class="collapse col-12" id="form-create-account">
+						<form:form action="/create-account.htm" method="post"
+							class="row g-3">
+							<div class="col-12" id="form-create-account">
 								<div class="row">
-									<div class="col-6" data-link="account" data-n="2">
+									<div class="col-12" data-link="account" data-n="2">
 										<label for="input-username" class="form-label">Tên tài
-											khoản</label> <input type="text" class="form-control"
-											id="input-username" />
+											khoản</label> <input type="text" name="userName" value="${userName}"
+											class="form-control" id="input-username" />
 									</div>
-									<div class="col-6">
-										<label for="input-password" class="form-label">Mật
-											khẩu</label> <input type="password" class="form-control"
-											id="input-password" />
-									</div>
+
+									<span class="text-danger">${error}</span>
 								</div>
 							</div>
 							<div class="text-end mt-3">
-								<button type="submit" name="btnUpdate" class="btn btn-primary">Xác
-									nhận</button>
+								<button type="submit" name="${btnCreate}"
+									class="btn btn-primary">Xác nhận</button>
 								<button type="button" class="btn btn-secondary close-form"
 									data-bs-dismiss="modal">Đóng</button>
 							</div>
@@ -376,7 +277,6 @@
 				</div>
 			</div>
 		</div>
-
 
 		<!-- detail -->
 		<div class="modal fade" id="modal-detail" tabindex="-1">
@@ -400,7 +300,7 @@
 							</div>
 							<div class="row">
 								<div class="col-lg-3 col-md-4 label">Giới tính</div>
-								<div class="col-lg-9 col-md-8">${staffDetail.gender==0? 'Nữ' : 'Nam' }</div>
+								<div class="col-lg-9 col-md-8">${staffDetail.gender? 'Nam' : 'Nữ' }</div>
 							</div>
 							<div class="row">
 								<div class="col-lg-3 col-md-4 label">Ngày sinh</div>
@@ -424,7 +324,7 @@
 							</div>
 
 							<div class="text-end mt-3">
-								<a href="admin/employee/update/${staffDetail.ptID}.htm"><button
+								<a href="admin/employee/update/${staffDetail.staffId}.htm"><button
 										type="button" class="btn btn-primary" data-bs-target="#create"
 										data-bs-toggle="modal">Chỉnh sửa</button></a>
 								<button type="button" class="btn btn-secondary"
@@ -443,77 +343,51 @@
 	<script type="text/javascript">
 		
       $(document).ready(function () {
-    	  // show class
-    	 
-    	 let personalChosen = $(".personal-chosen");
-    	 personalChosen.attr('disabled', true);
-    	 let inputType = $(".type")
-    	 let inputClass = $("#input-class");
-    	 let inputPack = $(".input-pack");
-    	  inputType.val(0);
-    	  personalChosen.click(function(){
-    		  inputClass.val("").change();
-    		  inputType.val(2);
-    	  });
-    	  
-    	  $(".personal-chosen-dismiss").click(function(){
-    		 
-    		  inputType.val(0);
-    	  });
-    	  inputPack.change(function(){
-    		  let packSelected = this.value
-    		  inputClass.val("").change();
-    	
-    		  if(packSelected) {
-    			 inputClass.attr('disabled', false);
-    		  $('.class').addClass("d-none")
-    		  $('.class[data="' + packSelected +'"]').removeClass("d-none")
-    		  personalChosen.attr('disabled', false);
-    		  }
-    		  else {
-    			  inputClass.attr('disabled', true);
-    			  personalChosen.attr('disabled', true);
-    			  inputType.val(0);
-    			  $(".personal-chosen-dismiss").click();
-    		  }
-    	  });
-    	  
-    	  inputClass.change(function(){
-    		  let classSelected = this.value
-    		  if(classSelected) {
-    			  inputType.val(1);
-    			
-    		  }
-    		  else {
-    			  
-    			  inputType.val(0);
-    		  }
-    	  });
-    	  
-    	  $("#register").submit(function(e) {
-    		  if($(".type").val() == 2) {
-    			 
-    			  if(!$(".date-start").val()) {
-    				 	$(".date-start-error").text("Nội dung này không được bỏ trống") 
-    				  e.preventDefault()
-    				  
-    			  }
-    			 
-    		  }
-    		 
-    	  })
-    	  
-    	  $(".btn-tt-confirm").click(function() {
-    		  $(".btn-tt").html('<i class="fa-solid fa-pen-to-square"></i> <span class="te">Chỉnh sửa TKB</span>')
-    	  })
+    	  $(".btn-create").wrap("<a href='admin/customer/add.htm'></a>")
+    	  $(".btn-create").removeAttr("data-bs-toggle");
+    	  $(".btn-create").removeAttr("data-bs-target");
     	  
     	  
     	  
-    	  // show modal
+    	// show modal
     	  let id = $(".modal-flag").attr("idModal")
     	  if(id) {
     	  $("#"+id).modal("show");
     	  }
+    	  
+    	  $(".btn-show-time-table-detail").click(function() {
+    		  $("#time-table-detail :input").prop( "checked", false );
+    		  $(this.getAttribute("data")).each(function() {
+    			  $("#"+this.value).prop( "checked", true );
+    		  })
+    		  $("#time-table-detail").modal("show");
+    	  })
+    	 
+    	  
+    	  // create account
+    	  const cId = $(".staffId-flag").attr("data")
+    	 if(cId !== "") {
+    		 $("#modal-create-account form").attr("action", "admin/employee/"+ cId + "/create-account.htm");
+    		 $(".staffId-flag").attr("data", "")
+    	 }
+    	  const btnCreateAccount = $(".btn-create-account");
+    	  
+    	 	 btnCreateAccount.click(function() {
+    	 		
+    	 		 $("#modal-create-account form").attr("action", "admin/employee/"+this.getAttribute("data") + "/create-account.htm");
+    	 		
+    	 		 
+    		 /*  const aCheckbox = $(".checkbox-create-account")
+    		  aCheckbox.prop("checked", !aCheckbox.prop("checked"))
+    		  if(aCheckbox.prop("checked")) {
+    			  btnCreateAccount.addClass("btn-outline-danger")
+    			  btnCreateAccount.text("Huỷ tạo tài khoản")
+    		  }
+    		  else {
+    			  btnCreateAccount.removeClass("btn-outline-danger")
+    			  btnCreateAccount.text("Tạo tài khoản mới")
+    		  } */
+    	  })
     	
         $(
           "#my-data-table_filter",

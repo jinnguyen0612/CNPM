@@ -2,9 +2,11 @@ package com.GymManager.Controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import org.hibernate.Query;
@@ -12,6 +14,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -25,10 +28,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.GymManager.Entity.StaffEntity;
 import com.GymManager.Entity.StaffEntity;
+import com.GymManager.Entity.AccountEntity;
+import com.GymManager.Entity.CustomerEntity;
 import com.GymManager.Entity.RegisterEntity;
 import com.GymManager.Entity.StaffEntity;
 import com.GymManager.Entity.TrainingPackEntity;
+import com.GymManager.ExtraClass.FormAttribute;
 import com.GymManager.ExtraClass.Message;
+import com.GymManager.ExtraClass.RandomPassword;
 
 @Controller
 @RequestMapping("admin/employee")
@@ -36,12 +43,15 @@ import com.GymManager.ExtraClass.Message;
 public class EmployeeController extends MethodAdminController {
 	@Autowired
 	SessionFactory factory;
+	@Autowired
+	public JavaMailSender mailer;
 	
-	@RequestMapping(method= RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public String index(ModelMap model) {
 		StaffEntity staff = newStaff();
-		model.addAttribute("staff",staff);
-		model.addAttribute("staffUpdate", newStaff());
+		model.addAttribute("staff", staff);
+		model.addAttribute("cFormAttribute",
+				new FormAttribute("Them moi nhan vien", "admin/employee.htm", "btnCreate"));
 		model.addAttribute("cList", getAllStaff());
 		return "admin/employee";
 	}
@@ -58,11 +68,20 @@ public class EmployeeController extends MethodAdminController {
 		
 	}
 	
+	// get view create customer
+
+		@RequestMapping(value = "add.htm", method = RequestMethod.GET)
+		public String getCreate(ModelMap model, RedirectAttributes redirectAttributes) {
+			redirectAttributes.addFlashAttribute("idModal", "modal-create");
+			return "redirect:/admin/employee.htm";
+
+		}
+	
 	// create staff
-		@RequestMapping(value="", method = RequestMethod.POST, params = "btnCreate")
+		@RequestMapping(method = RequestMethod.POST, params = "btnCreate")
 		public String createStaff(ModelMap model, @Validated @ModelAttribute("staff") StaffEntity staff,
-				BindingResult result, RedirectAttributes redirectAttributes) {
-			System.out.println(staff.getStaffId());
+				BindingResult result, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+//			System.out.println(staff.getStaffId());
 			if (!result.hasErrors()) {
 				Session session = factory.openSession();
 
@@ -81,7 +100,7 @@ public class EmployeeController extends MethodAdminController {
 					t.rollback();
 					System.out.println(e);
 					if (e.getCause().toString().contains("duplicate key")) {
-						result.rejectValue("staffId", "staff", "Ma bi trung");
+						result.rejectValue("staffId", "staff", "Ma khong duoc trung trung");
 					}
 					if (e.getCause().toString().contains("String or binary data would be truncated")) {
 						result.rejectValue("staffId", "staff", "Ma phai bang 8 ky tu");
@@ -101,10 +120,11 @@ public class EmployeeController extends MethodAdminController {
 		@RequestMapping(value = "update/{id}.htm", method = RequestMethod.GET)
 		public String getUpdate(ModelMap model, @PathVariable("id") String id) {
 
-			model.addAttribute("staff", newStaff());
-			model.addAttribute("staffUpdate", getStaff(id));
-			model.addAttribute("idModal", "modal-update");
+			model.addAttribute("staff", getStaff(id));
+			model.addAttribute("idModal", "modal-create");
 			model.addAttribute("cList", getAllStaff());
+			model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin khach hang",
+					"admin/employee/update/" + id + ".htm", "btnUpdate"));
 			return "admin/employee";
 		}
 
@@ -120,7 +140,7 @@ public class EmployeeController extends MethodAdminController {
 					session.update(staff);
 
 					t.commit();
-					redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
+					redirectAttributes.addFlashAttribute("message", new Message("success", "Sua thanh cong !!!"));
 
 					return "redirect:/admin/employee.htm";
 
@@ -144,6 +164,65 @@ public class EmployeeController extends MethodAdminController {
 			model.addAttribute("staff", newStaff());
 			model.addAttribute("cList", getAllStaff());
 			return "admin/employee";
+		}
+		
+		// create account staff
+
+		@RequestMapping(value = "{id}/create-account.htm", method = RequestMethod.POST)
+		public String getCreateAccount(ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("id") String id,
+				HttpServletRequest request) {
+
+			Session session = factory.openSession();
+			Transaction t = session.beginTransaction();
+			String userName = request.getParameter("userName");
+			System.out.println(userName);
+
+			StaffEntity staff = getStaff(id);
+			redirectAttributes.addFlashAttribute("error", "Tai khoan khong duoc bo trong");
+			if (!userName.equals("")) {
+				try {
+
+					RandomPassword radomPassword = new RandomPassword(8);
+
+					AccountEntity accountEntity = new AccountEntity(userName, radomPassword.getPassword(), 1, 2, new Date(),
+							staff);
+
+					session.save(accountEntity);
+
+//						String mailMessage = "Mật khẩu cho tài khoản PTITGYM của bạn là: " + radomPassword.getPassword();
+					//
+//						MimeMessage mail = mailer.createMimeMessage();
+//						MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+//						helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
+//						helper.setTo(customer.getEmail());
+//						helper.setReplyTo("nguyenminhnhat301101@gmail.com");
+//						helper.setSubject("Tai khoản PTITGYM");
+//						helper.setText(mailMessage);
+//						mailer.send(mail);
+					//
+					staff.setAccount(accountEntity);
+					session.merge(staff);
+					t.commit();
+					redirectAttributes.addFlashAttribute("message", new Message("success", "Tạo tài khoản thành công !!!"));
+					return "redirect:/admin/employee.htm";
+				} catch (Exception e) {
+
+					t.rollback();
+					System.out.println(e);
+					if (e.getCause().toString().contains("duplicate key")) {
+						redirectAttributes.addFlashAttribute("error", "Tên tài khoản đã tồn tại");
+					}
+				} finally {
+					session.close();
+				}
+
+			}
+
+			redirectAttributes.addFlashAttribute("userName", userName);
+			redirectAttributes.addFlashAttribute("idModal", "modal-create-account");
+			redirectAttributes.addFlashAttribute("staffId", id);
+
+			return "redirect:/admin/employee.htm";
 		}
 
 		// filter

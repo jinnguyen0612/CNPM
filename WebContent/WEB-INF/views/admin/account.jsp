@@ -70,22 +70,42 @@
 												</c:otherwise>
 											</c:choose>
 
-											<td class="text-center"><a href=""><button
+											<td class="text-center">
+												<c:choose>
+
+												<c:when test="${not empty a.customer}">
+													<a href="admin/customer/detail/${a.customer.customerId}.htm"><button
 														class="btn btn-outline-info btn-light btn-sm"
 														title="Chi tiết người sở hữu" data-bs-toggle="modal"
 														data-bs-target="#detail" data-bs-placement="top">
 														<i class="fa-solid fa-circle-exclamation"></i>
-													</button></a>
-
-												<button class="btn btn-outline-danger btn-light btn-sm"
-													title="Đặt lại mật khẩu" data-bs-toggle="modal"
-													data-bs-placement="top">
-													<i class="fa-solid fa-rotate"></i>
+												</button></a>
+												</c:when>
+												
+												<c:when test="${not empty a.staff}">
+													<a href="admin/customer/detail/${a.staff.staffId}.htm"><button
+														class="btn btn-outline-info btn-light btn-sm"
+														title="Chi tiết người sở hữu" data-bs-toggle="modal"
+														data-bs-target="#detail" data-bs-placement="top">
+														<i class="fa-solid fa-circle-exclamation"></i>
+												</button></a>
+												</c:when>
+												
+												<c:otherwise>
+													<button disabled="disabled"
+														class="btn btn-light btn-sm"
+														title="Chi tiết người sở hữu" data-bs-toggle="modal"
+														data-bs-target="#detail" data-bs-placement="top">
+														<i class="fa-solid fa-circle-exclamation"></i>
 												</button>
-												<button class="btn btn-outline-warning btn-light btn-sm"
+												</c:otherwise>
+											</c:choose>
+												
+
+												<a href="admin/account/status/${i.username}.htm"><button class="btn btn-outline-warning btn-light btn-sm"
 													title="Khoá tài khoản">
 													<i class="fa-solid fa-lock"></i>
-												</button></td>
+												</button></a></td>
 										</tr>
 									</c:forEach>
 								</tbody>

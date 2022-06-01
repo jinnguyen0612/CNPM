@@ -120,5 +120,16 @@ public class AccountEntity {
 		this.dateCreate = dateCreate;
 		this.customer = customer;
 	}
+	
+	public AccountEntity(String username, String password, int status, int policyId, Date dateCreate,
+			StaffEntity staff) {
+		super();
+		this.username = username;
+		this.password = password;
+		this.status = status;
+		this.policyId = policyId;
+		this.dateCreate = dateCreate;
+		this.staff = staff;
+	}
 
 }
