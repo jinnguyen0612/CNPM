@@ -37,76 +37,80 @@
 									</tr>
 								</thead>
 								<tbody>
-
-									<c:forEach var="a" items="${aList}" varStatus="count">
-										<tr>
-											<th scope="row" class="text-center">${count.index+1}</th>
-											<td>${a.username }</td>
-
-											<td>${a.dateCreate }</td>
-
-											<c:choose>
-												<c:when test="${a.status=='0' }">
-													<td class="account-state text-success"><span
-														class="badge rounded-pill bg-secondary">Khoá</span></td>
-												</c:when>
-												<c:otherwise>
-													<td class="account-state text-success"><span
-														class="badge rounded-pill bg-success">Hoạt động</span></td>
-												</c:otherwise>
-											</c:choose>
-
-											<c:choose>
-												<c:when test="${a.policyId=='0'}">
-													<td class="account-state text-danger">Quản lý</td>
-												</c:when>
-
-												<c:when test="${a.policyId=='2'}">
-													<td class="account-state text-primary">Nhân viên</td>
-												</c:when>
-
-												<c:otherwise>
-													<td class="account-state text-success">Khách hàng</td>
-												</c:otherwise>
-											</c:choose>
-
-											<td class="text-center">
+									<% int count=0; %>
+									<c:forEach var="a" items="${aList}">
+										<c:if test="${(not empty a.customer) or (not empty a.staff) }">
+											<tr>
+												<th scope="row" class="text-center">${count=count+1}</th>
+												<td>${a.username }</td>
+	
+												<td>${a.dateCreate }</td>
+	
 												<c:choose>
-
-												<c:when test="${not empty a.customer}">
-													<a href="admin/customer/detail/${a.customer.customerId}.htm"><button
-														class="btn btn-outline-info btn-light btn-sm"
-														title="Chi tiết người sở hữu" data-bs-toggle="modal"
-														data-bs-target="#detail" data-bs-placement="top">
-														<i class="fa-solid fa-circle-exclamation"></i>
-												</button></a>
-												</c:when>
-												
-												<c:when test="${not empty a.staff}">
-													<a href="admin/customer/detail/${a.staff.staffId}.htm"><button
-														class="btn btn-outline-info btn-light btn-sm"
-														title="Chi tiết người sở hữu" data-bs-toggle="modal"
-														data-bs-target="#detail" data-bs-placement="top">
-														<i class="fa-solid fa-circle-exclamation"></i>
-												</button></a>
-												</c:when>
-												
-												<c:otherwise>
-													<button disabled="disabled"
-														class="btn btn-light btn-sm"
-														title="Chi tiết người sở hữu" data-bs-toggle="modal"
-														data-bs-target="#detail" data-bs-placement="top">
-														<i class="fa-solid fa-circle-exclamation"></i>
-												</button>
-												</c:otherwise>
-											</c:choose>
-												
-
-												<a href="admin/account/status/${i.username}.htm"><button class="btn btn-outline-warning btn-light btn-sm"
-													title="Khoá tài khoản">
-													<i class="fa-solid fa-lock"></i>
-												</button></a></td>
-										</tr>
+													<c:when test="${a.status=='0' }">
+														<td class="account-state text-success"><span
+															class="badge rounded-pill bg-secondary">Khoá</span></td>
+													</c:when>
+													<c:otherwise>
+														<td class="account-state text-success"><span
+															class="badge rounded-pill bg-success">Hoạt động</span></td>
+													</c:otherwise>
+												</c:choose>
+	
+												<c:choose>
+													<c:when test="${a.policyId=='0'}">
+														<td class="account-state text-danger">Quản lý</td>
+													</c:when>
+	
+													<c:when test="${a.policyId=='2'}">
+														<td class="account-state text-primary">Nhân viên</td>
+													</c:when>
+	
+													<c:otherwise>
+														<td class="account-state text-success">Khách hàng</td>
+													</c:otherwise>
+												</c:choose>
+	
+												<td class="text-center">
+													<c:choose>
+	
+														<c:when test="${not empty a.customer}">
+															<a href="admin/customer/detail/${a.customer.customerId}.htm"><button
+																class="btn btn-outline-info btn-light btn-sm"
+																title="Chi tiết người sở hữu" data-bs-toggle="modal"
+																data-bs-target="#detail" data-bs-placement="top">
+																<i class="fa-solid fa-circle-exclamation"></i>
+															</button></a>
+														</c:when>
+														
+														<c:when test="${not empty a.staff}">
+															<a href="admin/employee/detail/${a.staff.staffId}.htm"><button
+																class="btn btn-outline-info btn-light btn-sm"
+																title="Chi tiết người sở hữu" data-bs-toggle="modal"
+																data-bs-target="#detail" data-bs-placement="top">
+																<i class="fa-solid fa-circle-exclamation"></i>
+															</button></a>
+														</c:when>
+													</c:choose>
+													
+													<c:choose>
+														<c:when test="${(empty a.customer) and (not empty a.staff) }">
+															<a href="admin/account/clock/${a.username}.htm"><button class="btn btn-outline-warning btn-light btn-sm"
+															title="Khoá tài khoản">
+															<i class="fa-solid fa-lock"></i>
+															</button></a>
+														</c:when>
+														<c:when test="${(empty a.staff) and (not empty a.customer) }">
+															<button disabled="disabled" class="btn btn-secondary btn-sm"
+															title="Khoá tài khoản">
+															<i class="fa-solid fa-lock"></i>
+															</button>
+														</c:when>
+													</c:choose>
+													
+												</td>
+											</tr>
+										</c:if>
 									</c:forEach>
 								</tbody>
 							</table>
