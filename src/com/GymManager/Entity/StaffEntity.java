@@ -19,7 +19,7 @@ public class StaffEntity {
 	@Column(name = "MaNV")
 	private String staffId;
 
-	@NotEmpty(message = "Ho ten ko duoc bo trong")
+	@NotEmpty(message = "Tên không được để trống")
 	@Column(name = "HoTen")
 	private String name;
 
@@ -34,7 +34,6 @@ public class StaffEntity {
 	@NotEmpty(message = "email khong duoc bo trong")
 	@Column(name = "Email")
 	private String email;
-	@PastOrPresent(message = "ngay sinh nho hon ngay hien tai")
 	@Column(name = "NgaySinh")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")

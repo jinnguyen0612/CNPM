@@ -1,6 +1,8 @@
 package com.GymManager.Controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -19,6 +21,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.GymManager.Entity.CustomerEntity;
@@ -68,6 +71,44 @@ public class ContractRegistrationController extends MethodAdminController {
 		redirectAttributes.addFlashAttribute("registerList", getAllRegister());
 		String referer = request.getHeader("Referer");
 		return "redirect:" + referer;
+	}
+
+	// filter
+
+	@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
+	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model) {
+
+		Session session = factory.getCurrentSession();
+
+		String whereClause = "";
+
+		String birthday = toHqlRangeCondition(allParams.get("birthdayLeft"), allParams.get("birthdayRight"),
+				"registerDate");
+		String hql = "from RegisterEntity where " + birthday;
+		if (birthday.equals("")) {
+			hql = "from RegisterEntity";
+		}
+
+		System.out.println(hql);
+		Query query = session.createQuery(hql);
+		List<RegisterEntity> list = query.list();
+		String status = allParams.get("status");
+		if (!status.equals("")) {
+			List<RegisterEntity> newList = new ArrayList<RegisterEntity>();
+
+			for (RegisterEntity registerEntity : list) {
+
+				if (registerEntity.getStatus() == Integer.parseInt(status)) {
+					newList.add(registerEntity);
+				}
+
+			}
+			model.addAttribute("registerList", newList);
+
+		} else {
+			model.addAttribute("registerList", list);
+		}
+		return "admin/contract-registration";
 	}
 
 	// detail

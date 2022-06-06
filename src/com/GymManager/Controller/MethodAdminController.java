@@ -90,13 +90,7 @@ public class MethodAdminController {
 		return (AccountEntity) session.get(AccountEntity.class, username);
 	}
 
-	public List<RegisterEntity> getExpireRegister() {
-		Session session = factory.getCurrentSession();
-		String hql = "FROM RegisterEntity where DATEDIFF(day, registerDate, getday()) > 10";
-		Query query = session.createQuery(hql);
-		List<RegisterEntity> list = query.list();
-		return list;
-	}
+
 
 	public String hashPass(String matKhau) {
 		String hashpw = DigestUtils.md5Hex(matKhau).toUpperCase();

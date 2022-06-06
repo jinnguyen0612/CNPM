@@ -24,12 +24,24 @@ public class HomeController {
 	SessionFactory factory;
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String index(HttpServletRequest request, HttpSession session, ModelMap model) {
+	public String index(HttpServletRequest request, ModelMap model) {
 		Date today = new Date();
 
 //		model.addAttribute("numOfBill", getNumOfBillFilter("day", today.getDate()));
 //		model.addAttribute("revenue", getRevenue("day", today.getDate()));
-		model.addAttribute("numOfCustomer", getNumOfCustomer());
+
+		Long mumOfCustomer = getNumberEntity("CustomerEntity");
+		Long mumOfStaff = getNumberEntity("StaffEntity");
+		Long mumOfRegister = getNumberEntity("RegisterEntity");
+		Long mumOfClass = getNumberEntity("ClassEntity");
+		Long mumOfPack = getNumberEntity("TrainingPackEntity");
+
+		model.addAttribute("numOfCustomer", mumOfCustomer);
+		model.addAttribute("mumOfStaff", mumOfStaff);
+		model.addAttribute("mumOfRegister", mumOfRegister);
+		model.addAttribute("mumOfClass", mumOfClass);
+		model.addAttribute("mumOfPack", mumOfPack);
+
 		model.addAttribute("billFilter", "day");
 		model.addAttribute("revenueFilter", "day");
 		return "admin/index";
@@ -82,6 +94,17 @@ public class HomeController {
 			return date.getMonth() + 1;
 		else
 			return date.getYear() + 1900;
+	}
+
+	public Long getNumberEntity(String entity) {
+		Session session = factory.getCurrentSession();
+		String hql = "SELECT COUNT(*) FROM " + entity;
+		if (entity.equals("ClassEntity")) {
+			hql += " where maxPP > 1";
+		}
+		Query query = session.createQuery(hql);
+		Long mum = (Long) query.list().get(0);
+		return mum;
 	}
 
 }

@@ -310,10 +310,12 @@
 													<c:forEach var="p" items="${pack}">
 														<c:forEach var="l" items="${p.classList}">
 															<c:if test="${l.maxPP > 1}">
-																<option
-																	${register.registerDetailList[size - 1].classEntity.classId == l.classId ? 'selected': ''}
-																	class="class d-none" data="${p.packID}"
-																	value="${l.classId}">${l.classId}</option>
+																<c:if test="${l.getClassStatus() == 1}">
+																	<option
+																		${register.registerDetailList[size - 1].classEntity.classId == l.classId ? 'selected': ''}
+																		class="class d-none" data="${p.packID}"
+																		value="${l.classId}">${l.classId}</option>
+																</c:if>
 															</c:if>
 														</c:forEach>
 
@@ -409,10 +411,13 @@
 													<c:forEach var="p" items="${pack}">
 
 														<c:forEach var="l" items="${p.classList}">
+
 															<c:if test="${l.maxPP > 1}">
-																<option class="class2 d-none"
-																	${register.registerDetailList[size - 2].classEntity.classId == l.classId ? 'selected': ''}
-																	data="${p.packID}" value="${l.classId}">${l.classId}</option>
+																<c:if test="${l.getClassStatus() == 1}">
+																	<option class="class2 d-none"
+																		${register.registerDetailList[size - 2].classEntity.classId == l.classId ? 'selected': ''}
+																		data="${p.packID}" value="${l.classId}">${l.classId}</option>
+																</c:if>
 															</c:if>
 														</c:forEach>
 													</c:forEach>
@@ -885,30 +890,25 @@
 																		class="fa-solid ms-1 fa-angle-down"></i>
 																</button>
 																<c:choose>
-																	<c:when test="${r.status == 1}">
-																		<button title="Chỉnh sửa" disabled="disabled"
-																			class="btn btn-sm btn-secondary">
-																			<i class="fa-solid fa-pen-to-square"></i>
-																		</button>
-																	</c:when>
-																	<c:otherwise>
+																	<c:when test="${r.status == 0}">
 																		<a
 																			href="admin/customer/register/update/${r.registerId}.htm"><button
 																				class="btn btn-outline-warning btn-light btn-sm"
 																				title="Chỉnh sửa">
 																				<i class="fa-solid fa-pen-to-square"></i>
 																			</button> </a>
+																	</c:when>
+																	<c:otherwise>
+																		<button title="Chỉnh sửa" disabled="disabled"
+																			class="btn btn-sm btn-secondary">
+																			<i class="fa-solid fa-pen-to-square"></i>
+																		</button>
+
 																	</c:otherwise>
 																</c:choose>
 
 																<c:choose>
-																	<c:when test="${r.status == 1}">
-																		<button title="Thanh toán" disabled="disabled"
-																			class="btn  btn-sm btn-secondary">
-																			<i class="fa-solid fa-ballot"></i>
-																		</button>
-																	</c:when>
-																	<c:otherwise>
+																	<c:when test="${r.status == 0}">
 																		<a class="btnCheckout"
 																			href="admin/contract-registration/checkout/${r.registerId}.htm">
 																			<button title="Thanh toán"
@@ -916,6 +916,13 @@
 																				<i class="fa-solid fa-ballot"></i>
 																			</button>
 																		</a>
+
+																	</c:when>
+																	<c:otherwise>
+																		<button title="Thanh toán" disabled="disabled"
+																			class="btn  btn-sm btn-secondary">
+																			<i class="fa-solid fa-ballot"></i>
+																		</button>
 																	</c:otherwise>
 																</c:choose>
 
@@ -1117,7 +1124,7 @@
 		
       $(document).ready(function () {
     	  $(".btnCheckout").click(function() {
-    		  alert("Xác nhận thanh toán");
+    		  confirm("Xác nhận thanh toán");
     	  })
     	  // wrap create c btn 
     	  $(".btn-create").wrap("<a href='admin/customer/add.htm'></a>")
@@ -1406,7 +1413,7 @@
                               <span class="text-white"></span>
                           </button>
                           <!-- filter table -->
-                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 22rem;">
+                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 28rem;">
                               <div class="card-header py-2 text-secondary bg-info text-black fs-6">Bộ lọc</div>
                               <div class="card-body">
                                   <form action="admin/customer.htm" class="row g-3 mt-1" id="form-filter">
@@ -1460,17 +1467,23 @@
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="0" />
+                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-0">
                                                       Đang tập
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="1" />
+                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-1">
                                                       Chưa đăng ký
                                                   </label>
                                               </div>
+                                              <div class="form-check-filter">
+                                              <input class="form-check-input-filter" type="radio" name="status" id="filter-status-2" value="2" />
+                                              <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-2">
+                                                  Đã đăng ký
+                                              </label>
+                                          </div>
                                           </div>
                                       </div>
                                   </form>

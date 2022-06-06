@@ -1,6 +1,7 @@
 package com.GymManager.Controller;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.GymManager.Entity.AccountEntity;
+import com.GymManager.Entity.RegisterEntity;
 import com.GymManager.ExtraClass.Message;
 import com.GymManager.ExtraClass.RandomPassword;
 import com.GymManager.Serializer.LoginRequest;
@@ -71,6 +73,43 @@ public class LoginController {
 			return "admin/login";
 		}
 
+		List<RegisterEntity> registerEntities1 = getExpireRegister(7);
+		for (RegisterEntity registerEntity : registerEntities1) {
+			String mailMessage = "Hợp hợp đồng đăng ký PTITGYM với mã " + registerEntity.getRegisterId()
+					+ " của bạn chỉ còn 1 ngày là hết hạn, vui lòng đến trung tâm để thanh toán trong hôm nay";
+			try {
+				MimeMessage mail = mailer.createMimeMessage();
+				MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+				helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
+				helper.setTo(registerEntity.getCustomer().getEmail());
+				helper.setReplyTo("nguyenminhnhat301101@gmail.com");
+				helper.setSubject("Thanh toán hợp đồng đăng ký PTITGYM");
+				helper.setText(mailMessage);
+				mailer.send(mail);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+
+		}
+
+		List<RegisterEntity> registerEntities2 = getExpireRegister2(7);
+		for (RegisterEntity registerEntity : registerEntities2) {
+			updateStatusRegister(registerEntity, 2);
+			String mailMessage = "Hợp hợp đồng đăng ký PTITGYM với mã " + registerEntity.getRegisterId()
+					+ " của bạn đã bị huỷ do hết hạn thanh toán";
+			try {
+				MimeMessage mail = mailer.createMimeMessage();
+				MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+				helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
+				helper.setTo(registerEntity.getCustomer().getEmail());
+				helper.setReplyTo("nguyenminhnhat301101@gmail.com");
+				helper.setSubject("Huỷ hợp đồng đăng ký PTITGYM");
+				helper.setText(mailMessage);
+				mailer.send(mail);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
 		return "redirect:/admin/customer.htm";
 	}
 
@@ -173,6 +212,39 @@ public class LoginController {
 	public AccountEntity getAccount(String userName) {
 		Session session = factory.getCurrentSession();
 		return (AccountEntity) session.get(AccountEntity.class, userName);
+	}
+
+	public List<RegisterEntity> getExpireRegister(int num) {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM RegisterEntity where DATEDIFF(day, registerDate, getdate()) =" + num + " and status = 0";
+		Query query = session.createQuery(hql);
+		List<RegisterEntity> list = query.list();
+		return list;
+	}
+
+	public List<RegisterEntity> getExpireRegister2(int num) {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM RegisterEntity where DATEDIFF(day, registerDate, getdate()) >" + num + " and status = 0";
+		Query query = session.createQuery(hql);
+		List<RegisterEntity> list = query.list();
+		return list;
+	}
+
+	public boolean updateStatusRegister(RegisterEntity registerEntity, int status) {
+		Session session = factory.openSession();
+		Transaction t = session.beginTransaction();
+		try {
+			registerEntity.setStatus(status);
+			session.merge(registerEntity);
+			t.commit();
+		} catch (Exception e) {
+			t.rollback();
+			System.out.println(e.getCause());
+			return false;
+		} finally {
+			session.close();
+		}
+		return true;
 	}
 
 }

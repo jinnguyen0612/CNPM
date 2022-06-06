@@ -24,24 +24,25 @@ public class CustomerEntity {
 	@NotEmpty(message = "Ma khach hang khong duoc de trong")
 	@Column(name = "MaKH")
 	private String customerId;
-	@NotEmpty(message = "Ho ten khong duoc de trong")
+	@NotEmpty(message = "Tên không đươc để trống")
 	@Column(name = "HoTen")
 	private String name;
 	@Column(name = "Phai")
 	private boolean gender;
-	@NotEmpty(message = "Dia chi khong duoc de trong")
+	@NotEmpty(message = "Địa chỉ không được để trống")
 	@Column(name = "DiaChi")
 	private String address;
-	@NotEmpty(message = "Email khong duoc de trong")
-	@Email(message = "Vui long nhap dung dinh dang email")
+	@NotEmpty(message = "Email không được để trống")
+	@Email(message = "Vui lòng nhập đúng định dạng email")
 	@Column(name = "Email")
 	private String email;
-	@NotNull(message = "Ngay sinh khong duoc de trong")
+	@NotNull(message = "Ngày sinh không được để trống")
 //	@PastOrPresent(message = "Ngay sinh phai nho hon ngay hien tai")
 	@Column(name = "NgaySinh")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
+	@NotEmpty(message = "Số điện thoại không được để trống")
 	@Column(name = "SDT")
 	private String phone;
 

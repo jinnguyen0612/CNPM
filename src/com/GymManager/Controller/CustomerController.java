@@ -1,5 +1,6 @@
 package com.GymManager.Controller;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -97,9 +98,20 @@ public class CustomerController extends MethodAdminController {
 			} catch (Exception e) {
 
 				t.rollback();
-				System.out.println(e);
-				if (e.getCause().toString().contains("duplicate key")) {
-					result.rejectValue("customerId", "customer", "Ma khong duoc trung");
+				System.out.println(e.getCause());
+				if (e.getCause().toString().contains("UNIQUE_KHACHHANG_SDT")) {
+					result.rejectValue("phone", "customer", "số điện thoại này đã được sử dụng");
+				}
+
+				if (e.getCause().toString().contains("UCHECK_KHACHHANG_SDT")) {
+					result.rejectValue("phone", "customer", "số điện thoại không đúng định dạng");
+				}
+
+				if (e.getCause().toString().contains("CK_KHACHHANG_NGAYSINH")) {
+					result.rejectValue("birthday", "customer", "Ngày sinh phải nhỏ hơn ngày hiện tại");
+				}
+				if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
+					result.rejectValue("email", "customer", "email này đã được sử dụng");
 				}
 				if (e.getCause().toString().contains("String or binary data would be truncated")) {
 					result.rejectValue("customerId", "customer", "Ma khong qua 8 ky tu");
@@ -155,21 +167,33 @@ public class CustomerController extends MethodAdminController {
 
 			} catch (Exception e) {
 
-				t.rollback();
 				System.out.println(e.getCause());
-				if (e.getCause().toString().contains("duplicate key")) {
-					result.rejectValue("customerId", "customerUpdate", "Ma da ton tai");
+				if (e.getCause().toString().contains("UNIQUE_KHACHHANG_SDT")) {
+					result.rejectValue("phone", "customer", "số điện thoại này đã được sử dụng");
+				}
+
+				if (e.getCause().toString().contains("UCHECK_KHACHHANG_SDT")) {
+					result.rejectValue("phone", "customer", "số điện thoại không đúng định dạng");
+				}
+
+				if (e.getCause().toString().contains("CK_KHACHHANG_NGAYSINH")) {
+					result.rejectValue("birthday", "customer", "Ngày sinh phải nhỏ hơn ngày hiện tại");
+				}
+				if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
+					result.rejectValue("email", "customer", "email này đã được sử dụng");
 				}
 				if (e.getCause().toString().contains("String or binary data would be truncated")) {
-					result.rejectValue("customerId", "customerUpdate", "Ma phai co 8 ky tu");
+					result.rejectValue("customerId", "customer", "Ma khong qua 8 ky tu");
 				}
-			}
+				t.rollback();
 
-			finally {
+			} finally {
 				session.close();
 			}
 		}
-		model.addAttribute("idModal", "modal-update");
+		model.addAttribute("cFormAttribute", new FormAttribute("Chỉnh sửa thông tin khách hàng",
+				"admin/customer/update/" + id + ".htm", "btnUpdate"));
+		model.addAttribute("idModal", "modal-create");
 		model.addAttribute("cList", getAllCustomer());
 		return "admin/customer";
 	}
@@ -614,7 +638,23 @@ public class CustomerController extends MethodAdminController {
 		String hql = "from CustomerEntity " + whereClause;
 		Query query = session.createQuery(hql);
 		List<CustomerEntity> list = query.list();
-		model.addAttribute("cList", list);
+		String status = allParams.get("status");
+		if (!status.equals("")) {
+			List<CustomerEntity> newList = new ArrayList<CustomerEntity>();
+
+			for (CustomerEntity customerEntity : list) {
+
+				if (customerEntity.getCustomerStatus() == Integer.parseInt(status)) {
+					newList.add(customerEntity);
+				}
+
+			}
+			model.addAttribute("cList", newList);
+
+		} else {
+			model.addAttribute("cList", list);
+		}
+
 		CustomerEntity customer = newCustomer();
 		model.addAttribute("customer", customer);
 		model.addAttribute("customerUpdate", customer);
@@ -645,7 +685,7 @@ public class CustomerController extends MethodAdminController {
 	public RegisterEntity newRegister() {
 		RegisterEntity register = new RegisterEntity();
 		register.setRegisterId(this.toPK("DK", "RegisterEntity", "registerId"));
-		register.setMoney(0);
+		register.setMoney(new BigDecimal(0));
 		return register;
 	}
 
