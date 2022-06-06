@@ -26,10 +26,12 @@ public class RegisterEntity {
 
 	@Column(name = "TrangThai")
 	private int status;
+	@Column(name = "GiaTien")
+	private float money;
 	@ManyToOne
 	@JoinColumn(name = "NguoiTao")
 	private AccountEntity account;
-	
+
 	@OneToMany(mappedBy = "registerEntity")
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private Collection<RegisterDetailEntity> registerDetailList;
@@ -82,5 +84,12 @@ public class RegisterEntity {
 		this.registerDetailList = registerDetailList;
 	}
 
-	
+	public float getMoney() {
+		return money;
+	}
+
+	public void setMoney(float money) {
+		this.money = money;
+	}
+
 }

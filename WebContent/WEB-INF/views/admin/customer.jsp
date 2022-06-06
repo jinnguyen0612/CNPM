@@ -53,9 +53,20 @@
 											<td>${c.gender? 'Nam':'Nữ'}</td>
 											<td><fmt:formatDate value="${c.birthday }"
 													pattern="dd/MM/yyyy" /></td>
-
-											<td class="account-state"><span
-												class="badge rounded-pill bg-success">Đang tập</span></td>
+											<td class="account-state"><c:choose>
+													<c:when test="${c.getCustomerStatus() == 0}">
+														<span class="badge rounded-pill bg-secondary"> Chưa
+															đăng ký tập </span>
+													</c:when>
+													<c:when test="${c.getCustomerStatus() == 1}">
+														<span class="badge rounded-pill bg-warning"> Đang
+															tập </span>
+													</c:when>
+													<c:when test="${c.getCustomerStatus() == 2}">
+														<span class="badge rounded-pill bg-success"> Đã
+															đăng ký </span>
+													</c:when>
+												</c:choose></td>
 
 											<td class="text-center"><a
 												href="admin/customer/register/${c.customerId}.htm">
@@ -180,27 +191,7 @@
 									id="input-address" placeholder="97 Man Thiện, ..." />
 								<span class="text-danger"><form:errors path="address"></form:errors></span>
 							</div>
-							<!-- <div class="col-12">
-								<button type="button"
-									class="btn btn-outline-primary btn-create-account col-12"
-									data-bs-toggle="collapse" data-bs-target="#form-create-account"
-									onClick="toggleBtnState(this, 'btn-outline-danger')">
-									<i class="bi bi-plus-circle"></i> <span class="">Tạo tài
-										khoản mới</span>
-								</button>
-							</div>
-							<div class="collapse col-12" id="form-create-account">
-								<input type="checkbox" value="1" name="checkbox-create-account"
-									class="checkbox-create-account">
-								<div class="row">
-									<div class="col-12" data-link="account" data-n="2">
-										<label for="input-username" class="form-label">Tên tài
-											khoản</label> <input type="text" name="userName" class="form-control"
-											id="input-username" />
-									</div>
 
-								</div>
-							</div> -->
 							<div class="text-end mt-3">
 								<button type="submit" name="${cFormAttribute.btnAction}"
 									class="btn btn-primary">Xác nhận</button>
@@ -262,8 +253,11 @@
 						<form:form id="register" action="${formAttribute.formAction}"
 							class="row g-3" modelAttribute="${register}">
 							<div class="col-md-12">
+								<c:set var="size" scope="session"
+									value="${register.registerDetailList.size()}" />
 								<label class="form-label">Mã: <span
-									class="employeeId text-danger">${register.registerId}</span></label>
+									class="employeeId text-danger">${register.registerId}</span>
+								</label>
 							</div>
 							<div class="contact-registration-list">
 								<div
@@ -272,11 +266,33 @@
 										<label for="input-package" class="form-label">Gói tập</label>
 										<select id="input-package" name="pack"
 											class="form-select input-pack">
-											<option selected value="">Chọn</option>
+
+											<option ${register.registerDetailList== NULL ? 'selected':''}
+												value="">Chọn</option>
 											<c:forEach var="p" items="${pack}">
-												<option value="${p.packID}">${p.packName}</option>
+												<option
+													${register.registerDetailList[size - 1].classEntity.packId == p.packID ? 'selected': ''}
+													value="${p.packID}">${p.packName}</option>
 											</c:forEach>
-										</select> <input type="number" class="type invisible position-absolute"
+										</select>
+										<c:choose>
+											<c:when test="${size <= 0}">
+												<c:set var="rType" value="0" />
+											</c:when>
+											<c:when
+												test="${register.registerDetailList[size - 1].classEntity.maxPP > 1}">
+												<c:set var="rType" value="1" />
+											</c:when>
+											<c:when
+												test="${register.registerDetailList[size - 1].classEntity.maxPP == 1}">
+												<c:set var="rType" value="2" />
+											</c:when>
+
+										</c:choose>
+
+
+										<input type="number" value="${rType}"
+											class="type  invisible position-absolute "
 											name="typeRegister">
 									</div>
 									<div class="type-select switch-element" data-n="1"
@@ -285,16 +301,22 @@
 										<div
 											class="col-12 d-flex gap-1 justify-content-around align-items-center">
 											<div class="col-5">
+
 												<select id="input-class" name="class" disabled="disabled"
 													class="form-select">
-													<option selected value="">Lớp</option>
+													<option
+														${register.registerDetailList[size - 1].classEntity.maxPP == 1 ? 'selected': ''}
+														value="">Lớp</option>
 													<c:forEach var="p" items="${pack}">
-														<c:forEach var="c" items="${p.classList}">
-															<c:if test="${c.maxPP > 1 }">
-																<option class="class d-none" data="${p.packID}"
-																	value="${c.classId}">${c.classId}</option>
+														<c:forEach var="l" items="${p.classList}">
+															<c:if test="${l.maxPP > 1}">
+																<option
+																	${register.registerDetailList[size - 1].classEntity.classId == l.classId ? 'selected': ''}
+																	class="class d-none" data="${p.packID}"
+																	value="${l.classId}">${l.classId}</option>
 															</c:if>
 														</c:forEach>
+
 													</c:forEach>
 												</select>
 											</div>
@@ -312,8 +334,9 @@
 										<div class="col-md-6">
 											<label for="input-close-register-day" class="form-label">Ngày
 												bắt đầu tập</label> <input type="date"
-												class="form-control date-start" name="date-start"
-												id="input-close-register-day" />
+												class="form-control date-start"
+												value="${register.registerDetailList[size - 1].classEntity.dateStart}"
+												name="date-start" id="input-close-register-day" />
 											<div class="date-start-error text-danger"></div>
 										</div>
 
@@ -327,6 +350,7 @@
 												<i class="bi bi-plus-circle"></i> <span class="te">Tạo
 													TKB</span>
 											</button>
+											<div class="schedule-error text-danger"></div>
 										</div>
 
 										<div class="text-end mt-3">
@@ -336,19 +360,120 @@
 										</div>
 									</div>
 								</div>
+
+								<!-- 2 -->
+								<input class="invisible position-absolute"
+									name="is-select-course-2" value="${size > 1? '1': '' }">
+								<div
+									class="contact-registration-detail d-none course-2 mt-2 border rounded p-2 bg-light">
+									<div class="col-md-12 mb-3">
+										<label for="input-package2" class="form-label">Gói tập</label>
+										<select id="input-package2" name="pack2"
+											class="form-select input-pack2">
+											<option ${size < 2? 'selected': ''} value="">Chọn</option>
+											<c:forEach var="p" items="${pack}">
+												<option
+													${register.registerDetailList[size - 2].classEntity.packId == p.packID ? 'selected': ''}
+													value="${p.packID}">${p.packName}</option>
+											</c:forEach>
+											<c:choose>
+												<c:when
+													test="${register.registerDetailList[size - 2].classEntity.maxPP > 1}">
+													<c:set var="rType2" value="1" />
+												</c:when>
+												<c:when
+													test="${register.registerDetailList[size - 2].classEntity.maxPP == 1}">
+													<c:set var="rType2" value="2" />
+												</c:when>
+
+												<c:otherwise>
+													<c:set var="rType2" value="0" />
+												</c:otherwise>
+
+											</c:choose>
+										</select> <input type="number" value="${rType2}"
+											class="type2 invisible position-absolute"
+											name="typeRegister2">
+									</div>
+									<div class="type-select switch-element" data-n="10"
+										data-link="course-2">
+										<label for="inputName2" class="form-label">Hình thức</label>
+										<div
+											class="col-12 d-flex gap-1 justify-content-around align-items-center">
+											<div class="col-5">
+												<select id="input-class2" name="class2" disabled="disabled"
+													class="form-select">
+													<option
+														${register.registerDetailList[size - 2].classEntity.maxPP == 1 ? 'selected': ''}
+														value="">Lớp</option>
+													<c:forEach var="p" items="${pack}">
+
+														<c:forEach var="l" items="${p.classList}">
+															<c:if test="${l.maxPP > 1}">
+																<option class="class2 d-none"
+																	${register.registerDetailList[size - 2].classEntity.classId == l.classId ? 'selected': ''}
+																	data="${p.packID}" value="${l.classId}">${l.classId}</option>
+															</c:if>
+														</c:forEach>
+													</c:forEach>
+												</select>
+											</div>
+											<span>Hoặc</span>
+											<button type="button"
+												class="btn btn-primary col-5 switch-btn personal-chosen2"
+												data-n-switch-target="20" data-link="course-2">
+												<i class="bi bi-plus-circle"></i> <span class="text-white">Cá
+													Nhân</span>
+											</button>
+										</div>
+									</div>
+									<div class="row g-3 switch-element invisible position-absolute"
+										data-n="20" data-link="course-2">
+										<div class="col-md-6">
+											<label for="input-close-register-day" class="form-label">Ngày
+												bắt đầu tập</label> <input type="date"
+												class="form-control date-start2"
+												value="${register.registerDetailList[size - 2].classEntity.dateStart}"
+												name="date-start2" id="input-close-register-day2" />
+											<div class="date-start-error2 text-danger"></div>
+										</div>
+
+										<div class="col-md-6">
+											<label for="" class="form-label"> Thời khoá biểu </label>
+											<button
+												class="btn btn-tt2 col-12 btn-outline-primary btn-light"
+												type="button" data-bs-target="#time-table2"
+												data-bs-toggle="modal">
+												<i class="bi bi-plus-circle"></i> <span class="te">Tạo
+													TKB</span>
+											</button>
+											<div class="schedule-error2 text-danger"></div>
+										</div>
+
+										<div class="text-end mt-3">
+											<button type="button"
+												class="btn btn-secondary personal-chosen-dismiss2 switch-btn"
+												data-link="course-2" data-n-switch-target="10">Huỷ</button>
+										</div>
+									</div>
+									<div class="col-12 mt-3 ${size == 2? 'd-none': ''} ">
+										<button type="button"
+											class="btn col-12 btn-outline-danger btn-light remove-course-2">
+											<i class="fa-regular fa-circle-minus"></i> <span>Loại
+												bỏ</span>
+										</button>
+									</div>
+
+								</div>
+
 							</div>
 
 							<div>
 								<button type="button"
-									class="btn d-none col-12 btn-outline-primary btn-light switch-element switch-btn  add-course-2"
-									data-link="course-btn" data-n="5" data-n-switch-target="6">
-									<i class="bi bi-plus-circle"></i> <span>Thêm</span>
+									class="btn col-12 btn-outline-primary btn-light add-course-2">
+									<i class="bi bi-plus-circle"></i> <span>Thêm gói khác</span>
 								</button>
-								<button type="button"
-									class="btn col-12 btn-outline-danger invisible position-absolute btn-light switch-element switch-btn remove-course-2"
-									data-link="course-btn" data-n="6" data-n-switch-target="5">
-									<i class="fa-regular fa-circle-minus"></i> <span>Loại bỏ</span>
-								</button>
+
 							</div>
 							<div class="text-end mt-3">
 								<button type="submit" name="${formAttribute.btnAction}"
@@ -363,7 +488,14 @@
 		</div>
 
 		<!-- Time-table -->
+		<c:forEach var="t"
+			items="${register.registerDetailList[size - 1].classEntity.scheduleEntity}">
+			<input type="text"
+				class="T-${d.classEntity.classId} input-tt-db invisible position-absolute"
+				value='T${t.day}-${t.session}'>
+		</c:forEach>
 		<div class="modal fade" id="time-table" tabindex="-1">
+
 			<div class="modal-dialog modal-xl modal-dialog-centered">
 				<div class="modal-content">
 					<section class="section">
@@ -412,78 +544,78 @@
 														<tr>
 															<td class="align-middle bg-light">Sáng</td>
 															<td class="td-time-table"><input type="radio"
-																name="T2" form="register" id="T2-M" value="0"
-																class="form-check-input" /> <label for="T2-M"></label></td>
+																name="T2" form="register" id="T2-0" value="0"
+																class="form-check-input" /> <label for="T2-0"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T3" id="T3-M" value="0"
-																class="form-check-input" /> <label for="T3-M"></label></td>
+																type="radio" name="T3" id="T3-0" value="0"
+																class="form-check-input" /> <label for="T3-0"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T4" id="T4-M" value="0"
-																class="form-check-input" /> <label for="T4-M"></label></td>
+																type="radio" name="T4" id="T4-0" value="0"
+																class="form-check-input" /> <label for="T4-0"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T5" id="T5-M" value="0"
-																class="form-check-input" /> <label for="T5-M"></label></td>
+																type="radio" name="T5" id="T5-0" value="0"
+																class="form-check-input" /> <label for="T5-0"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T6" id="T6-M" value="0"
-																class="form-check-input" /> <label for="T6-M"></label></td>
+																type="radio" name="T6" id="T6-0" value="0"
+																class="form-check-input" /> <label for="T6-0"></label></td>
 
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T7" id="T7-M" value="0"
-																class="form-check-input" /> <label for="T7-M"></label></td>
+																type="radio" name="T7" id="T7-0" value="0"
+																class="form-check-input" /> <label for="T7-0"></label></td>
 
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T8" id="T8-M" value="0"
-																class="form-check-input" /> <label for="T8-M"></label></td>
+																type="radio" name="T8" id="T8-0" value="0"
+																class="form-check-input" /> <label for="T8-0"></label></td>
 														</tr>
 
 														<tr>
 															<td class="align-middle bg-light">Chiều</td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T2" id="T2-A" value="1"
-																class="form-check-input" /> <label for="T2-A"></label></td>
+																type="radio" name="T2" id="T2-1" value="1"
+																class="form-check-input" /> <label for="T2-1"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T3" id="T3-A" value="1"
-																class="form-check-input" /> <label for="T3-A"></label></td>
+																type="radio" name="T3" id="T3-1" value="1"
+																class="form-check-input" /> <label for="T3-1"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T4" id="T4-A" value="1"
-																class="form-check-input" /> <label for="T4-A"></label></td>
+																type="radio" name="T4" id="T4-1" value="1"
+																class="form-check-input" /> <label for="T4-1"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T5" id="T5-A" value="1"
-																class="form-check-input" /> <label for="T5-A"></label></td>
+																type="radio" name="T5" id="T5-1" value="1"
+																class="form-check-input" /> <label for="T5-1"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T6" id="T6-A" value="1"
-																class="form-check-input" /> <label for="T6-A"></label></td>
+																type="radio" name="T6" id="T6-1" value="1"
+																class="form-check-input" /> <label for="T6-1"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T7" id="T7-A" value="1"
-																class="form-check-input" /> <label for="T7-A"></label></td>
+																type="radio" name="T7" id="T7-1" value="1"
+																class="form-check-input" /> <label for="T7-1"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T8" id="T8-A" value="1"
-																class="form-check-input" /> <label for="T8-A"></label></td>
+																type="radio" name="T8" id="T8-1" value="1"
+																class="form-check-input" /> <label for="T8-1"></label></td>
 														</tr>
 
 														<tr>
 															<td class="align-middle bg-light">Tối</td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T2" id="T2-E" value="2"
-																class="form-check-input" /> <label for="T2-E"></label></td>
+																type="radio" name="T2" id="T2-2" value="2"
+																class="form-check-input" /> <label for="T2-2"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T3" id="T3-E" value="2"
-																class="form-check-input" /> <label for="T3-E"></label></td>
+																type="radio" name="T3" id="T3-2" value="2"
+																class="form-check-input" /> <label for="T3-2"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T4" id="T4-E" value="2"
-																class="form-check-input" /> <label for="T4-E"></label></td>
+																type="radio" name="T4" id="T4-2" value="2"
+																class="form-check-input" /> <label for="T4-2"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T5" id="T5-E" value="2"
-																class="form-check-input" /> <label for="T5-E"></label></td>
+																type="radio" name="T5" id="T5-2" value="2"
+																class="form-check-input" /> <label for="T5-2"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T6" id="T6-E" value="2"
-																class="form-check-input" /> <label for="T6-E"></label></td>
+																type="radio" name="T6" id="T6-2" value="2"
+																class="form-check-input" /> <label for="T6-2"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T7" id="T7-E" value="2"
-																class="form-check-input" /> <label for="T7-E"></label></td>
+																type="radio" name="T7" id="T7-2" value="2"
+																class="form-check-input" /> <label for="T7-2"></label></td>
 															<td class="td-time-table"><input form="register"
-																type="radio" name="T8" id="T8-E" value="2"
-																class="form-check-input" /> <label for="T8-E"></label></td>
+																type="radio" name="T8" id="T8-2" value="2"
+																class="form-check-input" /> <label for="T8-2"></label></td>
 														</tr>
 													</tbody>
 												</table>
@@ -500,8 +632,149 @@
 		</div>
 
 
+		<!-- Time-table -->
+		<c:forEach var="t"
+			items="${register.registerDetailList[size - 2].classEntity.scheduleEntity}">
+			<input type="text"
+				class="2-T-${d.classEntity.classId} input-tt-db invisible position-absolute"
+				value='2-T${t.day}-${t.session}'>
+		</c:forEach>
+		<div class="modal fade" id="time-table2" tabindex="-1">
+			<div class="modal-dialog modal-xl modal-dialog-centered">
+				<div class="modal-content">
+					<section class="section">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="card mb-0">
+									<div class="card-body">
+										<h5
+											class="card-title align-items-center d-flex justify-content-between">
+											Thời Khoá Biểu
+											<div class="header-action d-flex gap-1">
+												<button type="button"
+													class="btn btn-primary btn-tt-confirm2"
+													data-bs-target="#modal-register" data-bs-toggle="modal">Xác
+													nhận</button>
+
+												<div class="search-bar-table d-flex align-items-stretch">
+													<div class="">
+														<button type="button"
+															class="btn btn-secondary btn-tt-cancel2"
+															data-bs-target="#modal-register" data-bs-toggle="modal">Huỷ
+															bỏ</button>
+													</div>
 
 
+												</div>
+											</div>
+										</h5>
+
+										<!-- Table with stripped rows -->
+										<div class="my-time-table">
+											<div class="table-responsive">
+												<table class="table table-bordered text-center">
+													<thead>
+														<tr class="bg-light-gray">
+															<th class="text-uppercase col-1 label">Buổi</th>
+															<th class="text-uppercase col-1 label">Thứ hai</th>
+															<th class="text-uppercase col-1 label">Thứ ba</th>
+															<th class="text-uppercase col-1 label">Thư tư</th>
+															<th class="text-uppercase col-1 label">Thứ năm</th>
+															<th class="text-uppercase col-1 label">Thứ sáu</th>
+															<th class="text-uppercase col-1 label">Thứ bảy</th>
+															<th class="text-uppercase col-1 label">Chủ nhật</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr>
+															<td class="align-middle bg-light">Sáng</td>
+															<td class="td-time-table"><input type="radio"
+																name="2-T2" form="register" id="2-T2-0" value="0"
+																class="form-check-input" /> <label for="2-T2-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T3" id="2-T3-0" value="0"
+																class="form-check-input" /> <label for="2-T3-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T4" id="2-T4-0" value="0"
+																class="form-check-input" /> <label for="2-T4-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T5" id="2-T5-0" value="0"
+																class="form-check-input" /> <label for="2-T5-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T6" id="2-T6-0" value="0"
+																class="form-check-input" /> <label for="2-T6-0"></label></td>
+
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T7" id="2-T7-0" value="0"
+																class="form-check-input" /> <label for="2-T7-0"></label></td>
+
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T8" id="2-T8-0" value="0"
+																class="form-check-input" /> <label for="2-T8-0"></label></td>
+														</tr>
+
+														<tr>
+															<td class="align-middle bg-light">Chiều</td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T2" id="2-T2-1" value="1"
+																class="form-check-input" /> <label for="2-T2-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T3" id="2-T3-1" value="1"
+																class="form-check-input" /> <label for="2-T3-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T4" id="2-T4-1" value="1"
+																class="form-check-input" /> <label for="2-T4-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T5" id="2-T5-1" value="1"
+																class="form-check-input" /> <label for="2-T5-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T6" id="2-T6-1" value="1"
+																class="form-check-input" /> <label for="2-T6-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T7" id="2-T7-1" value="1"
+																class="form-check-input" /> <label for="2-T7-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T8" id="2-T8-1" value="1"
+																class="form-check-input" /> <label for="2-T8-1"></label></td>
+														</tr>
+
+														<tr>
+															<td class="align-middle bg-light">Tối</td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T2" id="2-T2-2" value="2"
+																class="form-check-input" /> <label for="2-T2-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T3" id="2-T3-2" value="2"
+																class="form-check-input" /> <label for="2-T3-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T4" id="2-T4-2" value="2"
+																class="form-check-input" /> <label for="2-T4-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T5" id="2-T5-2" value="2"
+																class="form-check-input" /> <label for="2-T5-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T6" id="2-T6-2" value="2"
+																class="form-check-input" /> <label for="2-T6-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T7" id="2-T7-2" value="2"
+																class="form-check-input" /> <label for="2-T7-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T8" id="2-T8-2" value="2"
+																class="form-check-input" /> <label for="2-T8-2"></label></td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<!-- End Table with stripped rows -->
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
 
 		<!-- table detail -->
 		<div class="modal fade" id="modal-detail" tabindex="-1">
@@ -596,6 +869,10 @@
 																	<span class="badge rounded-pill bg-success">Đã
 																		thanh toán</span>
 																</c:if>
+																<c:if test="${r.status == 2}">
+																	<span class="badge rounded-pill bg-secondary">Đã
+																		huỷ </span>
+																</c:if>
 
 															</div>
 															<div class="col-3">${r.account.username}</div>
@@ -626,16 +903,19 @@
 
 																<c:choose>
 																	<c:when test="${r.status == 1}">
-																		<button title="Tạo hoá đơn" disabled="disabled"
+																		<button title="Thanh toán" disabled="disabled"
 																			class="btn  btn-sm btn-secondary">
 																			<i class="fa-solid fa-ballot"></i>
 																		</button>
 																	</c:when>
 																	<c:otherwise>
-																		<button title="Tạo hoá đơn"
-																			class="btn btn-outline-success btn-sm">
-																			<i class="fa-solid fa-ballot"></i>
-																		</button>
+																		<a class="btnCheckout"
+																			href="admin/contract-registration/checkout/${r.registerId}.htm">
+																			<button title="Thanh toán"
+																				class="btn btn-outline-success btn-sm">
+																				<i class="fa-solid fa-ballot"></i>
+																			</button>
+																		</a>
 																	</c:otherwise>
 																</c:choose>
 
@@ -647,7 +927,7 @@
 																	<span class="label">Các gói đăng ký</span>
 																</div>
 
-																<div class="my-4 row justify-content-center">
+																<div class="my-4 row justify-content-center gap-3">
 
 																	<c:forEach var="d" items="${r.registerDetailList}">
 																		<c:forEach var="t"
@@ -708,10 +988,9 @@
 		</div>
 		<!-- end table detail -->
 
-
-
 		<!-- Time-table detail -->
 		<div class="modal fade" id="time-table-detail" tabindex="-1">
+
 			<div class="modal-dialog modal-xl modal-dialog-centered">
 				<div class="modal-content">
 					<section class="section">
@@ -837,14 +1116,13 @@
 	<script type="text/javascript">
 		
       $(document).ready(function () {
+    	  $(".btnCheckout").click(function() {
+    		  alert("Xác nhận thanh toán");
+    	  })
     	  // wrap create c btn 
     	  $(".btn-create").wrap("<a href='admin/customer/add.htm'></a>")
     	  $(".btn-create").removeAttr("data-bs-toggle");
     	  $(".btn-create").removeAttr("data-bs-target");
-    	  
-    	  
-    	  
-    	  
     	  
     	  // show class
     	 let personalChosen = $(".personal-chosen");
@@ -852,54 +1130,88 @@
     	 let inputType = $(".type")
     	 let inputClass = $("#input-class");
     	 let inputPack = $(".input-pack");
-    	  inputType.val(0);
+    	 console.log(inputType.val())
+    	 let btnAddCourseSecond = $(".add-course-2")
     	  personalChosen.click(function(){
     		  inputClass.val("").change();
     		  inputType.val(2);
     	  });
     	  
     	  $(".personal-chosen-dismiss").click(function(){
-    		 
     		  inputType.val(0);
     	  });
+    	  //initial
+    	  let inputTypeVal = inputType.val();
+    	  
+    	  if(inputTypeVal == 2) {
+    		  console.log(inputTypeVal); 
+    		  personalChosen.click();
+    		  $(".btn-tt").html('<i class="fa-solid fa-pen-to-square"></i> <span class="te">Chỉnh sửa TKB</span>') 
+    	  }
+    	  
+    	 	function changeType1(packSelected) {
+    	 		if(packSelected) {
+       			inputClass.attr('disabled', false);
+       		  	$('.class').addClass("d-none")
+       		 	 $('.class[data="' + packSelected +'"]').removeClass("d-none")
+       		  	personalChosen.attr('disabled', false);
+       		  	}
+       		  	else {
+       			  inputClass.attr('disabled', true);
+       			  personalChosen.attr('disabled', true);
+       			  inputType.val(0);
+       			  $(".personal-chosen-dismiss").click();
+       		  }	
+    	 	}
+    	 changeType1(inputPack.val());
     	  inputPack.change(function(){
     		  let packSelected = this.value
-    		  inputClass.val("").change();
-    	
-    		  if(packSelected) {
-    			 inputClass.attr('disabled', false);
-    		  $('.class').addClass("d-none")
-    		  $('.class[data="' + packSelected +'"]').removeClass("d-none")
-    		  personalChosen.attr('disabled', false);
-    		  }
-    		  else {
-    			  inputClass.attr('disabled', true);
-    			  personalChosen.attr('disabled', true);
-    			  inputType.val(0);
-    			  $(".personal-chosen-dismiss").click();
-    		  }
+    		  if(inputType.val() !== "2") {
+        		  inputClass.val("").change();
+        		}
+    		  changeType1(packSelected);
     	  });
     	  
     	  inputClass.change(function(){
     		  let classSelected = this.value
     		  if(classSelected) {
     			  inputType.val(1);
-    			
     		  }
-    		  else {
-    			  
+    		  else {  
     			  inputType.val(0);
     		  }
     	  });
     	  
     	  $("#register").submit(function(e) {
     		  if($(".type").val() == 2) {
-    			 
     			  if(!$(".date-start").val()) {
     				 	$(".date-start-error").text("Nội dung này không được bỏ trống") 
     				  e.preventDefault()
     				  
     			  }
+    			  else {
+    				  $(".date-start-error").text("") 
+    			  }
+    			  let isValid = false
+    			  $("#time-table :input").each(function() {
+    				  if(this.id) {
+    					if($("#" + this.id).prop("checked")) {
+    		
+    						isValid = true;
+    					}
+        			    
+    				  }
+        		  })
+       
+        		  
+        		  if(!isValid) {
+        			  $(".schedule-error").text("Vui lòng chọn ít nhất 1 ngày để lập thời khoá biểu")
+        			  e.preventDefault()
+        		  }
+        		  else {
+        			  $(".schedule-error").text("")
+        		  }
+    			  
     			 
     		  }
     		 
@@ -909,6 +1221,113 @@
     		  $(".btn-tt").html('<i class="fa-solid fa-pen-to-square"></i> <span class="te">Chỉnh sửa TKB</span>')
     	  })
     	  
+    	    $(".btn-tt-confirm2").click(function() {
+    		  $(".btn-tt2").html('<i class="fa-solid fa-pen-to-square"></i> <span class="te">Chỉnh sửa TKB</span>')
+    	  })
+    	  
+    	  
+    	  
+    	  //////////////////////////////////// ------------- course 2 -------------/////////////////////////////////////////////////////////////////
+    	  
+    	  
+    	 let personalChosen2 = $(".personal-chosen2");
+    	 personalChosen2.attr('disabled', true);
+    	 let isSelectCourse2 = $("input[name='is-select-course-2']");
+    	 let inputType2 = $(".type2")
+    	 let inputClass2 = $("#input-class2");
+    	 let inputPack2 = $(".input-pack2");
+    	 if(isSelectCourse2.val() == "1") {
+    		 $(".course-2").removeClass("d-none")
+             btnAddCourseSecond.addClass("d-none")
+    	 }
+    	 if(inputType2.val() == 2) {
+   		  personalChosen2.click();
+   		  $(".btn-tt2").html('<i class="fa-solid fa-pen-to-square"></i> <span class="te">Chỉnh sửa TKB</span>')
+   	  }
+    	  personalChosen2.click(function(){
+    		  inputClass2.val("").change();
+    		  inputType2.val(2);
+    	  });
+    	  
+    	  $(".personal-chosen-dismiss2").click(function(){
+    		 
+    		  inputType2.val(0);
+    	  });
+    	  changeType2(inputPack2.val());
+    	  
+    	  function changeType2(packSelected) {
+    		  if(packSelected) {
+     			 inputClass2.attr('disabled', false);
+     		  $('.class2').addClass("d-none")
+     		  $('.class2[data="' + packSelected +'"]').removeClass("d-none")
+     		  personalChosen2.attr('disabled', false);
+     		  }
+     		  else {
+     			  inputClass2.attr('disabled', true);
+     			  personalChosen2.attr('disabled', true);
+     			  inputType2.val(0);
+     			  $(".personal-chosen-dismiss2").click();
+     		  }
+  	 	}
+    	  inputPack2.change(function(){
+    		  let packSelected = this.value
+    		  if(inputType2.value != "2") {
+    			  inputClass2.val("").change();
+        		}
+    		
+    		  changeType2(packSelected)
+    		 
+    	  });
+    	  
+    	  
+    	  
+    	  inputClass2.change(function(){
+    		  let classSelected = this.value
+    		  if(classSelected) {
+    			  inputType2.val(1);		  
+    		  }
+    		  else {  
+    			  inputType2.val(0);
+    			    		  }
+    	  });
+    	  
+    	  $("#register").submit(function(e) {
+    		  if($(".type2").val() == 2) {
+    			  
+    			 
+    			  if(!$(".date-start2").val()) {
+    				 	$(".date-start-error2").text("Nội dung này không được bỏ trống") 
+    				  e.preventDefault()
+    			  }
+    			  else {
+    				  $(".date-start-error2").text("") 
+    			  }
+    				  
+    			let isValid = false
+    			  $("#time-table2 :input").each(function() {
+    				  if(this.id) {
+    					if($("#" + this.id).prop("checked"))
+        			    isValid = true;
+    				  }
+        		  })
+        		  
+        		  if(!isValid) {
+        			  $(".schedule-error2").text("Vui lòng chọn ít nhất 1 ngày để lập thời khoá biểu")
+        			  e.preventDefault()
+        		  }
+        		  else {
+        			  $(".schedule-error2").text("")
+        		  }
+    				  
+    
+    			 
+    		  }
+    		 
+    	  })
+    	  
+    	    //////////////////////////////////// ------------- course 2 -------------/////////////////////////////////////////////////////////////////
+    	  
+    	  
     	  
     	  
     	  // show modal
@@ -917,6 +1336,17 @@
     	  $("#"+id).modal("show");
     	  }
     	  
+    	   $(window).click(function(e) {
+    		 	if(e.target.getAttribute("for")) {
+    		 		if(e.target.getAttribute("for").includes("T")) {
+    		 			e.preventDefault();
+    		 			let el = e.target.getAttribute("for");
+        		 		$("#" + el).prop("checked", !$("#" + el).prop("checked"));
+    		 		}
+    		 		
+    		 	}
+    		}); 
+    	  
     	  $(".btn-show-time-table-detail").click(function() {
     		  $("#time-table-detail :input").prop( "checked", false );
     		  $(this.getAttribute("data")).each(function() {
@@ -924,6 +1354,34 @@
     		  })
     		  $("#time-table-detail").modal("show");
     	  })
+    	  
+    	    $(".btn-tt").click(function() {
+    		  $("#time-table :input").prop( "checked", false );
+    		  $(".input-tt-db").each(function() {
+    			  $("#"+this.value).prop( "checked", true );
+    		  })
+    	  })
+    	  
+    	  $(".btn-tt2").click(function() {
+    		  $("#time-table2 :input").prop( "checked", false );
+    		  $(".input-tt-db").each(function() {
+    			  $("#"+this.value).prop( "checked", true );
+    		  })
+    	  })
+    	  
+    	  btnAddCourseSecond.click(function () {
+          $(".course-2").removeClass("d-none")
+           btnAddCourseSecond.addClass("d-none")
+           isSelectCourse2.val("1")
+        });
+        $(".remove-course-2").click(function () {
+          $(".course-2").addClass("d-none");
+          btnAddCourseSecond.removeClass("d-none")
+          inputType2.val(0);
+          inputClass2.val("").change();
+          inputPack2.val("").change();
+          isSelectCourse2.val("")
+        });
     	  
     	  // create account
     	  const cId = $(".customerId-flag").attr("data")
@@ -937,17 +1395,6 @@
     	 		
     	 		 $("#modal-create-account form").attr("action", "admin/customer/"+this.getAttribute("data") + "/create-account.htm");
     	 		
-    	 		 
-    		 /*  const aCheckbox = $(".checkbox-create-account")
-    		  aCheckbox.prop("checked", !aCheckbox.prop("checked"))
-    		  if(aCheckbox.prop("checked")) {
-    			  btnCreateAccount.addClass("btn-outline-danger")
-    			  btnCreateAccount.text("Huỷ tạo tài khoản")
-    		  }
-    		  else {
-    			  btnCreateAccount.removeClass("btn-outline-danger")
-    			  btnCreateAccount.text("Tạo tài khoản mới")
-    		  } */
     	  })
     	
         $(
@@ -1041,93 +1488,7 @@
                   </div>
                 `);
 
-        $(".add-course-2").click(function () {
-          $(".contact-registration-list").append(` <div
-                    class="contact-registration-detail course-2 mt-2 border rounded p-2 bg-light"
-                  >
-                    <div class="type-select switch-element" data-n="3" data-link ="course-2">
-                       <div class="col-md-12 mb-3">
-                      <label for="input-package" class="form-label"
-                        >Gói tập</label
-                      >
-
-                      <select id="input-package" class="form-select">
-                        <option selected>Chọn</option>
-                        <option>Gói xxx</option>
-                      </select>
-                    </div>
-                      <label  class="form-label"
-                        >Hình thức</label
-                      >
-                      <div
-                        class="col-12 d-flex gap-1 justify-content-around align-items-center"
-                      >
-                        <div class="col-5">
-                          <select id="input-class" class="form-select">
-                            <option selected value="0">Lớp</option>
-                            <option value="1">Lớp A</option>
-                          </select>
-                        </div>
-                        <span>Hoặc</span>
-                        <button
-                          type="button"
-                          class="btn btn-primary btn-create-account col-5 switch-btn personal-chosen"
-                          data-n-switch-target="4"
-                          data-link ="course-2"
-                        >
-                          <i class="bi bi-plus-circle"></i>
-                          <span class="text-white">Cá Nhân</span>
-                        </button>
-                      </div>
-                    </div>
-                    <div
-                      class="row g-3 switch-element invisible position-absolute"
-                      data-n="4"
-                      data-link="course-2"
-                    >
-                     
-                      <div class="col-md-6">
-                        <label for="input-close-register-day" class="form-label"
-                          >Ngày bắt đầu tập</label
-                        >
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="input-close-register-day"
-                        />
-                      </div>
-
-                      <div class="col-md-6">
-                        <label for="input-close-register-day" class="form-label"
-                          >Thời khoá biểu</label
-                        >
-                        <button
-                          class="btn col-12 btn-outline-primary btn-light"
-                          type="button"
-                          data-bs-target="#time-table"
-                          data-bs-toggle="modal"
-                        >
-                          <i class="bi bi-plus-circle"></i>
-                          <span class="te">Tạo TKB</span>
-                        </button>
-                      </div>
-
-                      <div class="text-end mt-3">
-                        <button
-                          type="button"
-                          class="btn btn-secondary switch-btn"
-                          data-link ="course-2"
-                          data-n-switch-target="3"
-                        >
-                          Huỷ
-                        </button>
-                      </div>
-                    </div>
-                  </div>`);
-        });
-        $(".remove-course-2").click(function () {
-          $(".course-2").remove();
-        });
+    	 
       });
     </script>
 

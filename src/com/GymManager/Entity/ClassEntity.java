@@ -22,46 +22,42 @@ public class ClassEntity {
 	@Id
 	@Column(name = "MaLop")
 	private String classId;
-	
+
 	@Column(name = "NgayMoDK")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateOpen;
-	
+
 	@Column(name = "NgayDongDK")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateClose;
-	
+
 	@Column(name = "NgayBatDauLop")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateStart;
-	
+
 	@Column(name = "SoLuongNguoiToiDa")
 	private int maxPP;
-	
-	// join to column
-	@Column(name = "PT", insertable = false, updatable= false)
-	private String PT;
-	
 
-	
-	@ManyToOne(fetch = FetchType.EAGER)
+	// join to column
+	@Column(name = "PT", insertable = false, updatable = false)
+	private String PT;
+
+	@ManyToOne
 	@JoinColumn(name = "PT")
 	private PTEntity ptEntity;
 
-	
-	@Column(name = "MaGoi", insertable = false, updatable= false)
+	@Column(name = "MaGoi", insertable = false, updatable = false)
 	private String packId;
-	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name ="MaGoi")
+
+	@ManyToOne
+	@JoinColumn(name = "MaGoi")
 	private TrainingPackEntity trainingPackEntity;
-	
-	@OneToMany(mappedBy ="classEntity", fetch = FetchType.EAGER)
+
+	@OneToMany(mappedBy = "classEntity", fetch = FetchType.EAGER)
 	private Collection<ScheduleEntity> scheduleEntity;
-	
 
 	public Collection<ScheduleEntity> getScheduleEntity() {
 		return scheduleEntity;
@@ -119,8 +115,6 @@ public class ClassEntity {
 		this.maxPP = maxPP;
 	}
 
-
-
 	public String getPackId() {
 		return packId;
 	}
@@ -128,10 +122,6 @@ public class ClassEntity {
 	public void setPackId(String packId) {
 		this.packId = packId;
 	}
-
-
-
-
 
 	public String getPT() {
 		return PT;

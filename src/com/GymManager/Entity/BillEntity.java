@@ -28,9 +28,9 @@ public class BillEntity {
 	@JoinColumn(name = "MaNV")
 	private StaffEntity staff;
 
-	@OneToOne
-	@JoinColumn(name = "MaTTDK")
-	private RegisterEntity register;
+//	@OneToOne
+//	@JoinColumn(name = "MaTTDK")
+//	private RegisterEntity register;
 
 	public String getBillId() {
 		return billId;
@@ -64,12 +64,12 @@ public class BillEntity {
 		this.staff = staff;
 	}
 
-	public RegisterEntity getRegister() {
-		return register;
-	}
-
-	public void setRegister(RegisterEntity register) {
-		this.register = register;
-	}
+//	public RegisterEntity getRegister() {
+//		return register;
+//	}
+//
+//	public void setRegister(RegisterEntity register) {
+//		this.register = register;
+//	}
 
 }

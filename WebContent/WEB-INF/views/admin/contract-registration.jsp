@@ -21,6 +21,7 @@
 		<!-- End Page Title -->
 
 
+
 		<section class="section">
 			<div class="row">
 				<div class="col-lg-12">
@@ -54,22 +55,25 @@
 												</c:if> <c:if test="${r.status == 1}">
 													<span class="badge rounded-pill bg-success">Đã thanh
 														toán</span>
+												</c:if> <c:if test="${r.status == 2}">
+													<span class="badge rounded-pill bg-secondary">Đã huỷ</span>
 												</c:if></td>
 
 											<td class="text-center"><c:choose>
-													<c:when test="${r.status == 1}">
-														<button title="Chỉnh sửa" disabled="disabled"
-															class="btn btn-sm btn-secondary">
-															<i class="fa-solid fa-pen-to-square"></i>
-														</button>
-													</c:when>
-													<c:otherwise>
+													<c:when test="${r.status == 0}">
+
 														<a
 															href="admin/customer/register/update/${r.registerId}.htm"><button
 																class="btn btn-outline-warning btn-light btn-sm"
 																title="Chỉnh sửa">
 																<i class="fa-solid fa-pen-to-square"></i>
 															</button> </a>
+													</c:when>
+													<c:otherwise>
+														<button title="Chỉnh sửa" disabled="disabled"
+															class="btn btn-sm btn-secondary">
+															<i class="fa-solid fa-pen-to-square"></i>
+														</button>
 													</c:otherwise>
 												</c:choose> <a
 												href="admin/contract-registration/detail/${r.registerId}.htm">
@@ -79,15 +83,19 @@
 														<i class="fa-solid fa-circle-exclamation"></i>
 													</button>
 											</a> <c:choose>
-													<c:when test="${r.status == 1}">
-														<button title="Tạo hoá đơn" disabled="disabled"
-															class="btn  btn-sm btn-secondary">
-															<i class="fa-solid fa-ballot"></i>
-														</button>
+													<c:when test="${r.status == 0}">
+														<a class="btnCheckout"
+															href="admin/contract-registration/checkout/${r.registerId}.htm">
+															<button title="Thanh toán"
+																class="btn btn-outline-success btn-sm">
+																<i class="fa-solid fa-ballot"></i>
+															</button>
+														</a>
+
 													</c:when>
 													<c:otherwise>
-														<button title="Tạo hoá đơn"
-															class="btn btn-outline-success btn-sm">
+														<button title="Thanh toán" disabled="disabled"
+															class="btn  btn-sm btn-secondary">
 															<i class="fa-solid fa-ballot"></i>
 														</button>
 													</c:otherwise>
@@ -154,8 +162,11 @@
 																<c:if test="${registerDetail.status == 0}">
 																	<span class="text-danger">Chưa thanh toán</span>
 																</c:if>
-																<c:if test="${r.status == 1}">
+																<c:if test="${registerDetail.status == 1}">
 																	<span class="text-success">Đã thanh toán</span>
+																</c:if>
+																<c:if test="${registerDetail.status == 2}">
+																	<span class="text-secondary">Đã huỷ</span>
 																</c:if>
 															</div>
 														</div>
@@ -354,6 +365,10 @@
 	<%@include file="./script.jsp"%>
 	<script type="text/javascript">
       $(document).ready(function () {
+    	  $(".btn-create").remove();
+    	  $(".btnCheckout").click(function() {
+    		  alert("Xác nhận thanh toán");
+    	  })
     	  let id = $(".modal-flag").attr("idModal")
     	  if(id) {
     	  $("#"+id).modal("show");

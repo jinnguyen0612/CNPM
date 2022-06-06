@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
@@ -21,30 +23,30 @@ public class TrainingPackEntity {
 	@Id
 	@Column(name = "MaGoi")
 	private String packID;
-	
+
 	@Column(name = "TenGoi")
 	private String packName;
-	
+
 	@Column(name = "ThoiHanGoi")
 	private int packDuration;
 
 	@Column(name = "TrangThai")
 	private String status;
-	
-	@Column(name="LoaiGoi", insertable = false, updatable= false)
+
+	@Column(name = "LoaiGoi", insertable = false, updatable = false)
 	private String packTypeID;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "LoaiGoi")
 	private TrainingPackTypeEntity trainingPackTypeEntity;
-	
-	@Column(name ="GiaTien")
+
+	@Column(name = "GiaTien")
 	private float money;
 
-	@OneToMany(mappedBy ="trainingPackEntity", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "trainingPackEntity")
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private Collection<ClassEntity> classList;
-	
-	
+
 	public Collection<ClassEntity> getClassList() {
 		return classList;
 	}
@@ -109,8 +111,6 @@ public class TrainingPackEntity {
 		this.money = money;
 	}
 
-
-
 	public TrainingPackEntity(String packID, String packName, int packDuration, String status, String packTypeID,
 			TrainingPackTypeEntity trainingPackTypeEntity, float money) {
 		super();
@@ -127,8 +127,4 @@ public class TrainingPackEntity {
 		super();
 	}
 
-	
-
-
-	 
 }

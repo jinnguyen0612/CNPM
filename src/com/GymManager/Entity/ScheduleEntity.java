@@ -6,8 +6,8 @@ import javax.persistence.*;
 @Table(name = "TKB_LOP")
 public class ScheduleEntity {
 	@Id
-	@GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)
-	@Column(name = "Ma", unique = true, nullable = false)
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "Ma")
 	private Integer id;
 
 	@Column(name="MaLop")
