@@ -5,12 +5,15 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.GymManager.Entity.AccountEntity;
+import com.GymManager.Entity.RegisterEntity;
+import com.GymManager.Entity.TrainingPackEntity;
 
 @Transactional
 public class MethodAdminController {
@@ -85,6 +88,19 @@ public class MethodAdminController {
 	public AccountEntity getAccount(String username) {
 		Session session = factory.getCurrentSession();
 		return (AccountEntity) session.get(AccountEntity.class, username);
+	}
+
+	public List<RegisterEntity> getExpireRegister() {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM RegisterEntity where DATEDIFF(day, registerDate, getday()) > 10";
+		Query query = session.createQuery(hql);
+		List<RegisterEntity> list = query.list();
+		return list;
+	}
+
+	public String hashPass(String matKhau) {
+		String hashpw = DigestUtils.md5Hex(matKhau).toUpperCase();
+		return hashpw;
 	}
 
 }
