@@ -46,9 +46,9 @@ public class StaffEntity {
 	@OneToOne
 	@JoinColumn(name = "TaiKhoan")
 	private AccountEntity account;
+
 	@OneToMany(mappedBy = "staff")
 	@LazyCollection(LazyCollectionOption.FALSE)
-	private Collection<BillEntity> billList;
 
 	public String getStaffId() {
 		return staffId;
@@ -128,14 +128,6 @@ public class StaffEntity {
 
 	public void setAccount(AccountEntity account) {
 		this.account = account;
-	}
-
-	public Collection<BillEntity> getBillList() {
-		return billList;
-	}
-
-	public void setBillList(Collection<BillEntity> billList) {
-		this.billList = billList;
 	}
 
 }

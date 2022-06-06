@@ -27,10 +27,8 @@ public class HomeController {
 	public String index(HttpServletRequest request, HttpSession session, ModelMap model) {
 		Date today = new Date();
 
-		System.out.println(today.getYear());
-
-		model.addAttribute("numOfBill", getNumOfBillFilter("day", today.getDate()));
-		model.addAttribute("revenue", getRevenue("day", today.getDate()));
+//		model.addAttribute("numOfBill", getNumOfBillFilter("day", today.getDate()));
+//		model.addAttribute("revenue", getRevenue("day", today.getDate()));
 		model.addAttribute("numOfCustomer", getNumOfCustomer());
 		model.addAttribute("billFilter", "day");
 		model.addAttribute("revenueFilter", "day");
