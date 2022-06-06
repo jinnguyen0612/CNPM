@@ -31,43 +31,43 @@ public class AccountController extends MethodAdminController {
 	@Autowired
 	SessionFactory factory;
 
-	@RequestMapping(method= RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public String index(ModelMap model) {
 		AccountEntity account = newAccount();
-		model.addAttribute("account",account);
+		model.addAttribute("account", account);
 //		model.addAttribute("accountUpdate", account);
 		model.addAttribute("aList", getAllAccount());
 		return "admin/account";
 	}
-	
+
 //Clock account
 
-	
 	@RequestMapping(value = "clock/{username}.htm")
 	public String clockAccount(@PathVariable("username") String username) {
-			Session session = factory.openSession();
-			Transaction t = session.beginTransaction();
-			AccountEntity account = getAccount(username);
-			try {
-				if(account.getStatus()==0) account.setStatus(1);
-				if(account.getStatus()==1) account.setStatus(0);
-				session.merge(account);
+		Session session = factory.openSession();
+		Transaction t = session.beginTransaction();
+		AccountEntity account = getAccount(username);
+		try {
+			if (account.getStatus() == 0)
+				account.setStatus(1);
+			else if (account.getStatus() == 1)
+				account.setStatus(0);
+			session.merge(account);
 
-				t.commit();
+			t.commit();
 
-				return "redirect:/admin/account.htm";
+			return "redirect:/admin/account.htm";
 
-			}
+		}
 
-			finally {
-				session.close();
-			}
-			
+		finally {
+			session.close();
+		}
+
 	}
-	
-	
+
 //method
-	
+
 	public List<AccountEntity> getAllAccount() {
 		Session session = factory.getCurrentSession();
 		String hql = "FROM AccountEntity";
@@ -75,7 +75,7 @@ public class AccountController extends MethodAdminController {
 		List<AccountEntity> list = query.list();
 		return list;
 	}
-	
+
 //	public AccountEntity getAccount(String username) {
 //		Session session = factory.getCurrentSession();
 //		String hql = "FROM AccountEntity Where";
@@ -83,10 +83,7 @@ public class AccountController extends MethodAdminController {
 //		AccountEntity account = query.account;
 //		return list;
 //	}
-	
-	
-	
-	
+
 	public AccountEntity getAccount(String username) {
 		Session session = factory.getCurrentSession();
 		return (AccountEntity) session.get(AccountEntity.class, username);

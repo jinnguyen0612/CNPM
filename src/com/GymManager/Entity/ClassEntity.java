@@ -14,6 +14,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
@@ -58,6 +60,10 @@ public class ClassEntity {
 
 	@OneToMany(mappedBy = "classEntity", fetch = FetchType.EAGER)
 	private Collection<ScheduleEntity> scheduleEntity;
+
+	@OneToMany(mappedBy = "classEntity")
+	@LazyCollection(LazyCollectionOption.FALSE)
+	private Collection<RegisterDetailEntity> registerDetailEntities;
 
 	public Collection<ScheduleEntity> getScheduleEntity() {
 		return scheduleEntity;
@@ -139,6 +145,14 @@ public class ClassEntity {
 		this.ptEntity = ptEntity;
 	}
 
+	public Collection<RegisterDetailEntity> getRegisterDetailEntities() {
+		return registerDetailEntities;
+	}
+
+	public void setRegisterDetailEntities(Collection<RegisterDetailEntity> registerDetailEntities) {
+		this.registerDetailEntities = registerDetailEntities;
+	}
+
 	public ClassEntity(String classId, Date dateOpen, Date dateClose, Date dateStart, int maxPP, String pT,
 			PTEntity ptEntity, String packId, TrainingPackEntity trainingPackEntity) {
 		super();
@@ -155,6 +169,22 @@ public class ClassEntity {
 
 	public ClassEntity() {
 		super();
+	}
+
+	public int getClassStatus() {
+		RegisterDetailEntity[] registerDetailEntities = this.getRegisterDetailEntities()
+				.toArray(RegisterDetailEntity[]::new);
+		if (registerDetailEntities.length == this.maxPP) {
+			return 0;
+		}
+		if (this.maxPP > 1) {
+			Date toDay = new Date();
+			if (toDay.after(this.dateOpen) && toDay.before(this.dateClose)) {
+				return 1;
+			}
+		}
+
+		return 0;
 	}
 
 }

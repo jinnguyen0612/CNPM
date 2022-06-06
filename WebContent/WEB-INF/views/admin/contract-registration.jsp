@@ -38,6 +38,7 @@
 										<th>Tài khoản đăng ký</th>
 										<th>Ngày đăng ký</th>
 										<th>Trạng thái</th>
+										<th>Thành Tiền</th>
 										<th class="text-center ">Thao tác</th>
 									</tr>
 								</thead>
@@ -47,7 +48,8 @@
 											<td>${r.registerId}</td>
 											<td>${r.customer.name}</td>
 											<td>${r.account.username}</td>
-											<td>${r.registerDate}</td>
+											<td><fmt:formatDate value="${r.registerDate}"
+													pattern="dd/MM/yyyy" /></td>
 
 											<td class="account-state"><c:if test="${r.status == 0}">
 													<span class="badge rounded-pill bg-danger">Chưa
@@ -58,6 +60,8 @@
 												</c:if> <c:if test="${r.status == 2}">
 													<span class="badge rounded-pill bg-secondary">Đã huỷ</span>
 												</c:if></td>
+											<td><fmt:formatNumber pattern="###,### đ"
+													value="${r.money} " type="currency" /></td>
 
 											<td class="text-center"><c:choose>
 													<c:when test="${r.status == 0}">
@@ -170,6 +174,13 @@
 																</c:if>
 															</div>
 														</div>
+														<div class="row">
+															<div class="col-lg-5 col-md-4 label">Thanh tiền</div>
+															<div class="col-lg-7 col-md-8">
+																<fmt:formatNumber pattern="###,### đ"
+																	value="${registerDetail.money}" type="currency" />
+															</div>
+														</div>
 													</div>
 													<div class="col-6">
 														<div class="row mt-4 ">
@@ -209,6 +220,8 @@
 																	<div class="col-lg-7 col-md-8">${d.classEntity.maxPP == 1?'Cá nhân':'Lớp' }
 																	</div>
 																</div>
+
+
 
 																<button type="button" data=".T-${d.classEntity.classId}"
 																	class="btn-show-time-table-detail btn btn-outline-success btn-light btn-sm">
@@ -390,29 +403,29 @@
                               <span class="text-white"></span>
                           </button>
                           <!-- filter table -->
-                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 26rem;">
+                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 22rem;">
                           <div class="card-header py-2 text-secondary bg-info text-black fs-6">Bộ lọc</div>
                               <div class="card-body">
-                                  <form class="row g-3 mt-1" id="form-filter">
+                                  <form class="row g-3 mt-1" action="admin/contract-registration.htm" id="form-filter">
                                       <div class="col-12">
                                           <label for="input-birthday" class="form-label">Ngày đăng ký</label>
 
                                           <div class="col-12 d-flex gap-1 justify-content-around align-items-stretch">
                                               <div class="input-group">
-                                                  <input id="input-birthday" type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
+                                                  <input id="input-birthday" type="date" name="birthdayLeft" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
                                               </div>
                                               <button type="button" class="btn btn-primary btn-sm btn-range-filter">
                                                   Đến
                                               </button>
 
                                               <div class="input-group d-none range-filter-right">
-                                                  <input id="input-birthday-right" type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
+                                                  <input id="input-birthday-right" name = "birthdayRight" type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
                                               </div>
                                           </div>
                                       </div>
                                       <div class="col-md-12">
                                           <label for="status" class="form-label">Trạng thái</label>
-                                          <div class="col-md-12 d-flex">
+                                          <div class="d-flex" style="flex-wrap: wrap">
                                               <div class="form-check-filter">
                                                   <input class="form-check-input-filter" type="radio" name="status" id="filter-allStatus" value="" checked />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-allStatus">
@@ -420,23 +433,30 @@
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="0" />
+                                              <input class="form-check-input-filter" type="radio" name="status" id="filter-status-2" value="2" />
+                                              <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-2">
+                                                  Đã huỷ
+                                              </label>
+                                          </div>
+                                              <div class="form-check-filter">
+                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-0">
                                                       Đã thanh toán
                                                   </label>
                                               </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="1" />
+                                              <div class="form-check-filter mt-2">
+                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-1">
                                                       Chưa thanh toán
                                                   </label>
                                               </div>
+                                              
                                           </div>
                                       </div>
                                   </form>
                               </div>
                               <div class="card-footer py-2 text-end">
-                                  <button type="submit" form="form-filter" class="btn btn-primary">
+                                  <button type="submit" form="form-filter" name="btnFilter" class="btn btn-primary">
                                       Lọc
                                   </button>
                                   <button type="reset" class="btn btn-secondary">
