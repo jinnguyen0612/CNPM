@@ -98,22 +98,22 @@
 		</section>
 
 		<!-- modal  -->
-		<!-- Form thêm PT -->
+		<!-- Form thêm + sua PT -->
 		<div class="modal fade" id="modal-create" tabindex="-1">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
-						<h5 class="modal-title">Thêm mới PT</h5>
+						<h5 class="modal-title">${cFormAttribute.formTitle}</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form:form action="admin/personal-trainer.htm" method="post"
+						<form:form action="${cFormAttribute.formAction}" method="post"
 							class="row g-3" modelAttribute="pt">
 							<div class="col-md-12">
 								<label for="input-id" class="form-label ">Mã: <span
 									class="employeeId text-danger customerId"></span> <form:input
-										path="ptID" type="text" class="form-control" id="input-id" />
+										path="ptID" type="text" class="form-control" id="input-id" readonly="true" />
 									<span class="text-danger"><form:errors path="ptID"></form:errors></span>
 								</label>
 							</div>
@@ -174,49 +174,8 @@
 								<span class="text-danger"><form:errors path="address"></form:errors></span>
 							</div>
 
-							<fieldset class="col-md-12">
-								<legend class="col-form-label col-sm-2 pt-0"> Trạng
-									thái </legend>
-								<div class="col-sm-12 d-flex gap-4">
-									<div class="form-check">
-										<form:radiobutton path="status" class="form-check-input"
-											name="input-gender" id="unact" value="0" />
-										<label class="form-check-label" for="unact"> Chưa có
-											lớp </label>
-									</div>
-									<div class="form-check">
-										<form:radiobutton path="status" class="form-check-input"
-											name="input-gender" id="act" value="1" />
-										<label class="form-check-label" for="act"> Có lớp </label>
-									</div>
-								</div>
-							</fieldset>
-
-							<div class="col-12">
-								<button type="button"
-									class="btn btn-outline-primary btn-create-account col-12"
-									data-bs-toggle="collapse" data-bs-target="#form-create-account"
-									onClick="toggleBtnState(this, 'btn-outline-danger')">
-									<i class="bi bi-plus-circle"></i> <span class="">Tạo tài
-										khoản mới</span>
-								</button>
-							</div>
-							<div class="collapse col-12" id="form-create-account">
-								<div class="row">
-									<div class="col-6" data-link="account" data-n="2">
-										<label for="input-username" class="form-label">Tên tài
-											khoản</label> <input type="text" class="form-control"
-											id="input-username" />
-									</div>
-									<div class="col-6">
-										<label for="input-password" class="form-label">Mật
-											khẩu</label> <input type="password" class="form-control"
-											id="input-password" />
-									</div>
-								</div>
-							</div>
 							<div class="text-end mt-3">
-								<button type="submit" name="btnCreate" class="btn btn-primary">Xác
+								<button type="submit" name="${cFormAttribute.btnAction}" class="btn btn-primary">Xác
 									nhận</button>
 								<button type="button" class="btn btn-secondary close-form"
 									data-bs-dismiss="modal">Đóng</button>
@@ -295,7 +254,13 @@
 	<script type="text/javascript">
       $(document).ready(function () {
     	  
-    	  // show modal
+    	  $(".btn-create").wrap("<a href='admin/personal-trainer/add.htm'></a>")
+    	  $(".btn-create").removeAttr("data-bs-toggle");
+    	  $(".btn-create").removeAttr("data-bs-target");
+    	  
+    	  
+    	  
+    	// show modal
     	  let id = $(".modal-flag").attr("idModal")
     	  if(id) {
     	  $("#"+id).modal("show");

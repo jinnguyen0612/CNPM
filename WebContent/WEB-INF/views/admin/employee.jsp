@@ -151,7 +151,7 @@
 							<div class="col-md-12">
 								<label for="input-id" class="form-label ">Mã: <span
 									class="employeeId text-danger customerId"></span> <form:input
-										path="staffId" type="text" class="form-control" id="input-id" />
+										path="staffId" type="text" class="form-control" id="input-id" readonly="true" />
 									<span class="text-danger"><form:errors path="staffId"></form:errors></span>
 								</label>
 							</div>
@@ -343,7 +343,7 @@
 	<script type="text/javascript">
 		
       $(document).ready(function () {
-    	  $(".btn-create").wrap("<a href='admin/customer/add.htm'></a>")
+    	  $(".btn-create").wrap("<a href='admin/employee/add.htm'></a>")
     	  $(".btn-create").removeAttr("data-bs-toggle");
     	  $(".btn-create").removeAttr("data-bs-target");
     	  

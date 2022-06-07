@@ -68,7 +68,7 @@ public class EmployeeController extends MethodAdminController {
 		
 	}
 	
-	// get view create customer
+	// get view create staff
 
 		@RequestMapping(value = "add.htm", method = RequestMethod.GET)
 		public String getCreate(ModelMap model, RedirectAttributes redirectAttributes) {
@@ -99,11 +99,22 @@ public class EmployeeController extends MethodAdminController {
 
 					t.rollback();
 					System.out.println(e);
-					if (e.getCause().toString().contains("duplicate key")) {
-						result.rejectValue("staffId", "staff", "Ma khong duoc trung trung");
+					
+					if (e.getCause().toString().contains("UNIQUE_NHANVIEN_SDT")) {
+						result.rejectValue("phone", "staff", "So dien thoai nay da duoc su dung");
+					}
+
+					if (e.getCause().toString().contains("UCHECK_NHANVIEN_SDT")) {
+						result.rejectValue("phone", "staff", "So dien thoai khong dung dinh dang");
+					}
+					if (e.getCause().toString().contains("CK_NHANVIEN_NGAYSINH")) {
+						result.rejectValue("birthday", "staff", "Tuoi nhan vien phai tren 18 tuoi");
+					}
+					if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
+						result.rejectValue("email", "staff", "Email nhap sai dinh dang");
 					}
 					if (e.getCause().toString().contains("String or binary data would be truncated")) {
-						result.rejectValue("staffId", "staff", "Ma phai bang 8 ky tu");
+						result.rejectValue("staffId", "staff", "Ma khong qua 8 ky tu");
 					}
 				}
 
@@ -129,14 +140,14 @@ public class EmployeeController extends MethodAdminController {
 		}
 
 		@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
-		public String updatCustomer(ModelMap model, @Validated @ModelAttribute("staffUpdate") StaffEntity staff,
+		public String updateStaff(ModelMap model, @Validated @ModelAttribute("staffUpdate") StaffEntity staff,
 				BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
 			if (!result.hasErrors()) {
 				Session session = factory.openSession();
 
 				Transaction t = session.beginTransaction();
 				try {
-
+					staff.setAccount(getStaff(id).getAccount());
 					session.update(staff);
 
 					t.commit();
@@ -148,11 +159,21 @@ public class EmployeeController extends MethodAdminController {
 
 					t.rollback();
 					System.out.println(e.getCause());
-					if (e.getCause().toString().contains("duplicate key")) {
-						result.rejectValue("staffId", "staffUpdate", "Ma da ton tai");
+					if (e.getCause().toString().contains("UNIQUE_NHANVIEN_SDT")) {
+						result.rejectValue("phone", "staff", "So dien thoai nay da duoc su dung");
+					}
+
+					if (e.getCause().toString().contains("UCHECK_NHANVIEN_SDT")) {
+						result.rejectValue("phone", "staff", "So dien thoai khong dung dinh dang");
+					}
+					if (e.getCause().toString().contains("CK_NHANVIEN_NGAYSINH")) {
+						result.rejectValue("birthday", "staff", "Tuoi nhan vien phai tren 18 tuoi");
+					}
+					if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
+						result.rejectValue("email", "staff", "Email nhap sai dinh dang");
 					}
 					if (e.getCause().toString().contains("String or binary data would be truncated")) {
-						result.rejectValue("staffId", "staffUpdate", "Ma phai co 8 ky tu");
+						result.rejectValue("staffId", "staff", "Ma khong qua 8 ky tu");
 					}
 				}
 
