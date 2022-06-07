@@ -1,4 +1,5 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
@@ -23,9 +24,6 @@
 					<div class="card">
 						<div class="card-body pb-0">
 							<h5 class="card-title">Danh sách gói tập</h5>
-							<h3 class="success-message">${message}</h3>
-							<h3 class="fail-message">${fmessage}</h3>
-
 							<!-- Table with stripped rows -->
 							<table class="table" id="my-data-table">
 								<thead>
@@ -37,7 +35,7 @@
 										<th scope="col" class="col-1">Giá gói</th>
 										<th scope="col" class="col-1">Trạng thái</th>
 
-										<th scope="col" class="text-center col-1">Hành động</th>
+										<th scope="col" class="text-center col-1">Thao tác</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -45,9 +43,11 @@
 										<tr>
 											<td>${Z.packID}</td>
 											<td>${Z.packName}</td>
-											<td>${Z.packTypeID}</td>
-											<td>${Z.packDuration}</td>
-											<td>${Z.money}</td>
+											<td>${Z.trainingPackTypeEntity.packTypeName}</td>
+											<td>${Z.packDuration}<span>&nbsptháng </span>
+											</td>
+											<td><fmt:formatNumber pattern="###,### đ"
+													value="${Z.money}" type="currency" /></td>
 
 
 											<c:choose>
@@ -57,19 +57,25 @@
 												</c:when>
 												<c:otherwise>
 													<td class="account-state"><span
-														class="badge rounded-pill bg-secondary">Kích hoạt</span></td>
+														class="badge rounded-pill bg-success">Kích hoạt</span></td>
 												</c:otherwise>
 											</c:choose>
 
-
-
-											<td class="text-center">
-												<button class="btn btn-outline-warning btn-light btn-sm"
-													onclick="window.location.href = '${pageContext.request.contextPath}/admin/package/updateTrainingPack/${Z.packID}.htm'"
-													title="Chỉnh sửa">
-													<i class="fa-solid fa-pen-to-square"></i>
-												</button>
-											</td>
+											<td class="text-center"><c:choose>
+													<c:when test="${Z.classList.size() > 0}">
+														<button title="Chỉnh sửa" disabled="disabled"
+															class="btn btn-sm btn-secondary">
+															<i class="fa-solid fa-pen-to-square"></i>
+														</button>
+													</c:when>
+													<c:otherwise>
+														<button class="btn btn-outline-warning btn-light btn-sm"
+															onclick="window.location.href = '${pageContext.request.contextPath}/admin/package/updateTrainingPack/${Z.packID}.htm'"
+															title="Chỉnh sửa">
+															<i class="fa-solid fa-pen-to-square"></i>
+														</button>
+													</c:otherwise>
+												</c:choose></td>
 										</tr>
 									</c:forEach>
 								</tbody>
@@ -93,9 +99,94 @@
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
+						<form:form action="admin/package/insertP.htm" class="row g-3"
+							id="form-package" modelAttribute="insertPackage">
+							<div class="col-md-12">
+								<label class="form-label">Mã:</label>
+								<form:input path="packID" type="text" class="form-control" />
+							</div>
+							<div class="col-md-6">
+								<label for="package-type" class="form-label">Loại gói</label>
+								<form:select path="packTypeID" class="form-control">
+									<c:forEach var="T" items="${trainingPackTypeEntity}">
+										<form:option value="${T.packTypeID}">${T.packTypeName}</form:option>
+									</c:forEach>
+								</form:select>
+							</div>
+
+							<div class="col-md-6">
+								<label for="input-package-name" class="form-label">Tên
+									gói tập</label>
+								<form:input type="text" class="form-control"
+									id="input-package-name" path="packName" />
+							</div>
+
+							<div class="col-md-6">
+								<label for="input-package-limit-time" class="form-label">Hạn
+									gói</label>
+								<div class="input-group col-md-6 mb-3">
+									<form:input id="input-package-limit-time" type="number"
+										class="form-control" aria-label="Username"
+										aria-describedby="basic-addon1" path="packDuration" />
+									<span class="input-group-text" id="basic-addon1">Tháng</span>
+								</div>
+							</div>
+
+							<div class="col-md-6">
+								<label for="input-package-price" class="form-label">Giá
+									gói</label>
+								<div class="input-group col-md-6 mb-3">
+									<form:input id="iinput-package-price" type="number"
+										class="form-control" placeholder="vd: 50000"
+										aria-label="input-package-price"
+										aria-describedby="basic-addon1" path="money" />
+									<span class="input-group-text" id="basic-addon1">VND</span>
+								</div>
+							</div>
+							<fieldset class="col-md-12">
+								<legend class="col-form-label col-sm-2 pt-0"> Trạng
+									thái </legend>
+								<div class="col-sm-12 d-flex gap-4">
+									<div class="form-check">
+										<form:radiobutton path="status" class="form-check-input"
+											name="input-gender" id="female" value="0" />
+										<label class="form-check-label" for="female"> Khoá </label>
+									</div>
+									<div class="form-check">
+										<form:radiobutton path="status" class="form-check-input"
+											name="input-gender" id="male" value="1" />
+										<label class="form-check-label" for="male"> Kích hoạt
+										</label>
+									</div>
+								</div>
+							</fieldset>
+
+
+
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-primary">Xác nhận</button>
+								<button type="button" class="btn btn-secondary close-form"
+									data-bs-dismiss="modal">Đóng</button>
+							</div>
+						</form:form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- modal  -->
+		<div class="modal fade" id="modal-update" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header bg-primary text-white px-3 py-2">
+						<h5 class="modal-title">Chỉnh sửa gói tập</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
 						<form:form
-							action="${pageContext.request.contextPath}/admin/package/insertP.htm"
-							class="row g-3" id="form-package" modelAttribute="insertPackage">
+							action="admin/package/updateTrainingPack/${updatePackage.packID}.htm"
+							class="row g-3" id="form-package" modelAttribute="updatePackage">
 							<div class="col-md-12">
 								<label class="form-label">Mã:</label>
 								<form:input path="packID" type="text" class="form-control" />
@@ -141,19 +232,28 @@
 							<fieldset class="col-md-12">
 								<legend class="col-form-label col-sm-2 pt-0"> Trạng
 									thái </legend>
-								<form:select path="status" class="form-control">
-									<form:option value="0">Khóa</form:option>
-								</form:select>
+								<div class="col-sm-12 d-flex gap-4">
+									<div class="form-check">
+										<form:radiobutton path="status" class="form-check-input"
+											name="input-gender" id="female" value="0" />
+										<label class="form-check-label" for="female"> Khoá </label>
+									</div>
+									<div class="form-check">
+										<form:radiobutton path="status" class="form-check-input"
+											name="input-gender" id="male" value="1" />
+										<label class="form-check-label" for="male"> Kích hoạt
+										</label>
+									</div>
+								</div>
 							</fieldset>
+
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-primary">Xác nhận</button>
+								<button type="button" class="btn btn-secondary close-form"
+									data-bs-dismiss="modal">Đóng</button>
+							</div>
+						</form:form>
 					</div>
-					<div class="modal-footer">
-						<button type="submit" form="form-package" class="btn btn-primary">
-							Xác nhận</button>
-						<button type="button" form="form-package"
-							class="btn btn-secondary close-form" data-bs-dismiss="modal">
-							Đóng</button>
-					</div>
-					</form:form>
 				</div>
 			</div>
 		</div>
@@ -165,6 +265,12 @@
 	<%@include file="./script.jsp"%>
 	<script type="text/javascript">
       $(document).ready(function () {
+    	 
+  			let id = $(".modal-flag").attr("idModal")
+  			if (id) {
+  				$("#" + id).modal("show");
+  		
+  		}
         $(
           "#my-data-table_filter",
         ).append(`  <div class="search-bar-table d-flex align-items-stretch">

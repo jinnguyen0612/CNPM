@@ -7,6 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -44,10 +45,11 @@ public class ClassController {
 	@Autowired
 	PTService ptService;
 
-	@RequestMapping(value="")
-	public String classGym(ModelMap model, Integer offset, Integer maxResult, HttpServletRequest request, ClassEntity classEntity) {
-		List<ClassEntity> classEntities = classService.getAllClass(offset, maxResult);
-		List<TrainingPackEntity> listTP = trainingPackService.getAllPack(offset, maxResult);// gọi list gói tập
+	@RequestMapping(value = "")
+	public String classGym(ModelMap model, Integer offset, Integer maxResult, HttpServletRequest request,
+			ClassEntity classEntity) {
+		List<ClassEntity> classEntities = getAllClass();
+		List<TrainingPackEntity> listTP = getAllPackAvailable();// gọi list gói tập
 		List<PTEntity> listPT = ptService.getAllPT(offset, maxResult); // gọi listPT
 		model.addAttribute("trainingPackEntity", listTP);
 		model.addAttribute("ptEntity", listPT);
@@ -55,55 +57,50 @@ public class ClassController {
 		model.addAttribute("classer", new ClassEntity());
 		return "admin/class";
 	}
-	
-	@RequestMapping(value="insert", method = RequestMethod.POST, params = "btnCreate")
-	public String addClass(ModelMap model,  @ModelAttribute("classer") ClassEntity classer,
-		BindingResult result, RedirectAttributes redirectAttributes, Integer offset, Integer maxResult,
-		HttpServletRequest request) 
-	{
+
+	@RequestMapping(value = "insert", method = RequestMethod.POST, params = "btnCreate")
+	public String addClass(ModelMap model, @ModelAttribute("classer") ClassEntity classer, BindingResult result,
+			RedirectAttributes redirectAttributes, Integer offset, Integer maxResult, HttpServletRequest request) {
 		List<TrainingPackEntity> listTP = trainingPackService.getAllPack(offset, maxResult);// gọi list gói tập
 		TrainingPackEntity trainingPackEntity = trainingPackService.getPackByPackId(classer.getPackId());
-		
+
 		List<PTEntity> listPT = ptService.getAllPT(offset, maxResult); // gọi listPT
 		PTEntity ptEntity = ptService.getPTById(classer.getPT());
-		
+
 		classer.setTrainingPackEntity(trainingPackEntity);
 		classer.setPtEntity(ptEntity);
 		classService.updateClass(classer);
-		// Thêm thời khóa biểu 
+		// Thêm thời khóa biểu
 		boolean check = classService.insertClass(classer);
 		if (check) {
 			model.addAttribute("trainingPackEntity", listTP);
 			model.addAttribute("ptEntity", listPT);
 			model.addAttribute("classer", new ClassEntity());
 //	            model.addAttribute("success_message", "Thêm mới thành công!");
-        } else {
-            model.addAttribute("trainingPackEntity", listTP);
+		} else {
+			model.addAttribute("trainingPackEntity", listTP);
 			model.addAttribute("ptEntity", listPT);
 			model.addAttribute("classer", new ClassEntity());
-        }
+		}
 		Session session = factory.openSession();
-		if(true)
-		{
+		if (true) {
 
 			Transaction transaction = session.beginTransaction();
 
-			for(int i = 2; i<9; i++)
-			{
-				String value = request.getParameter("T"+i);
-				if(value != null) {
-					ScheduleEntity schedule = new ScheduleEntity(classer.getClassId(), classer, i, Integer.parseInt(value));
-					session.save(schedule);				
+			for (int i = 2; i < 9; i++) {
+				String value = request.getParameter("T" + i);
+				if (value != null) {
+					ScheduleEntity schedule = new ScheduleEntity(classer.getClassId(), classer, i,
+							Integer.parseInt(value));
+					session.save(schedule);
 				}
 			}
 			transaction.commit();
 		}
-		
-		
+
 		return "admin/class";
 	}
 
-	
 //	// SỬA LỚP
 //	@RequestMapping(value = "updateClass/{classId}", method=RequestMethod.GET)
 //	public String update(ModelMap model , @PathVariable("classId") String classId) 
@@ -138,8 +135,8 @@ public class ClassController {
 //        }
 //		return "admin/class";
 //	}
-	
-	// Sửa lớp 
+
+	// Sửa lớp
 	@RequestMapping(value = "updateClass/{classId}", method = RequestMethod.GET)
 	public String update(ModelMap model, @PathVariable("classId") String classIdx, Integer offset, Integer maxResult) {
 
@@ -150,35 +147,50 @@ public class ClassController {
 		model.addAttribute("trainingPackEntity", trainingPackEntity);
 		List<PTEntity> ptEntity = ptService.getAllPT(offset, maxResult);
 		model.addAttribute("ptEntity", ptEntity);
-		
+
 //		model.addAttribute("",);// mã PT
 //		model.addAttribute("",);// Mã gói 
-		
 
 		return "admin/updateClass";
 	}
 
 	@RequestMapping(value = "updateClass/{classId}", method = RequestMethod.POST)
-	public String update(ModelMap model, @ModelAttribute("updateC") ClassEntity classEntity,
-				Integer offset, Integer maxResult) {
+	public String update(ModelMap model, @ModelAttribute("updateC") ClassEntity classEntity, Integer offset,
+			Integer maxResult) {
 		Session session = factory.openSession();
 		TrainingPackEntity trainingPackEntity = trainingPackService.getPackByPackId(classEntity.getPackId());
 		PTEntity ptEntity = ptService.getPTById(classEntity.getPT());
-		
+
 		classEntity.setPtEntity(ptEntity);
 		classEntity.setTrainingPackEntity(trainingPackEntity);
-		
+
 		boolean check = classService.updateClass(classEntity);
 		if (check) {
 			List<ClassEntity> list = classService.getAllClass(offset, maxResult);
 			model.addAttribute("pack", list);
 //			model.addAttribute("classEntityUpdate", classEntity);
-        } else {
+		} else {
 			List<ClassEntity> list = classService.getAllClass(offset, maxResult);
 			model.addAttribute("pack", list);
 //			model.addAttribute("classEntityUpdate", classEntity);
-        }
+		}
 		return "admin/updateClass";
 	}
-	
+
+	public List<ClassEntity> getAllClass() {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM ClassEntity where maxPP > 1";
+		Query query = session.createQuery(hql);
+		List<ClassEntity> list = query.list();
+		return list;
+	}
+
+	public List<TrainingPackEntity> getAllPackAvailable() {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM TrainingPackEntity where status = 1";
+		Query query = session.createQuery(hql);
+		List<TrainingPackEntity> list = query.list();
+		return list;
+	}
+
 }

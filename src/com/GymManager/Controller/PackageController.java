@@ -14,93 +14,98 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.GymManager.Entity.TrainingPackEntity;
 import com.GymManager.Entity.TrainingPackTypeEntity;
+import com.GymManager.ExtraClass.Message;
 import com.GymManager.Service.TrainingPackService;
 import com.GymManager.Service.TrainingPackTypeService;
 
 @Controller
 @RequestMapping("admin/package")
 @Transactional
-public class PackageController {
+public class PackageController extends MethodAdminController {
 	@Autowired
 	TrainingPackTypeService trainingPackTypeService;
 	@Autowired
-	TrainingPackService trainingPackService;	
+	TrainingPackService trainingPackService;
 	@Autowired
 	SessionFactory factory;
 	@Autowired
 	HttpSession session;
+
 	// HIá»‚N THá»Š DANH SÃ�CH GÃ“I Táº¬P
 	@RequestMapping(value = "")
 	public String pack(ModelMap model, Integer offset, Integer maxResult) {
 		List<TrainingPackEntity> list = trainingPackService.getAllPack(offset, maxResult);
 		model.addAttribute("pack", list);
-		model.addAttribute("insertPackage", new TrainingPackEntity());
-		
-		
+		model.addAttribute("insertPackage", newPack());
+		model.addAttribute("updatePackage", newPack());
+
 		List<TrainingPackTypeEntity> listT = trainingPackTypeService.getAllPackType(offset, maxResult);
 		model.addAttribute("trainingPackTypeEntity", listT);
 		return "admin/package";
 	}
-	
-	//HIá»‚N THá»Š LOáº I GÃ“I Táº¬P
+
+	// HIá»‚N THá»Š LOáº I GÃ“I Táº¬P
 	@RequestMapping(value = "type")
 	public String packageType(ModelMap model, Integer offset, Integer maxResult) {
 		List<TrainingPackTypeEntity> list = trainingPackTypeService.getAllPackType(offset, maxResult);
 		model.addAttribute("packageType", list);
-		model.addAttribute("insertPKT", new TrainingPackTypeEntity());
+		model.addAttribute("updatePKT", new TrainingPackTypeEntity());
+		model.addAttribute("insertPKT", newPackType());
 		return "admin/package-type";
 	}
-	
+
 	@RequestMapping(value = "insert", method = RequestMethod.POST)
-	public String addPackageType(ModelMap model, @ModelAttribute("insertPKT") TrainingPackTypeEntity trainingPackTypeEntity)
-	{
+	public String addPackageType(ModelMap model, RedirectAttributes redirectAttributes,
+			@ModelAttribute("insertPKT") TrainingPackTypeEntity trainingPackTypeEntity) {
 		boolean check = trainingPackTypeService.insertPackType(trainingPackTypeEntity);
 		if (check) {
-			model.addAttribute("insertPKT", new TrainingPackTypeEntity());
-            model.addAttribute("success_message", "Them thanh cong!");
-        } else {
-        	model.addAttribute("insertPKT", new TrainingPackTypeEntity());
-            model.addAttribute("fail_message", "Them that bai!");
-        }
+			redirectAttributes.addFlashAttribute("message", new Message("success", "Thêm mới thành công !!!"));
+			return "redirect:/admin/package/type.htm";
+		} else {
+			model.addAttribute("insertPKT", newPackType());
+			model.addAttribute("message", new Message("error", "Thêm mới thất bại !!!"));
+		}
 		return "admin/package-type";
 	}
-	
+
 	// Sá»¬A LOáº I GÃ“I Táº¬P
-	@RequestMapping(value="update/{packTypeID}", method=RequestMethod.GET)
-	public String updatePackageType(ModelMap model , @PathVariable("packTypeID") String packIDX)
-	{
+	@RequestMapping(value = "update/{packTypeID}", method = RequestMethod.GET)
+	public String updatePackageType(ModelMap model, @PathVariable("packTypeID") String packIDX, Integer offset,
+			Integer maxResult) {
 		Session session = factory.openSession();
-        TrainingPackTypeEntity trainingPackTypeEntity = (TrainingPackTypeEntity) session.get(TrainingPackTypeEntity.class, packIDX) ;
-        model.addAttribute("trainingPackTypeEntity" , trainingPackTypeEntity) ;
-        
-        model.addAttribute("insertPKT", new TrainingPackTypeEntity());
-        
-        
-        return "admin/updatePackage-type" ;
+		TrainingPackTypeEntity trainingPackTypeEntity = (TrainingPackTypeEntity) session
+				.get(TrainingPackTypeEntity.class, packIDX);
+		model.addAttribute("updatePKT", trainingPackTypeEntity);
+		model.addAttribute("insertPKT", newPackType());
+		model.addAttribute("idModal", "modal-update");
+		List<TrainingPackTypeEntity> listTKL = trainingPackTypeService.getAllPackType(offset, maxResult);
+		model.addAttribute("packageType", listTKL);
+
+		return "admin/package-type";
 	}
-	@RequestMapping(value="update/{packTypeID}", method=RequestMethod.POST)
-	public String updatePackageType(ModelMap model ,  @ModelAttribute("updatePKT") TrainingPackTypeEntity trainingPackTypeEntity,Integer offset, Integer maxResult)
-	{
+
+	@RequestMapping(value = "update/{packTypeID}", method = RequestMethod.POST)
+	public String updatePackageType(ModelMap model, RedirectAttributes redirectAttributes,
+			@ModelAttribute("updatePKT") TrainingPackTypeEntity trainingPackTypeEntity, Integer offset,
+			Integer maxResult) {
 		boolean check = trainingPackTypeService.updatePackType(trainingPackTypeEntity);
 		if (check) {
-			model.addAttribute("message", "Cáº­p nháº­t thÃ nh cÃ´ng!");
-            List<TrainingPackTypeEntity> listTKL = trainingPackTypeService.getAllPackType(offset, maxResult) ;
-            model.addAttribute("packageType", listTKL) ;
-            
-            model.addAttribute("insertPKT", new TrainingPackTypeEntity());
-        } else {
-        	model.addAttribute("message", "Cáº­p nháº­t tháº¥t báº¡i!");
-            List<TrainingPackTypeEntity> listTKL = trainingPackTypeService.getAllPackType(offset, maxResult) ;
-            model.addAttribute("packageType", listTKL) ;
-            
-            model.addAttribute("insertPKT", new TrainingPackTypeEntity());
-        }
-        return "admin/package-type" ;
+			redirectAttributes.addFlashAttribute("message", new Message("success", "Cập nhật thành công !!!"));
+			return "redirect:/admin/package/type.htm";
+		} else {
+			model.addAttribute("message", new Message("success", "Cập nhật thất bại!!!"));
+			List<TrainingPackTypeEntity> listTKL = trainingPackTypeService.getAllPackType(offset, maxResult);
+			model.addAttribute("packageType", listTKL);
+			model.addAttribute("insertPKT", newPackType());
+			return "admin/package-type";
+		}
+
 	}
-	
+
 	// THÃŠM Má»šI GÃ“I Táº¬P
 //	@RequestMapping(value="insertP", method=RequestMethod.GET)
 //	public String addPackage(ModelMap model, Integer offset, Integer maxResults) {
@@ -109,58 +114,75 @@ public class PackageController {
 //		model.addAttribute("insertP", new TrainingPackEntity());
 //		return "admin/addPackage";
 //	}
-	@RequestMapping(value="insertP", method=RequestMethod.POST)
-	public String addPackage(ModelMap model, @ModelAttribute("insertPackage") TrainingPackEntity trainingPackEntity, Integer offset, Integer maxResults)
-	{
+	@RequestMapping(value = "insertP", method = RequestMethod.POST)
+	public String addPackage(ModelMap model, @ModelAttribute("insertPackage") TrainingPackEntity trainingPackEntity,
+			Integer offset, Integer maxResults, RedirectAttributes redirectAttributes) {
 		List<TrainingPackTypeEntity> LIST = trainingPackTypeService.getAllPackType(offset, maxResults);
-		TrainingPackTypeEntity trainingPackTypeEntity = trainingPackTypeService.getPackByID(trainingPackEntity.getPackTypeID());
-		
-		
+		TrainingPackTypeEntity trainingPackTypeEntity = trainingPackTypeService
+				.getPackByID(trainingPackEntity.getPackTypeID());
+
 		trainingPackEntity.setTrainingPackTypeEntity(trainingPackTypeEntity);
 		trainingPackService.updatePack(trainingPackEntity);
 		boolean check = trainingPackService.insertPack(trainingPackEntity);
-		if(check)
-		{
+		if (check) {
+			redirectAttributes.addFlashAttribute("message", new Message("success", "Thêm mới thành công !!!"));
+			return "redirect:/admin/package.htm";
+		} else {
 			model.addAttribute("trainingPackTypeEntity", LIST);
-			model.addAttribute("insertP", new TrainingPackEntity());
-			model.addAttribute("message", "ThÃªm má»›i thÃ nh cÃ´ng");
-		}
-		else {
-			model.addAttribute("trainingPackTypeEntity", LIST);
-			model.addAttribute("insertP", new TrainingPackEntity());
-			model.addAttribute("fmessage", "Ma da ton tai");
+			model.addAttribute("insertPackage", newPack());
+			model.addAttribute("message", new Message("error", "Thêm mới thất bại !!!"));
+			model.addAttribute("updatePackage", new TrainingPackEntity());
 		}
 		return "admin/package";
 	}
-	
+
 	// Sá»¬A GÃ“I Táº¬P
-	@RequestMapping(value="updateTrainingPack/{packID}", method=RequestMethod.GET)
-	public String updatePackage(ModelMap model , @PathVariable("packID") String packIDX)
-	{
+	@RequestMapping(value = "updateTrainingPack/{packID}", method = RequestMethod.GET)
+	public String updatePackage(ModelMap model, @PathVariable("packID") String packIDX, Integer offset,
+			Integer maxResults) {
 		Session session = factory.openSession();
-        TrainingPackEntity trainingPackEntity = (TrainingPackEntity) session.get(TrainingPackEntity.class, packIDX) ;
-        model.addAttribute("trainingPackEntity" , trainingPackEntity) ;
-        System.out.println(trainingPackEntity.getPackTypeID());
-        System.out.println(trainingPackEntity.getStatus());
-        model.addAttribute("packTypeID", trainingPackEntity.getPackTypeID());
-        return "admin/updatePackage" ;
+		List<TrainingPackTypeEntity> LIST = trainingPackTypeService.getAllPackType(offset, maxResults);
+		List<TrainingPackEntity> list = trainingPackService.getAllPack(offset, maxResults);
+		TrainingPackEntity trainingPackEntity = (TrainingPackEntity) session.get(TrainingPackEntity.class, packIDX);
+		model.addAttribute("updatePackage", trainingPackEntity);
+		model.addAttribute("trainingPackTypeEntity", LIST);
+		model.addAttribute("pack", list);
+		model.addAttribute("idModal", "modal-update");
+		model.addAttribute("insertPackage", newPack());
+		return "admin/package";
 	}
-	@RequestMapping(value="updateTrainingPack/{packID}", method=RequestMethod.POST)
-	public String updatePackageType(ModelMap model ,  @ModelAttribute("updateP") TrainingPackEntity trainingPackEntity,Integer offset, Integer maxResult)
-	{
-		Session session = factory.openSession();
-		TrainingPackTypeEntity trainingPackTypeEntity = trainingPackTypeService.getPackByID(trainingPackEntity.getPackTypeID());
+
+	@RequestMapping(value = "updateTrainingPack/{packID}", method = RequestMethod.POST)
+	public String updatePackageType(ModelMap model,
+			@ModelAttribute("updatePackage") TrainingPackEntity trainingPackEntity, Integer offset, Integer maxResult,
+			RedirectAttributes redirectAttributes) {
+
+		TrainingPackTypeEntity trainingPackTypeEntity = trainingPackTypeService
+				.getPackByID(trainingPackEntity.getPackTypeID());
 		trainingPackEntity.setTrainingPackTypeEntity(trainingPackTypeEntity);
 		boolean check = trainingPackService.updatePack(trainingPackEntity);
 		if (check) {
-			model.addAttribute("message", "Cap nhat thanh cong!");
-            List<TrainingPackEntity> listP = trainingPackService.getAllPack(offset, maxResult) ;
-            model.addAttribute("pack", listP) ;
-        } else {
-        	model.addAttribute("message", "Cap nhat that bai!");
-            List<TrainingPackEntity> listP = trainingPackService.getAllPack(offset, maxResult) ;
-            model.addAttribute("pack", listP) ;
-        }
-        return "admin/updatePackage" ;
+			redirectAttributes.addFlashAttribute("message", new Message("success", "Cập nhật thành công !!!"));
+			return "redirect:/admin/package.htm";
+		} else {
+			model.addAttribute("message", new Message("error", "Cập nhật thất bại !!!"));
+			List<TrainingPackEntity> listP = trainingPackService.getAllPack(offset, maxResult);
+			model.addAttribute("pack", listP);
+		}
+		return "admin/package";
+	}
+
+	public TrainingPackTypeEntity newPackType() {
+		TrainingPackTypeEntity packType = new TrainingPackTypeEntity();
+		packType.setPackTypeID(this.toPK("LG", "TrainingPackTypeEntity", "packTypeID"));
+
+		return packType;
+	}
+
+	public TrainingPackEntity newPack() {
+		TrainingPackEntity pack = new TrainingPackEntity();
+		pack.setPackID(this.toPK("GT", "TrainingPackEntity", "packID"));
+		pack.setStatus("1");
+		return pack;
 	}
 }

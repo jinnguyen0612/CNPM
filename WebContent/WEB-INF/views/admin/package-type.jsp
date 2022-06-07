@@ -26,9 +26,6 @@
 							<h5
 								class="card-title align-items-center d-flex justify-content-between transitioning">
 								Danh sách gói tập</h5>
-							<h3 class="success-message">${message}</h3>
-							<h3 class="fail-message">${fmessage}</h3>
-
 							<br />
 
 							<!-- Table with stripped rows -->
@@ -38,7 +35,7 @@
 										<th class="col-2">Mã</th>
 										<th class="col-2">Tên loại</th>
 										<th>Mô tả</th>
-										<th class="text-center col-2">Hành động</th>
+										<th class="text-center col-2">Thao tác</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -68,7 +65,7 @@
 		</section>
 
 		<!-- modal  -->
-		<div class="modal fade" id="modal-create" tabindex="-1">
+		<div class="modal fade" id="modal-update" tabindex="-1">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
@@ -78,12 +75,12 @@
 					</div>
 					<div class="modal-body">
 						<form:form
-							action="${pageContext.request.contextPath}/admin/package/insert.htm"
-							modelAttribute="insertPKT" class="row g-3" id="form-package">
+							action="admin/package/update/${trainingPackTypeEntity.packTypeID}.htm"
+							modelAttribute="updatePKT" class="row g-3" id="form-package">
 							<div class="col-md-12">
 								<label class="form-label">Mã: </label>
 								<form:input path="packTypeID" type="text" class="form-control"
-									id="input-package-name" required="text" />
+									id="input-package-name" required="text" readonly="true" />
 							</div>
 
 							<div class="col-md-12">
@@ -94,8 +91,9 @@
 							</div>
 							<div class="col-md-12">
 								<label for="input-package-name" class="form-label">Mô tả</label>
-								<form:input path="describe" type="textarea" class="form-control"
-									aria-label="With textarea" rows="5" required="text" />
+								<form:textarea path="describe" type="textarea"
+									class="form-control" aria-label="With textarea" rows="5"
+									required="text" />
 							</div>
 
 
@@ -112,16 +110,65 @@
 			</div>
 		</div>
 
+		<div class="modal fade" id="modal-create" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header bg-primary text-white px-3 py-2">
+						<h5 class="modal-title">Thêm mới Loại gói</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form:form
+							action="${pageContext.request.contextPath}/admin/package/insert.htm"
+							modelAttribute="insertPKT" class="row g-3">
+							<div class="col-md-12">
+								<label class="form-label">Mã: </label>
+								<form:input path="packTypeID" type="text" class="form-control"
+									id="input-package-name" required="text" />
+							</div>
+
+							<div class="col-md-12">
+								<label for="input-package-name" class="form-label">Tên
+									loại</label>
+								<form:input path="packTypeName" type="text" class="form-control"
+									id="input-package-name" required="text" />
+							</div>
+							<div class="col-md-12">
+								<label for="input-package-name" class="form-label">Mô tả</label>
+								<form:textarea path="describe" type="textarea"
+									class="form-control" aria-label="With textarea" rows="5"
+									required="text" />
+							</div>
+
+
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-primary">Xác nhận</button>
+								<button type="button" class="btn btn-secondary close-form"
+									data-bs-dismiss="modal">Đóng</button>
+							</div>
+						</form:form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
 		<!-- detail -->
 	</main>
 	<!-- End #main -->
 	<!-- common script -->
 	<%@include file="./script.jsp"%>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			let id = $(".modal-flag").attr("idModal")
+			if (id) {
+				$("#" + id).modal("show");
+			}
+		})
+	</script>
+
+
 </body>
 </html>
-
-
-<!--  		<input type="button" title="Chỉnh sửa" class="btn btn-outline-warning btn-light btn-sm" value="Chỉnh sửa asdsad "  onclick="window.location.href = 'admin/package/insert.htm'"/>
-
-				<input type="button" onclick="window.location.href = 'admin/package.htm';" value="w3docs"/>
-				-->
