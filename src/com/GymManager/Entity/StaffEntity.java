@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 
 import org.hibernate.annotations.LazyCollection;
@@ -34,12 +35,12 @@ public class StaffEntity {
 	@NotEmpty(message = "email khong duoc bo trong")
 	@Column(name = "Email")
 	private String email;
-	@NotEmpty(message="Ngay sinh khong duoc bo trong")
+	@NotNull(message = "Ngay sinh khong duoc bo trong")
 	@Column(name = "NgaySinh")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
-	@NotEmpty(message="SDT khong duoc bo trong")
+	@NotEmpty(message = "SDT khong duoc bo trong")
 	@Column(name = "SDT")
 	private String phone;
 	@Column(name = "TrangThai")
