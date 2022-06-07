@@ -238,7 +238,7 @@
 				</div>
 			</div>
 		</div>
-		</div>
+
 
 		<!-- Form đăng ký tập -->
 		<div class="modal fade" id="modal-register" tabindex="-1">
@@ -496,7 +496,7 @@
 		<c:forEach var="t"
 			items="${register.registerDetailList[size - 1].classEntity.scheduleEntity}">
 			<input type="text"
-				class="T-${d.classEntity.classId} input-tt-db invisible position-absolute"
+				class="T-${register.registerDetailList[size - 1].classEntity.classId} input-tt-db invisible position-absolute"
 				value='T${t.day}-${t.session}'>
 		</c:forEach>
 		<div class="modal fade" id="time-table" tabindex="-1">
@@ -641,7 +641,7 @@
 		<c:forEach var="t"
 			items="${register.registerDetailList[size - 2].classEntity.scheduleEntity}">
 			<input type="text"
-				class="2-T-${d.classEntity.classId} input-tt-db invisible position-absolute"
+				class="2-T-${register.registerDetailList[size - 2].classEntity.classId} input-tt-db invisible position-absolute"
 				value='2-T${t.day}-${t.session}'>
 		</c:forEach>
 		<div class="modal fade" id="time-table2" tabindex="-1">
@@ -1082,7 +1082,7 @@
 															<td class="align-middle bg-light">Tối</td>
 															<td class="td-time-table"><input form="register"
 																type="radio" name="T2" id="D-T2-2" value="2"
-																class="form-check-input" /> <label for="D-T2-2E"></label></td>
+																class="form-check-input" /> <label for="D-T2-2"></label></td>
 															<td class="td-time-table"><input form="register"
 																type="radio" name="T3" id="D-T3-2" value="2"
 																class="form-check-input" /> <label for="D-T3-2"></label></td>

@@ -37,7 +37,6 @@ public class CustomerEntity {
 	@Column(name = "Email")
 	private String email;
 	@NotNull(message = "Ngày sinh không được để trống")
-//	@PastOrPresent(message = "Ngay sinh phai nho hon ngay hien tai")
 	@Column(name = "NgaySinh")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")

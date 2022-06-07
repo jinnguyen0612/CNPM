@@ -727,7 +727,6 @@ public class CustomerController extends MethodAdminController {
 		Transaction t = session.beginTransaction();
 
 		try {
-
 			String hql = "delete from ScheduleEntity where id= :id";
 			Query query = session.createQuery(hql);
 			query.setInteger("id", id).executeUpdate();

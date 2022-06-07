@@ -175,7 +175,7 @@ public class ClassEntity {
 		RegisterDetailEntity[] registerDetailEntities = this.getRegisterDetailEntities()
 				.toArray(RegisterDetailEntity[]::new);
 		if (registerDetailEntities.length == this.maxPP) {
-			return 0;
+			return 2;
 		}
 		if (this.maxPP > 1) {
 			Date toDay = new Date();

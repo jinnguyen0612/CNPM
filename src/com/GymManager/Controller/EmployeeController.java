@@ -45,7 +45,7 @@ public class EmployeeController extends MethodAdminController {
 	SessionFactory factory;
 	@Autowired
 	public JavaMailSender mailer;
-	
+
 	@RequestMapping(method = RequestMethod.GET)
 	public String index(ModelMap model) {
 		StaffEntity staff = newStaff();
@@ -55,9 +55,9 @@ public class EmployeeController extends MethodAdminController {
 		model.addAttribute("cList", getAllStaff());
 		return "admin/employee";
 	}
-	
-	//detail
-	@RequestMapping(value="detail/{id}.htm", method = RequestMethod.GET)
+
+	// detail
+	@RequestMapping(value = "detail/{id}.htm", method = RequestMethod.GET)
 	public String getDetail(ModelMap model, @PathVariable("id") String id) {
 		model.addAttribute("staff", newStaff());
 		model.addAttribute("staffUpdate", newStaff());
@@ -65,153 +65,155 @@ public class EmployeeController extends MethodAdminController {
 		model.addAttribute("idModal", "modal-detail");
 		model.addAttribute("cList", getAllStaff());
 		return "admin/employee";
-		
+
 	}
-	
+
 	// get view create staff
 
-		@RequestMapping(value = "add.htm", method = RequestMethod.GET)
-		public String getCreate(ModelMap model, RedirectAttributes redirectAttributes) {
-			redirectAttributes.addFlashAttribute("idModal", "modal-create");
-			return "redirect:/admin/employee.htm";
+	@RequestMapping(value = "add.htm", method = RequestMethod.GET)
+	public String getCreate(ModelMap model, RedirectAttributes redirectAttributes) {
+		redirectAttributes.addFlashAttribute("idModal", "modal-create");
+		return "redirect:/admin/employee.htm";
 
-		}
-	
+	}
+
 	// create staff
-		@RequestMapping(method = RequestMethod.POST, params = "btnCreate")
-		public String createStaff(ModelMap model, @Validated @ModelAttribute("staff") StaffEntity staff,
-				BindingResult result, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+	@RequestMapping(method = RequestMethod.POST, params = "btnCreate")
+	public String createStaff(ModelMap model, @Validated @ModelAttribute("staff") StaffEntity staff,
+			BindingResult result, RedirectAttributes redirectAttributes, HttpServletRequest request) {
 //			System.out.println(staff.getStaffId());
-			if (!result.hasErrors()) {
-				Session session = factory.openSession();
-
-				Transaction t = session.beginTransaction();
-				try {
-
-					session.save(staff);
-
-					t.commit();
-					redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
-
-					return "redirect:/admin/employee.htm";
-
-				} catch (Exception e) {
-
-					t.rollback();
-					System.out.println(e);
-					
-					if (e.getCause().toString().contains("UNIQUE_NHANVIEN_SDT")) {
-						result.rejectValue("phone", "staff", "So dien thoai nay da duoc su dung");
-					}
-
-					if (e.getCause().toString().contains("UCHECK_NHANVIEN_SDT")) {
-						result.rejectValue("phone", "staff", "So dien thoai khong dung dinh dang");
-					}
-					if (e.getCause().toString().contains("CK_NHANVIEN_NGAYSINH")) {
-						result.rejectValue("birthday", "staff", "Tuoi nhan vien phai tren 18 tuoi");
-					}
-					if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
-						result.rejectValue("email", "staff", "Email nhap sai dinh dang");
-					}
-					if (e.getCause().toString().contains("String or binary data would be truncated")) {
-						result.rejectValue("staffId", "staff", "Ma khong qua 8 ky tu");
-					}
-				}
-
-				finally {
-					session.close();
-				}
-			}
-			model.addAttribute("idModal", "modal-create");
-			model.addAttribute("staffUpdate", staff);
-			return "admin/employee";
-		}
-
-		// return views update
-		@RequestMapping(value = "update/{id}.htm", method = RequestMethod.GET)
-		public String getUpdate(ModelMap model, @PathVariable("id") String id) {
-
-			model.addAttribute("staff", getStaff(id));
-			model.addAttribute("idModal", "modal-create");
-			model.addAttribute("cList", getAllStaff());
-			model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin khach hang",
-					"admin/employee/update/" + id + ".htm", "btnUpdate"));
-			return "admin/employee";
-		}
-
-		@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
-		public String updateStaff(ModelMap model, @Validated @ModelAttribute("staffUpdate") StaffEntity staff,
-				BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
-			if (!result.hasErrors()) {
-				Session session = factory.openSession();
-
-				Transaction t = session.beginTransaction();
-				try {
-					staff.setAccount(getStaff(id).getAccount());
-					session.update(staff);
-
-					t.commit();
-					redirectAttributes.addFlashAttribute("message", new Message("success", "Sua thanh cong !!!"));
-
-					return "redirect:/admin/employee.htm";
-
-				} catch (Exception e) {
-
-					t.rollback();
-					System.out.println(e.getCause());
-					if (e.getCause().toString().contains("UNIQUE_NHANVIEN_SDT")) {
-						result.rejectValue("phone", "staff", "So dien thoai nay da duoc su dung");
-					}
-
-					if (e.getCause().toString().contains("UCHECK_NHANVIEN_SDT")) {
-						result.rejectValue("phone", "staff", "So dien thoai khong dung dinh dang");
-					}
-					if (e.getCause().toString().contains("CK_NHANVIEN_NGAYSINH")) {
-						result.rejectValue("birthday", "staff", "Tuoi nhan vien phai tren 18 tuoi");
-					}
-					if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
-						result.rejectValue("email", "staff", "Email nhap sai dinh dang");
-					}
-					if (e.getCause().toString().contains("String or binary data would be truncated")) {
-						result.rejectValue("staffId", "staff", "Ma khong qua 8 ky tu");
-					}
-				}
-
-				finally {
-					session.close();
-				}
-			}
-			model.addAttribute("idModal", "modal-update");
-			model.addAttribute("staff", newStaff());
-			model.addAttribute("cList", getAllStaff());
-			return "admin/employee";
-		}
-		
-		// create account staff
-
-		@RequestMapping(value = "{id}/create-account.htm", method = RequestMethod.POST)
-		public String getCreateAccount(ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("id") String id,
-				HttpServletRequest request) {
-
+		if (!result.hasErrors()) {
 			Session session = factory.openSession();
+
 			Transaction t = session.beginTransaction();
-			String userName = request.getParameter("userName");
-			System.out.println(userName);
+			try {
 
-			StaffEntity staff = getStaff(id);
-			redirectAttributes.addFlashAttribute("error", "Tai khoan khong duoc bo trong");
-			if (!userName.equals("")) {
-				try {
+				session.save(staff);
 
-					RandomPassword radomPassword = new RandomPassword(8);
+				t.commit();
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
 
-					AccountEntity accountEntity = new AccountEntity(userName, radomPassword.getPassword(), 1, 2, new Date(),
-							staff);
+				return "redirect:/admin/employee.htm";
 
-					session.save(accountEntity);
+			} catch (Exception e) {
+
+				t.rollback();
+				System.out.println(e);
+
+				if (e.getCause().toString().contains("UNIQUE_NHANVIEN_SDT")) {
+					result.rejectValue("phone", "staff", "So dien thoai nay da duoc su dung");
+				}
+
+				if (e.getCause().toString().contains("UCHECK_NHANVIEN_SDT")) {
+					result.rejectValue("phone", "staff", "So dien thoai khong dung dinh dang");
+				}
+				if (e.getCause().toString().contains("CK_NHANVIEN_NGAYSINH")) {
+					result.rejectValue("birthday", "staff", "Tuoi nhan vien phai tren 18 tuoi");
+				}
+				if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
+					result.rejectValue("email", "staff", "Email nhap sai dinh dang");
+				}
+				if (e.getCause().toString().contains("String or binary data would be truncated")) {
+					result.rejectValue("staffId", "staff", "Ma khong qua 8 ky tu");
+				}
+			}
+
+			finally {
+				session.close();
+			}
+		}
+		model.addAttribute("idModal", "modal-create");
+		model.addAttribute("cFormAttribute",
+				new FormAttribute("Them moi nhan vien", "admin/employee.htm", "btnCreate"));
+		model.addAttribute("staffUpdate", staff);
+		return "admin/employee";
+	}
+
+	// return views update
+	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.GET)
+	public String getUpdate(ModelMap model, @PathVariable("id") String id) {
+
+		model.addAttribute("staff", getStaff(id));
+		model.addAttribute("idModal", "modal-create");
+		model.addAttribute("cList", getAllStaff());
+		model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin khach hang",
+				"admin/employee/update/" + id + ".htm", "btnUpdate"));
+		return "admin/employee";
+	}
+
+	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
+	public String updateStaff(ModelMap model, @Validated @ModelAttribute("staffUpdate") StaffEntity staff,
+			BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
+		if (!result.hasErrors()) {
+			Session session = factory.openSession();
+
+			Transaction t = session.beginTransaction();
+			try {
+				staff.setAccount(getStaff(id).getAccount());
+				session.update(staff);
+
+				t.commit();
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Sua thanh cong !!!"));
+
+				return "redirect:/admin/employee.htm";
+
+			} catch (Exception e) {
+
+				t.rollback();
+				System.out.println(e.getCause());
+				if (e.getCause().toString().contains("UNIQUE_NHANVIEN_SDT")) {
+					result.rejectValue("phone", "staff", "So dien thoai nay da duoc su dung");
+				}
+
+				if (e.getCause().toString().contains("UCHECK_NHANVIEN_SDT")) {
+					result.rejectValue("phone", "staff", "So dien thoai khong dung dinh dang");
+				}
+				if (e.getCause().toString().contains("CK_NHANVIEN_NGAYSINH")) {
+					result.rejectValue("birthday", "staff", "Tuoi nhan vien phai tren 18 tuoi");
+				}
+				if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
+					result.rejectValue("email", "staff", "Email nhap sai dinh dang");
+				}
+				if (e.getCause().toString().contains("String or binary data would be truncated")) {
+					result.rejectValue("staffId", "staff", "Ma khong qua 8 ky tu");
+				}
+			}
+
+			finally {
+				session.close();
+			}
+		}
+		model.addAttribute("idModal", "modal-update");
+		model.addAttribute("staff", newStaff());
+		model.addAttribute("cList", getAllStaff());
+		return "admin/employee";
+	}
+
+	// create account staff
+
+	@RequestMapping(value = "{id}/create-account.htm", method = RequestMethod.POST)
+	public String getCreateAccount(ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("id") String id,
+			HttpServletRequest request) {
+
+		Session session = factory.openSession();
+		Transaction t = session.beginTransaction();
+		String userName = request.getParameter("userName");
+		System.out.println(userName);
+
+		StaffEntity staff = getStaff(id);
+		redirectAttributes.addFlashAttribute("error", "Tai khoan khong duoc bo trong");
+		if (!userName.equals("")) {
+			try {
+
+				RandomPassword radomPassword = new RandomPassword(8);
+
+				AccountEntity accountEntity = new AccountEntity(userName, radomPassword.getPassword(), 1, 2, new Date(),
+						staff);
+
+				session.save(accountEntity);
 
 //						String mailMessage = "Mật khẩu cho tài khoản PTITGYM của bạn là: " + radomPassword.getPassword();
-					//
+				//
 //						MimeMessage mail = mailer.createMimeMessage();
 //						MimeMessageHelper helper = new MimeMessageHelper(mail, true);
 //						helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
@@ -220,83 +222,82 @@ public class EmployeeController extends MethodAdminController {
 //						helper.setSubject("Tai khoản PTITGYM");
 //						helper.setText(mailMessage);
 //						mailer.send(mail);
-					//
-					staff.setAccount(accountEntity);
-					session.merge(staff);
-					t.commit();
-					redirectAttributes.addFlashAttribute("message", new Message("success", "Tạo tài khoản thành công !!!"));
-					return "redirect:/admin/employee.htm";
-				} catch (Exception e) {
+				//
+				staff.setAccount(accountEntity);
+				session.merge(staff);
+				t.commit();
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Tạo tài khoản thành công !!!"));
+				return "redirect:/admin/employee.htm";
+			} catch (Exception e) {
 
-					t.rollback();
-					System.out.println(e);
-					if (e.getCause().toString().contains("duplicate key")) {
-						redirectAttributes.addFlashAttribute("error", "Tên tài khoản đã tồn tại");
-					}
-				} finally {
-					session.close();
+				t.rollback();
+				System.out.println(e);
+				if (e.getCause().toString().contains("duplicate key")) {
+					redirectAttributes.addFlashAttribute("error", "Tên tài khoản đã tồn tại");
 				}
-
+			} finally {
+				session.close();
 			}
 
-			redirectAttributes.addFlashAttribute("userName", userName);
-			redirectAttributes.addFlashAttribute("idModal", "modal-create-account");
-			redirectAttributes.addFlashAttribute("staffId", id);
-
-			return "redirect:/admin/employee.htm";
 		}
 
-		// filter
+		redirectAttributes.addFlashAttribute("userName", userName);
+		redirectAttributes.addFlashAttribute("idModal", "modal-create-account");
+		redirectAttributes.addFlashAttribute("staffId", id);
 
-		@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
-		public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model) {
+		return "redirect:/admin/employee.htm";
+	}
 
-			Session session = factory.getCurrentSession();
+	// filter
 
-			String whereClause = "";
+	@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
+	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model) {
 
-			String birthday = toHqlRangeCondition(allParams.get("birthdayLeft"), allParams.get("birthdayRight"),
-					"birthday");
+		Session session = factory.getCurrentSession();
 
-			String gender = allParams.get("gender");
-			if (gender.equals("1") || gender.equals("0")) {
-				gender = "gender = " + gender;
-			} else
-				gender = "";
+		String whereClause = "";
 
-			List<String> conditionCluaseList = new ArrayList<>();
-			conditionCluaseList.addAll(Arrays.asList(birthday, gender));
-			whereClause = toHqlWhereClause(conditionCluaseList);
-			String hql = "from StaffEntity " + whereClause;
-			Query query = session.createQuery(hql);
-			List<StaffEntity> list = query.list();
-			model.addAttribute("cList", list);
-			StaffEntity staff = newStaff();
-			model.addAttribute("staff", staff);
-			model.addAttribute("staffUpdate", staff);
-			return "admin/employee";
-		}
+		String birthday = toHqlRangeCondition(allParams.get("birthdayLeft"), allParams.get("birthdayRight"),
+				"birthday");
 
-		// method
+		String gender = allParams.get("gender");
+		if (gender.equals("1") || gender.equals("0")) {
+			gender = "gender = " + gender;
+		} else
+			gender = "";
 
-		public List<StaffEntity> getAllStaff() {
-			Session session = factory.getCurrentSession();
-			String hql = "FROM StaffEntity";
-			Query query = session.createQuery(hql);
-			List<StaffEntity> list = query.list();
-			return list;
-		}
+		List<String> conditionCluaseList = new ArrayList<>();
+		conditionCluaseList.addAll(Arrays.asList(birthday, gender));
+		whereClause = toHqlWhereClause(conditionCluaseList);
+		String hql = "from StaffEntity " + whereClause;
+		Query query = session.createQuery(hql);
+		List<StaffEntity> list = query.list();
+		model.addAttribute("cList", list);
+		StaffEntity staff = newStaff();
+		model.addAttribute("staff", staff);
+		model.addAttribute("staffUpdate", staff);
+		return "admin/employee";
+	}
 
-		public StaffEntity getStaff(String id) {
-			Session session = factory.getCurrentSession();
-			return (StaffEntity) session.get(StaffEntity.class, id);
-		}
+	// method
 
-		public StaffEntity newStaff() {
-			StaffEntity staff = new StaffEntity();
-			staff.setStaffId(this.toPK("NV", "StaffEntity", "staffId"));
-			return staff;
-		}
+	public List<StaffEntity> getAllStaff() {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM StaffEntity";
+		Query query = session.createQuery(hql);
+		List<StaffEntity> list = query.list();
+		return list;
+	}
 
+	public StaffEntity getStaff(String id) {
+		Session session = factory.getCurrentSession();
+		return (StaffEntity) session.get(StaffEntity.class, id);
+	}
+
+	public StaffEntity newStaff() {
+		StaffEntity staff = new StaffEntity();
+		staff.setStaffId(this.toPK("NV", "StaffEntity", "staffId"));
+		return staff;
+	}
 
 }

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.GymManager.Entity.ClassEntity;
+import com.GymManager.Entity.CustomerEntity;
 import com.GymManager.Entity.PTEntity;
 import com.GymManager.Entity.ScheduleEntity;
 import com.GymManager.Entity.TrainingPackEntity;
@@ -35,7 +36,7 @@ import antlr.debug.MessageAdapter;
 @Controller
 @RequestMapping("admin/class")
 @Transactional
-public class ClassController {
+public class ClassController extends MethodAdminController {
 	@Autowired
 	SessionFactory factory;
 	@Autowired
@@ -48,13 +49,11 @@ public class ClassController {
 	@RequestMapping(value = "")
 	public String classGym(ModelMap model, Integer offset, Integer maxResult, HttpServletRequest request,
 			ClassEntity classEntity) {
-		List<ClassEntity> classEntities = getAllClass();
-		List<TrainingPackEntity> listTP = getAllPackAvailable();// gọi list gói tập
-		List<PTEntity> listPT = ptService.getAllPT(offset, maxResult); // gọi listPT
-		model.addAttribute("trainingPackEntity", listTP);
-		model.addAttribute("ptEntity", listPT);
-		model.addAttribute("classEntity", classEntities);
-		model.addAttribute("classer", new ClassEntity());
+		model.addAttribute("trainingPackEntity", getAllPackAvailable());
+		model.addAttribute("ptEntity", getAllPTAvailable());
+		model.addAttribute("classEntity", getAllClass());
+		model.addAttribute("classer", newClass());
+		model.addAttribute("classUpdate", newClass());
 		return "admin/class";
 	}
 
@@ -76,11 +75,13 @@ public class ClassController {
 			model.addAttribute("trainingPackEntity", listTP);
 			model.addAttribute("ptEntity", listPT);
 			model.addAttribute("classer", new ClassEntity());
+			model.addAttribute("classUpdate", newClass());
 //	            model.addAttribute("success_message", "Thêm mới thành công!");
 		} else {
 			model.addAttribute("trainingPackEntity", listTP);
 			model.addAttribute("ptEntity", listPT);
 			model.addAttribute("classer", new ClassEntity());
+			model.addAttribute("classUpdate", newClass());
 		}
 		Session session = factory.openSession();
 		if (true) {
@@ -102,18 +103,16 @@ public class ClassController {
 	}
 
 //	// SỬA LỚP
-//	@RequestMapping(value = "updateClass/{classId}", method=RequestMethod.GET)
-//	public String update(ModelMap model , @PathVariable("classId") String classId) 
-//	{
-//		Session session = factory.openSession();
-//		ClassEntity classEntity = (ClassEntity) session.get(ClassEntity.class, classId);
-//		model.addAttribute("classEntity", classEntity);
-//		//thêm mã gói và  từ GOITAP và PT->maPT từ PT
-//		System.out.println(classEntity.getPackId());
-//		model.addAttribute("packId", classEntity.getPackId());
-//		model.addAttribute("PT", classEntity.getPT());
-//		return "admin/class";
-//	}
+	@RequestMapping(value = "updateClass/{classId}", method = RequestMethod.GET)
+	public String update(ModelMap model, @PathVariable("classId") String classId) {
+		model.addAttribute("trainingPackEntity", getAllPackAvailable());
+		model.addAttribute("ptEntity", getAllPTAvailable());
+		model.addAttribute("classEntity", getAllClass());
+		model.addAttribute("classer", newClass());
+		model.addAttribute("classUpdate", getClassEntity(classId));
+		model.addAttribute("idModal", "modal-update");
+		return "admin/class";
+	}
 //	
 //	@RequestMapping(value = "updateClass/{classId}", method=RequestMethod.POST)
 //	public String update(ModelMap model ,  @ModelAttribute("updateClass") ClassEntity classEntity,Integer offset, Integer maxResult)
@@ -136,23 +135,19 @@ public class ClassController {
 //		return "admin/class";
 //	}
 
-	// Sửa lớp
-	@RequestMapping(value = "updateClass/{classId}", method = RequestMethod.GET)
-	public String update(ModelMap model, @PathVariable("classId") String classIdx, Integer offset, Integer maxResult) {
-
-		Session session = factory.openSession();
-		ClassEntity classEntity = (ClassEntity) session.get(ClassEntity.class, classIdx);
-		model.addAttribute("classEntityUpdate", classEntity);
-		List<TrainingPackEntity> trainingPackEntity = trainingPackService.getAllPack(offset, maxResult);
-		model.addAttribute("trainingPackEntity", trainingPackEntity);
-		List<PTEntity> ptEntity = ptService.getAllPT(offset, maxResult);
-		model.addAttribute("ptEntity", ptEntity);
-
-//		model.addAttribute("",);// mã PT
-//		model.addAttribute("",);// Mã gói 
-
-		return "admin/updateClass";
-	}
+//	// Sửa lớp
+//	@RequestMapping(value = "updateClass/{classId}", method = RequestMethod.GET)
+//	public String update(ModelMap model, @PathVariable("classId") String classIdx, Integer offset, Integer maxResult) {
+//
+//		Session session = factory.openSession();
+//		ClassEntity classEntity = (ClassEntity) session.get(ClassEntity.class, classIdx);
+//		model.addAttribute("classEntityUpdate", classEntity);
+//		List<TrainingPackEntity> trainingPackEntity = trainingPackService.getAllPack(offset, maxResult);
+//		model.addAttribute("trainingPackEntity", trainingPackEntity);
+//		List<PTEntity> ptEntity = ptService.getAllPT(offset, maxResult);
+//		model.addAttribute("ptEntity", ptEntity);
+//		return "admin/updateClass";
+//	}
 
 	@RequestMapping(value = "updateClass/{classId}", method = RequestMethod.POST)
 	public String update(ModelMap model, @ModelAttribute("updateC") ClassEntity classEntity, Integer offset,
@@ -177,6 +172,13 @@ public class ClassController {
 		return "admin/updateClass";
 	}
 
+	@RequestMapping(value = "/detail/{id}.htm", method = RequestMethod.GET)
+	public String getDetail(ModelMap model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+		redirectAttributes.addFlashAttribute("classDetail", getClassEntity(id));
+		redirectAttributes.addFlashAttribute("idModal", "modal-detail");
+		return "redirect:/admin/class.htm";
+	}
+
 	public List<ClassEntity> getAllClass() {
 		Session session = factory.getCurrentSession();
 		String hql = "FROM ClassEntity where maxPP > 1";
@@ -191,6 +193,25 @@ public class ClassController {
 		Query query = session.createQuery(hql);
 		List<TrainingPackEntity> list = query.list();
 		return list;
+	}
+
+	public ClassEntity newClass() {
+		ClassEntity classEntity = new ClassEntity();
+		classEntity.setClassId(this.toPK("LP", "ClassEntity", "classId"));
+		return classEntity;
+	}
+
+	public List<PTEntity> getAllPTAvailable() {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM PTEntity where status = 0";
+		Query query = session.createQuery(hql);
+		List<PTEntity> list = query.list();
+		return list;
+	}
+
+	public ClassEntity getClassEntity(String id) {
+		Session session = factory.getCurrentSession();
+		return (ClassEntity) session.get(ClassEntity.class, id);
 	}
 
 }

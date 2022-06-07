@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <!DOCTYPE html>
 <html>
@@ -34,32 +35,50 @@
 										<th>Gói tập</th>
 										<th>Huấn luyện viên</th>
 										<th>Trang thái</th>
-										<th>Số Người DK</th>
-										<th class="text-center col-2">Hành động</th>
+										<th>Đăng ký tối đa</th>
+										<th class="text-center col-2">Thao tác</th>
 									</tr>
 								</thead>
 								<tbody>
 									<c:forEach var="C" items="${classEntity}">
+										<c:forEach var="t" items="${C.scheduleEntity}">
+											<input type="text"
+												class="T-${C.classId} invisible position-absolute"
+												value='D-T${t.day}-${t.session}'>
+										</c:forEach>
 										<tr>
 											<td>${C.classId}</td>
-											<td>${C.packId}</td>
-											<td>${C.PT}</td>
-											<td><span class="badge rounded-pill bg-success">Có
-													thể đăng ký</span></td>
-											<td class="account-state">${C.maxPP }</td>
+											<td>${C.trainingPackEntity.packName}</td>
+											<td>${C.ptEntity.ptName}</td>
+											<td><c:choose>
+													<c:when test="${C.getClassStatus() == 1}">
+														<span class="badge rounded-pill bg-success">Có thể
+															đăng ký</span>
+													</c:when>
+													<c:when test="${C.getClassStatus() == 2}">
+														<span class="badge rounded-pill bg-secondary">Đã đủ
+															số lượng đăng ký</span>
+													</c:when>
+													<c:otherwise>
+														<span class="badge rounded-pill bg-secondary">Hết
+															hạn đăng ký</span>
+													</c:otherwise>
+
+												</c:choose></td>
+											<td class="account-state">${C.maxPP }&nbspngười</td>
 
 											<td class="text-center">
 												<button class="btn btn-outline-warning btn-light btn-sm"
-													onclick="window.location.href = '${pageContext.request.contextPath}/admin/class/updateClass/${C.classId}.htm'"
+													onclick="window.location.href = 'admin/class/updateClass/${C.classId}.htm'"
 													title="Chỉnh sửa">
 													<i class="fa-solid fa-pen-to-square"></i>
 												</button>
 												<button class="btn btn-outline-info btn-light btn-sm"
-													title="Chi tiết" data-bs-toggle="modal"
-													data-bs-target="#detail" data-bs-placement="top">
+													onclick="window.location.href = 'admin/class/detail/${C.classId}.htm'"
+													title="Chi tiết" data-bs-placement="top">
 													<i class="fa-solid fa-circle-exclamation"></i>
 												</button>
-												<button data=".T-${d.classEntity.classId}"
+												<button data=".T-${C.classId}"
 													class="btn-show-time-table-detail btn btn-outline-success btn-light btn-sm">
 													<i class="fa-regular fa-calendar-days"></i>
 												</button>
@@ -85,71 +104,74 @@
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form method="post"
-							action="${pageContext.request.contextPath}/admin/class/update/${classEntityUpdate.classId}.htm"
-							modelAttribute="updateC" class="row g-3">
+						<form:form method="post"
+							action="admin/class/update/${classUpdate.classId}.htm"
+							modelAttribute="classUpdate" class="row g-3">
 							<div class="col-md-12">
-								<label for="inputName" class="form-label">Mã: <span
-									class="employeeId text-danger"> <input type="text"
-										class="form-control" name="classId"
-										value="${classEntityUpdate.classId}" readonly />
-								</span>
+								<label for="inputName" class="form-label">Mã: <form:input
+										path="classId" type="text" class="form-control"
+										readonly="true" />
 								</label>
 							</div>
 							<div class="col-md-6">
-								<label for="input-package" class="form-label">Gói tập</label> <select
-									name="packIDUpdate" id="input-package" class="form-select">
-									<option name="PTUpdate" value="${X.trainingEntity.packID}">
-										${X.trainingEntity.packID}</option>
-
-
-								</select>
+								<label for="input-package" class="form-label">Gói tập</label>
+								<form:select path="packId" id="input-package"
+									class="form-select">
+									<c:forEach var="X" items="${trainingPackEntity}">
+										<form:option value="${X.packID}">${X.packName}</form:option>
+									</c:forEach>
+								</form:select>
 							</div>
 							<div class="col-md-6">
-								<label for="input-pt" class="form-label">PT</label> <select
-									id="input-pt" class="form-select">
-									<c:forEach var="X" items="${ptEntity }">
-										<option value="${X.ptID}">${X.ptID}</option>
+								<label for="input-pt" class="form-label">PT</label>
+								<form:select path="PT" id="input-pt" class="form-select">
+									<form:option value="${classUpdate.ptEntity.ptID}">${classUpdate.ptEntity.ptID}</form:option>
+									<c:forEach var="T" items="${ptEntity}">
+										<form:option value="${T.ptID}">${T.ptID}</form:option>
 									</c:forEach>
-								</select>
+								</form:select>
 							</div>
 							<div class="col-md-6">
 								<label for="input-open-register-day" class="form-label">Ngày
-									mở đăng ký</label> <input type="date" class="form-control"
+									mở đăng ký</label>
+								<form:input path="dateOpen" type="date" class="form-control"
 									id="input-open-register-day" />
 							</div>
 							<div class="col-md-6">
 								<label for="input-close-register-day" class="form-label">Ngày
-									đóng đăng ký</label> <input type="date" class="form-control"
+									đóng đăng ký</label>
+								<form:input path="dateClose" type="date" class="form-control"
 									id="input-close-register-day" />
 							</div>
 
 							<div class="col-md-6">
 								<label for="input-close-register-day" class="form-label">Ngày
-									bắt đầu lớp</label> <input type="date" class="form-control"
+									bắt đầu lớp</label>
+								<form:input path="dateStart" type="date" class="form-control"
 									id="input-close-register-day" />
 							</div>
 
 							<div class="col-md-6">
 								<label for="inputPhone" class="form-label">Số người đăng
-									ký tối đa</label> <input type="number" class="form-control" />
+									ký tối đa</label>
+								<form:input path="maxPP" type="number" class="form-control" />
 							</div>
 							<div>
 								<button class="btn col-12 btn-outline-primary btn-light"
 									type="button" data-bs-target="#time-table"
 									data-bs-toggle="modal">
-									<i class="bi bi-plus-circle"></i> <span class="te">Tạo
-										TKB</span>
+									<i class="bi bi-plus-circle"></i> <span class="te">Chỉnh
+										sửa TKB</span>
 								</button>
 							</div>
 
 							<div class="text-end mt-3">
-								<button type="submit" name="btnUpdate" class="btn btn-primary">Xác
+								<button type="submit" name="btnCreate" class="btn btn-primary">Xác
 									nhận</button>
 								<button type="button" class="btn btn-secondary close-form"
 									data-bs-dismiss="modal">Đóng</button>
 							</div>
-						</form>
+						</form:form>
 					</div>
 				</div>
 			</div>
@@ -170,7 +192,8 @@
 							method="post" class="row g-3" modelAttribute="classer">
 							<div class="col-md-12">
 								<label for="inputName" class="form-label">Mã: <form:input
-										path="classId" type="text" class="form-control" />
+										path="classId" type="text" class="form-control"
+										readonly="true" />
 								</label>
 							</div>
 							<div class="col-md-6">
@@ -236,57 +259,109 @@
 			</div>
 		</div>
 		<!-- detail -->
-		<div class="modal fade" id="detail" tabindex="-1">
-			<div class="modal-dialog modal-dialog-centered">
+		<!-- table detail -->
+
+
+		<div class="modal fade" id="modal-detail" tabindex="-1">
+
+			<div class="modal-dialog modal-lg modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
-						<h5 class="modal-title">Thông tin lớp tập</h5>
+						<h5 class="modal-title">Chi tiết thông tin khách hàng</h5>
 						<button type="button" class="btn-close close-form"
 							data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
+					<div class="modal-body p-0">
+						<section class="section profile">
+							<div class="row">
+								<div class="col-xl-12 mx-auto">
+									<div class="card mb-0">
+										<div class="card-body pt-3">
+											<!-- Bordered Tabs -->
+											<ul class="nav nav-tabs nav-tabs-bordered">
+												<li class="nav-item">
+													<button class="nav-link active" data-bs-toggle="tab"
+														data-bs-target="#profile-overview">Thông tin cơ
+														bản</button>
+												</li>
 
-					<div class="modal-body">
-						<div class="row g-3 d-flex flex-column gap-4 pt-4">
+												<li class="nav-item">
+													<button class="nav-link" data-bs-toggle="tab"
+														data-bs-target="#profile-edit">Danh sách khách
+														đăng ký</button>
+												</li>
+											</ul>
+											<div class="tab-content pt-2">
+												<div class="tab-pane fade show active profile-overview"
+													id="profile-overview">
+													<div class="row mt-4">
+														<div class="col-lg-3 col-md-4 label">Mã</div>
+														<div class="col-lg-9 col-md-8">${classDetail.classId }</div>
 
-							<div class="row">
-								<div class="col-lg-6 col-md-6 label">Mã</div>
-								<div class="col-lg-6 col-md-6">${classEntityUpdate.classId }</div>
-							</div>
-							<div class="row">
-								<div class="col-lg-6 col-md-6 label">Gói</div>
-								<div class="col-lg-6 col-md-6">Gói tập xxxxx</div>
-							</div>
-							<div class="row">
-								<div class="col-lg-6 col-md-6 label">Huấn luyện viên</div>
-								<div class="col-lg-6 col-md-6">Nguyễn Minh Nhật</div>
-							</div>
-							<div class="row">
-								<div class="col-lg-6 col-md-6 label">Ngày mở đăng kký</div>
-								<div class="col-lg-6 col-md-6">30/11/2022</div>
-							</div>
-							<div class="row">
-								<div class="col-lg-6 col-md-6 label">Ngày đóng đăng ký</div>
-								<div class="col-lg-6 col-md-6">30/12/2022</div>
-							</div>
-							<div class="row">
-								<div class="col-lg-6 col-md-6 label">Ngày bắt đầu tập</div>
-								<div class="col-lg-6 col-md-6">1/1/2023</div>
-							</div>
-							<div class="row">
-								<div class="col-lg-6 col-md-6 label">Số người đăng ký</div>
-								<div class="col-lg-6 col-md-6">20/22 người</div>
-							</div>
+													</div>
 
+													<div class="row">
+														<div class="col-lg-3 col-md-4 label">Gói</div>
+														<div class="col-lg-9 col-md-8">${classDetail.trainingPackEntity.packName }</div>
 
-							<div class="text-end mt-3">
-								<button type="button" class="btn btn-primary"
-									data-bs-target="#create" data-bs-toggle="modal">Chỉnh
-									sửa</button>
-								<button type="button" class="btn btn-secondary"
-									data-bs-dismiss="modal">Đóng</button>
+													</div>
+													<div class="row">
+														<div class="col-lg-3 col-md-4 label">Huấn luyện</div>
+														<div class="col-lg-9 col-md-8">
+															${classDetail.ptEntity.ptName}</div>
+
+													</div>
+
+													<div class="row">
+
+														<div class="col-lg-3 col-md-4 label">Ngày mở đăng</div>
+														<div class="col-lg-9 col-md-8">
+															<fmt:formatDate value="${classDetail.dateOpen }"
+																pattern="dd/MM/yyyy" />
+														</div>
+													</div>
+
+													<div class="row">
+
+														<div class="col-lg-3 col-md-4 label">Ngày đóng đăng</div>
+														<div class="col-lg-9 col-md-8">
+															<fmt:formatDate value="${classDetail.dateClose }"
+																pattern="dd/MM/yyyy" />
+														</div>
+													</div>
+
+													<div class="row">
+														<div class="col-lg-3 col-md-4 label">Ngày bắt đầu</div>
+														<div class="col-lg-9 col-md-8">
+															<fmt:formatDate value="${classDetail.dateStart}"
+																pattern="dd/MM/yyyy" />
+														</div>
+													</div>
+
+													<div class="row">
+														<div class="col-lg-3 col-md-4 label">Số người đăng</div>
+														<div class="col-lg-9 col-md-8">
+															${classDetail.registerDetailEntities.size()}/${classDetail.maxPP}
+															người</div>
+													</div>
+													<div class="text-end mt-3">
+														<button type="button" class="btn btn-primary"
+															data-bs-target="#create" data-bs-toggle="modal">Chỉnh
+															sửa</button>
+														<button type="button" class="btn btn-secondary"
+															data-bs-dismiss="modal">Đóng</button>
+													</div>
+												</div>
+
+												<div class="tab-pane fade profile-edit pt-3"
+													id="profile-edit" style="min-height: 460px"></div>
+											</div>
+											<!-- End Bordered Tabs -->
+										</div>
+									</div>
+								</div>
 							</div>
-
-						</div>
+						</section>
 						<!-- End Multi Columns Form -->
 					</div>
 				</div>
@@ -431,12 +506,290 @@
 			</div>
 		</div>
 		<!-- end time table -->
+		
+		<!-- Time-table edit -->
+		<c:forEach var="t"
+			items="${classUpdate.scheduleEntity}">
+			<input type="text"
+				class="2-T-${classUpdate.classId} input-tt-db invisible position-absolute"
+				value='2-T${t.day}-${t.session}'>
+		</c:forEach>
+		<div class="modal fade" id="time-table2" tabindex="-1">
+			<div class="modal-dialog modal-xl modal-dialog-centered">
+				<div class="modal-content">
+					<section class="section">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="card mb-0">
+									<div class="card-body">
+										<h5
+											class="card-title align-items-center d-flex justify-content-between">
+											Thời Khoá Biểu
+											<div class="header-action d-flex gap-1">
+												<button type="button"
+													class="btn btn-primary btn-tt-confirm2"
+													data-bs-target="#modal-register" data-bs-toggle="modal">Xác
+													nhận</button>
+
+												<div class="search-bar-table d-flex align-items-stretch">
+													<div class="">
+														<button type="button"
+															class="btn btn-secondary btn-tt-cancel2"
+															data-bs-target="#modal-register" data-bs-toggle="modal">Huỷ
+															bỏ</button>
+													</div>
+
+
+												</div>
+											</div>
+										</h5>
+
+										<!-- Table with stripped rows -->
+										<div class="my-time-table">
+											<div class="table-responsive">
+												<table class="table table-bordered text-center">
+													<thead>
+														<tr class="bg-light-gray">
+															<th class="text-uppercase col-1 label">Buổi</th>
+															<th class="text-uppercase col-1 label">Thứ hai</th>
+															<th class="text-uppercase col-1 label">Thứ ba</th>
+															<th class="text-uppercase col-1 label">Thư tư</th>
+															<th class="text-uppercase col-1 label">Thứ năm</th>
+															<th class="text-uppercase col-1 label">Thứ sáu</th>
+															<th class="text-uppercase col-1 label">Thứ bảy</th>
+															<th class="text-uppercase col-1 label">Chủ nhật</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr>
+															<td class="align-middle bg-light">Sáng</td>
+															<td class="td-time-table"><input type="radio"
+																name="2-T2" form="register" id="2-T2-0" value="0"
+																class="form-check-input" /> <label for="2-T2-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T3" id="2-T3-0" value="0"
+																class="form-check-input" /> <label for="2-T3-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T4" id="2-T4-0" value="0"
+																class="form-check-input" /> <label for="2-T4-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T5" id="2-T5-0" value="0"
+																class="form-check-input" /> <label for="2-T5-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T6" id="2-T6-0" value="0"
+																class="form-check-input" /> <label for="2-T6-0"></label></td>
+
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T7" id="2-T7-0" value="0"
+																class="form-check-input" /> <label for="2-T7-0"></label></td>
+
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T8" id="2-T8-0" value="0"
+																class="form-check-input" /> <label for="2-T8-0"></label></td>
+														</tr>
+
+														<tr>
+															<td class="align-middle bg-light">Chiều</td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T2" id="2-T2-1" value="1"
+																class="form-check-input" /> <label for="2-T2-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T3" id="2-T3-1" value="1"
+																class="form-check-input" /> <label for="2-T3-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T4" id="2-T4-1" value="1"
+																class="form-check-input" /> <label for="2-T4-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T5" id="2-T5-1" value="1"
+																class="form-check-input" /> <label for="2-T5-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T6" id="2-T6-1" value="1"
+																class="form-check-input" /> <label for="2-T6-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T7" id="2-T7-1" value="1"
+																class="form-check-input" /> <label for="2-T7-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T8" id="2-T8-1" value="1"
+																class="form-check-input" /> <label for="2-T8-1"></label></td>
+														</tr>
+
+														<tr>
+															<td class="align-middle bg-light">Tối</td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T2" id="2-T2-2" value="2"
+																class="form-check-input" /> <label for="2-T2-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T3" id="2-T3-2" value="2"
+																class="form-check-input" /> <label for="2-T3-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T4" id="2-T4-2" value="2"
+																class="form-check-input" /> <label for="2-T4-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T5" id="2-T5-2" value="2"
+																class="form-check-input" /> <label for="2-T5-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T6" id="2-T6-2" value="2"
+																class="form-check-input" /> <label for="2-T6-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T7" id="2-T7-2" value="2"
+																class="form-check-input" /> <label for="2-T7-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="2-T8" id="2-T8-2" value="2"
+																class="form-check-input" /> <label for="2-T8-2"></label></td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<!-- End Table with stripped rows -->
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- Time-table detail -->
+		<div class="modal fade" id="time-table-detail" tabindex="-1">
+			<div class="modal-dialog modal-xl modal-dialog-centered">
+				<div class="modal-content">
+					<section class="section">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="card mb-0">
+									<div class="card-body">
+										<h5
+											class="card-title align-items-center d-flex justify-content-between">
+											Thời Khoá Biểu</h5>
+
+										<!-- Table with stripped rows -->
+										<div class="my-time-table">
+											<div class="table-responsive">
+												<table class="table table-bordered text-center">
+													<thead>
+														<tr class="bg-light-gray">
+															<th class="text-uppercase col-1 label">Buổi</th>
+															<th class="text-uppercase col-1 label">Thứ hai</th>
+															<th class="text-uppercase col-1 label">Thứ ba</th>
+															<th class="text-uppercase col-1 label">Thư tư</th>
+															<th class="text-uppercase col-1 label">Thứ năm</th>
+															<th class="text-uppercase col-1 label">Thứ sáu</th>
+															<th class="text-uppercase col-1 label">Thứ bảy</th>
+															<th class="text-uppercase col-1 label">Chủ nhật</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr>
+															<td class="align-middle bg-light">Sáng</td>
+															<td class="td-time-table"><input type="radio"
+																name="T2" form="register" id="D-T2-0" value="0"
+																class="form-check-input" /> <label for="D-T2-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T3" id="D-T3-0" value="0"
+																class="form-check-input" /> <label for="D-T3-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T4" id="D-T4-0" value="0"
+																class="form-check-input" /> <label for="D-T4-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T5" id="D-T5-0" value="0"
+																class="form-check-input" /> <label for="D-T5-0"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T6" id="D-T6-0" value="0"
+																class="form-check-input" /> <label for="D-T6-0"></label></td>
+
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T7" id="D-T7-0" value="0"
+																class="form-check-input" /> <label for="D-T7-0"></label></td>
+
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T8" id="D-T8-0" value="0"
+																class="form-check-input" /> <label for="D-T8-0"></label></td>
+														</tr>
+
+														<tr>
+															<td class="align-middle bg-light">Chiều</td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T2" id="D-T2-1" value="1"
+																class="form-check-input" /> <label for="D-T2-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T3" id="D-T3-1" value="1"
+																class="form-check-input" /> <label for="D-T3-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T4" id="D-T4-1" value="1"
+																class="form-check-input" /> <label for="D-T4-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T5" id="D-T5-1" value="1"
+																class="form-check-input" /> <label for="D-T5-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T6" id="D-T6-1" value="1"
+																class="form-check-input" /> <label for="D-T6-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T7" id="D-T7-1" value="1"
+																class="form-check-input" /> <label for="D-T7-1"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T8" id="D-T8-1" value="1"
+																class="form-check-input" /> <label for="D-T8-1"></label></td>
+														</tr>
+
+														<tr>
+															<td class="align-middle bg-light">Tối</td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T2" id="D-T2-2" value="2"
+																class="form-check-input" /> <label for="D-T2-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T3" id="D-T3-2" value="2"
+																class="form-check-input" /> <label for="D-T3-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T4" id="D-T4-2" value="2"
+																class="form-check-input" /> <label for="D-T4-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T5" id="D-T5-2" value="2"
+																class="form-check-input" /> <label for="D-T5-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T6" id="D-T6-2" value="2"
+																class="form-check-input" /> <label for="D-T6-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T7" id="D-T7-2" value="2"
+																class="form-check-input" /> <label for="D-T7-2"></label></td>
+															<td class="td-time-table"><input form="register"
+																type="radio" name="T8" id="D-T8-2" value="2"
+																class="form-check-input" /> <label for="D-T8-2"></label></td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<!-- End Table with stripped rows -->
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
 	</main>
 	<!-- End #main -->
 	<!-- common script -->
 	<%@include file="./script.jsp"%>
 	<script type="text/javascript">
       $(document).ready(function () {
+    	  let id = $(".modal-flag").attr("idModal")
+    	  if(id) {
+    	  $("#"+id).modal("show");
+    	  }
+    	  
+    	  $(".btn-show-time-table-detail").click(function() {
+    		  $("#time-table-detail :input").prop( "checked", false );
+    		  $(this.getAttribute("data")).each(function() {
+    			  console.log(this.value)
+    			  $("#"+this.value).prop( "checked", true );
+    		  })
+    		  $("#time-table-detail").modal("show");
+    	  })
         $(
           "#my-data-table_filter",
         ).append(`  <div class="search-bar-table d-flex align-items-stretch">
