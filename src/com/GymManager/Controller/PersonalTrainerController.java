@@ -33,8 +33,10 @@ import com.GymManager.Entity.PTEntity;
 import com.GymManager.Entity.RegisterDetailEntity;
 import com.GymManager.Entity.RegisterEntity;
 import com.GymManager.Entity.ScheduleEntity;
+import com.GymManager.Entity.StaffEntity;
 import com.GymManager.Entity.PTEntity;
 import com.GymManager.Entity.TrainingPackEntity;
+import com.GymManager.ExtraClass.FormAttribute;
 import com.GymManager.ExtraClass.Message;
 
 @Controller
@@ -70,93 +72,122 @@ public class PersonalTrainerController extends MethodAdminController {
 			
 		}
 
-	// create pt
-	@RequestMapping(value="", method = RequestMethod.POST, params = "btnCreate")
-	public String createPT(ModelMap model, @Validated @ModelAttribute("pt") PTEntity pt,
-			BindingResult result, RedirectAttributes redirectAttributes) {
-		System.out.println(pt.getPtID());
-		if (!result.hasErrors()) {
-			Session session = factory.openSession();
+		// get view create pt
 
-			Transaction t = session.beginTransaction();
-			try {
+				@RequestMapping(value = "add.htm", method = RequestMethod.GET)
+				public String getCreate(ModelMap model, RedirectAttributes redirectAttributes) {
+					redirectAttributes.addFlashAttribute("idModal", "modal-create");
+					return "redirect:/admin/personal-trainer.htm";
 
-				session.save(pt);
-
-				t.commit();
-				redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong!!!"));
-
-				return "redirect:/admin/personal-trainer.htm";
-
-			} catch (Exception e) {
-
-				t.rollback();
-				System.out.println(e);
-				if (e.getCause().toString().contains("duplicate key")) {
-					result.rejectValue("ptID", "pt", "Ma khong duoc trung");
 				}
-				if (e.getCause().toString().contains("String or binary data would be truncated")) {
-					result.rejectValue("ptID", "pt", "Ma khong qua 8 ky tu");
+			
+			// create PT
+				@RequestMapping(method = RequestMethod.POST, params = "btnCreate")
+				public String createPT(ModelMap model, @Validated @ModelAttribute("pt") PTEntity pt,
+						BindingResult result, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+						if (!result.hasErrors()) {
+							Session session = factory.openSession();
+	
+							Transaction t = session.beginTransaction();
+						try {
+							pt.setStatus(0);
+							session.save(pt);
+
+							t.commit();
+							redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
+
+							return "redirect:/admin/personal-trainer.htm";
+
+						} catch (Exception e) {
+
+							t.rollback();
+							System.out.println(e);
+							
+							if (e.getCause().toString().contains("UNIQUE_PT_SDT")) {
+								result.rejectValue("phoneNumber", "pt", "So dien thoai nay da duoc su dung");
+							}
+
+							if (e.getCause().toString().contains("UCHECK_PT_SDT")) {
+								result.rejectValue("phoneNumber", "pt", "So dien thoai khong dung dinh dang");
+							}
+							if (e.getCause().toString().contains("CK_PT_NGAYSINH")) {
+								result.rejectValue("birthday", "pt", "Tuoi nhan vien phai tren 18 tuoi");
+							}
+							if (e.getCause().toString().contains("UNIQUE_PT_EMAIL")) {
+								result.rejectValue("email", "pt", "Email nhap sai dinh dang");
+							}
+							if (e.getCause().toString().contains("String or binary data would be truncated")) {
+								result.rejectValue("ptID", "pt", "Ma khong qua 8 ky tu");
+							}
+						}
+
+						finally {
+							session.close();
+						}
+					}
+					model.addAttribute("idModal", "modal-create");
+					model.addAttribute("ptUpdate", pt);
+					return "admin/personal-trainer";
 				}
-			}
 
-			finally {
-				session.close();
-			}
-		}
-		model.addAttribute("idModal", "modal-create");
-		model.addAttribute("ptUpdate", pt);
-		return "admin/personal-trainer";
-	}
+				// return views update
+				@RequestMapping(value = "update/{id}.htm", method = RequestMethod.GET)
+				public String getUpdate(ModelMap model, @PathVariable("id") String id) {
 
-	// return views update
-	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.GET)
-	public String getUpdate(ModelMap model, @PathVariable("id") String id) {
-
-		model.addAttribute("staff", newPT());
-		model.addAttribute("ptUpdate", getPT(id));
-		model.addAttribute("idModal", "modal-update");
-		model.addAttribute("cList", getAllPT());
-		return "admin/personal-trainer";
-	}
-
-	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
-	public String updatCustomer(ModelMap model, @Validated @ModelAttribute("ptUpdate") PTEntity pt,
-			BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
-		if (!result.hasErrors()) {
-			Session session = factory.openSession();
-
-			Transaction t = session.beginTransaction();
-			try {
-
-				session.update(pt);
-
-				t.commit();
-				redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
-
-				return "redirect:/admin/personal-trainer.htm";
-
-			} catch (Exception e) {
-
-				t.rollback();
-				System.out.println(e.getCause());
-				if (e.getCause().toString().contains("duplicate key")) {
-					result.rejectValue("ptID", "ptUpdate", "Ma da ton tai");
+					model.addAttribute("pt", getPT(id));
+					model.addAttribute("idModal", "modal-create");
+					model.addAttribute("cList", getAllPT());
+					model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin PT",
+							"admin/personal-trainer/update/" + id + ".htm", "btnUpdate"));
+					return "admin/personal-trainer";
 				}
-				if (e.getCause().toString().contains("String or binary data would be truncated")) {
-					result.rejectValue("ptID", "ptUpdate", "Ma khong duoc qua 8 ky tu");
-				}
-			}
 
-			finally {
-				session.close();
-			}
-		}
-		model.addAttribute("idModal", "modal-update");
-		model.addAttribute("pt", newPT());
-		model.addAttribute("cList", getAllPT());
-		return "admin/personal-trainer";
-	}
+				@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
+				public String updatePT(ModelMap model, @Validated @ModelAttribute("ptUpdate") PTEntity pt,
+						BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
+					if (!result.hasErrors()) {
+						Session session = factory.openSession();
+
+						Transaction t = session.beginTransaction();
+						try {
+							session.update(pt);
+
+							t.commit();
+							redirectAttributes.addFlashAttribute("message", new Message("success", "Sua thanh cong !!!"));
+
+							return "redirect:/admin/personal-trainer.htm";
+
+						} catch (Exception e) {
+
+							t.rollback();
+							System.out.println(e.getCause());
+							if (e.getCause().toString().contains("UNIQUE_PT_SDT")) {
+								result.rejectValue("phoneNumber", "pt", "So dien thoai nay da duoc su dung");
+							}
+
+							if (e.getCause().toString().contains("UCHECK_PT_SDT")) {
+								result.rejectValue("phoneNumber", "pt", "So dien thoai khong dung dinh dang");
+							}
+							if (e.getCause().toString().contains("CK_PT_NGAYSINH")) {
+								result.rejectValue("birthday", "pt", "Tuoi nhan vien phai tren 18 tuoi");
+							}
+							if (e.getCause().toString().contains("UNIQUE_PT_EMAIL")) {
+								result.rejectValue("email", "pt", "Email nhap sai dinh dang");
+							}
+							if (e.getCause().toString().contains("String or binary data would be truncated")) {
+								result.rejectValue("ptID", "pt", "Ma khong qua 8 ky tu");
+							}
+						}
+
+						finally {
+							session.close();
+						}
+					}
+					model.addAttribute("idModal", "modal-update");
+					model.addAttribute("pt", newPT());
+					model.addAttribute("cList", getAllPT());
+					return "admin/personal-trainer";
+				}
 
 
 

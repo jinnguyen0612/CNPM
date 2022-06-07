@@ -34,11 +34,16 @@ public class StaffEntity {
 	@NotEmpty(message = "email khong duoc bo trong")
 	@Column(name = "Email")
 	private String email;
+<<<<<<< Updated upstream
 	@PastOrPresent(message = "ngay sinh nho hon ngay hien tai")
+=======
+	@NotEmpty(message="Ngay sinh khong duoc bo trong")
+>>>>>>> Stashed changes
 	@Column(name = "NgaySinh")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
+	@NotEmpty(message="SDT khong duoc bo trong")
 	@Column(name = "SDT")
 	private String phone;
 	@Column(name = "TrangThai")

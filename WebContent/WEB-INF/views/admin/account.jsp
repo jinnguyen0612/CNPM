@@ -74,7 +74,7 @@
 												<td class="text-center">
 													<c:choose>
 	
-														<c:when test="${not empty a.customer}">
+														<c:when test="${not empty a.customer and empty a.staff}">
 															<a href="admin/customer/detail/${a.customer.customerId}.htm"><button
 																class="btn btn-outline-info btn-light btn-sm"
 																title="Chi tiết người sở hữu" data-bs-toggle="modal"
@@ -83,7 +83,7 @@
 															</button></a>
 														</c:when>
 														
-														<c:when test="${not empty a.staff}">
+														<c:when test="${not empty a.staff and empty a.customer}">
 															<a href="admin/employee/detail/${a.staff.staffId}.htm"><button
 																class="btn btn-outline-info btn-light btn-sm"
 																title="Chi tiết người sở hữu" data-bs-toggle="modal"
@@ -91,6 +91,14 @@
 																<i class="fa-solid fa-circle-exclamation"></i>
 															</button></a>
 														</c:when>
+														<c:otherwise>
+															<button disabled ="disabled"
+																class="btn btn-secondary btn-sm"
+																title="Chi tiết người sở hữu" data-bs-toggle="modal"
+																data-bs-target="#detail" data-bs-placement="top">
+																<i class="fa-solid fa-circle-exclamation"></i>
+															</button>
+														</c:otherwise>
 													</c:choose>
 													
 													<c:choose>
