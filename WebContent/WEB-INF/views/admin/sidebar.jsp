@@ -7,6 +7,10 @@
 			href="admin/index.htm"> <i class="bi bi-grid"></i> <span>Trang
 					chủ</span>
 		</a></li>
+		<li class="nav-item"><a class="nav-link collapsed"
+			data="schedule" data-bs-target="#pt" href="admin/schedule.htm"> <i
+				class="fa-light fa-ballot"></i><span>Khách Tập</span>
+		</a></li>
 
 		<c:if test="${admin.policyId == '0'}">
 			<!-- End Dashboard Nav -->
@@ -65,11 +69,6 @@
 				</a></li>
 			</ul></li>
 		<!-- End Customer Nav -->
-
-		<li class="nav-item"><a class="nav-link collapsed" data="bill"
-			data-bs-target="#pt" href="admin/bill.htm"> <i
-				class="fa-light fa-ballot"></i><span>Hoá Đơn</span>
-		</a></li>
 
 		<li class="nav-item"><a class="nav-link collapsed"
 			href="admin/logout.htm"> <i class="bi bi-box-arrow-left"></i> <span>Đăng

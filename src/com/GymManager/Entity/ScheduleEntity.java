@@ -1,23 +1,25 @@
 package com.GymManager.Entity;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "TKB_LOP")
 public class ScheduleEntity {
 	@Id
-	@GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)
-	@Column(name = "Ma", unique = true, nullable = false)
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "Ma")
 	private Integer id;
 
-	@Column(name="MaLop")
+	@Column(name = "MaLop")
 	private String classId;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name ="MaLop", insertable = false, updatable= false)
+	@JoinColumn(name = "MaLop", insertable = false, updatable = false)
 	private ClassEntity classEntity;
-	
-	
+
 	@Column(name = "Thu")
 	private Integer day;
 	@Column(name = "Buoi")
@@ -66,11 +68,16 @@ public class ScheduleEntity {
 	public ScheduleEntity() {
 		super();
 	}
-	
-	
 
-	
+	public int getScheduleStatus() {
+		ClassEntity classEntity = this.classEntity;
+		LocalDate date2 = LocalDate.parse(classEntity.getDateStart().toString());
+		LocalDate date = date2.plusMonths(classEntity.getTrainingPackEntity().getPackDuration());
+		Date toDay = new Date();
+		if (toDay.after(classEntity.getDateStart()) && toDay.before(java.sql.Date.valueOf(date))) {
+			return 1;
+		}
+		return 0;
+	}
 
-
-	
 }

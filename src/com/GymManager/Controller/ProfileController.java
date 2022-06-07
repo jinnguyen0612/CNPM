@@ -3,6 +3,7 @@ package com.GymManager.Controller;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -37,7 +38,7 @@ public class ProfileController {
 		AccountEntity accountOld = (AccountEntity) ss.getAttribute("admin");
 		AccountEntity account = getAccount(accountOld.getUsername());
 
-		if (account.getPassword().trim().equals(PW) == false) {
+		if (account.getPassword().trim().equals(DigestUtils.md5Hex(PW).toUpperCase()) == false) {
 			model.addAttribute("message1", "Sai mật khẩu!");
 		} else {
 			if (nPW.trim().isEmpty()) {
@@ -63,7 +64,7 @@ public class ProfileController {
 			} else {
 				Session session = factory.openSession();
 				Transaction t = session.beginTransaction();
-				account.setPassword(nPW);
+				account.setPassword(DigestUtils.md5Hex(nPW).toUpperCase());
 				try {
 					session.merge(account);
 					t.commit();

@@ -62,7 +62,7 @@
 
 								<div class="card-body">
 									<h5 class="card-title">
-										Hoá đơn <span>| <c:choose>
+										Đăng ký <span>| <c:choose>
 												<c:when test="${billFilter=='day'}">Hôm nay</c:when>
 												<c:when test="${billFilter=='month'}">Tháng này</c:when>
 												<c:otherwise>Năm này</c:otherwise>
@@ -114,11 +114,7 @@
 
 								<div class="card-body">
 									<h5 class="card-title">
-										Doanh thu <span>| <c:choose>
-												<c:when test="${revenueFilter=='day'}">Hôm nay</c:when>
-												<c:when test="${revenueFilter=='month'}">Tháng này</c:when>
-												<c:otherwise>Năm này</c:otherwise>
-											</c:choose></span>
+										Huấn luyện viên <span>| Tất cả</span>
 									</h5>
 
 									<div class="d-flex align-items-center">
@@ -154,6 +150,66 @@
 										</div>
 										<div class="ps-3">
 											<h6>${numOfCustomer}</h6>
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xxl-4 col-xl-12">
+							<div class="card info-card customers-card">
+								<div class="card-body">
+									<h5 class="card-title">
+										Nhân viên <span>| Tất cả</span>
+									</h5>
+
+									<div class="d-flex align-items-center">
+										<div
+											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+											<i class="bi bi-people"></i>
+										</div>
+										<div class="ps-3">
+											<h6>${mumOfStaff}</h6>
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xxl-4 col-xl-12">
+							<div class="card info-card customers-card">
+								<div class="card-body">
+									<h5 class="card-title">
+										Lớp <span>| Tất cả</span>
+									</h5>
+
+									<div class="d-flex align-items-center">
+										<div
+											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+											<i class="bi bi-people"></i>
+										</div>
+										<div class="ps-3">
+											<h6>${mumOfClass}</h6>
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xxl-4 col-xl-12">
+							<div class="card info-card customers-card">
+								<div class="card-body">
+									<h5 class="card-title">
+										Gói tập <span>| Tất cả</span>
+									</h5>
+
+									<div class="d-flex align-items-center">
+										<div
+											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+											<i class="bi bi-people"></i>
+										</div>
+										<div class="ps-3">
+											<h6>${mumOfPack}</h6>
 
 										</div>
 									</div>

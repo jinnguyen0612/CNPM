@@ -1,5 +1,6 @@
 package com.GymManager.Entity;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.Collection;
 
@@ -26,13 +27,23 @@ public class RegisterEntity {
 
 	@Column(name = "TrangThai")
 	private int status;
+	@Column(name = "GiaTien")
+	private BigDecimal money;
 	@ManyToOne
 	@JoinColumn(name = "NguoiTao")
 	private AccountEntity account;
-	
+
 	@OneToMany(mappedBy = "registerEntity")
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private Collection<RegisterDetailEntity> registerDetailList;
+
+	public BigDecimal getMoney() {
+		return money;
+	}
+
+	public void setMoney(BigDecimal money) {
+		this.money = money;
+	}
 
 	public String getRegisterId() {
 		return registerId;
@@ -82,5 +93,4 @@ public class RegisterEntity {
 		this.registerDetailList = registerDetailList;
 	}
 
-	
 }

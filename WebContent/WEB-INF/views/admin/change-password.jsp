@@ -28,38 +28,39 @@
 							<div class="card mb-3">
 								<div class="card-body">
 									<div class="pt-4 pb-2">
-										<h5 class="card-title text-center pb-0 fs-4">Đăng nhập
-											tài khoản của bạn</h5>
-										<p class="text-center small">Nhập tên tài khoản và mật
-											khẩu để đăng nhập</p>
+										<h5 class="card-title text-center pb-0 fs-4">Cập nhật mật
+											khẩu</h5>
+										<p class="text-center small">Do đây là lần đăng nhập đầu
+											tiên hoặc mật khẩu của bạn đã được đặt lại, vui lòng cập nhật
+											mật khẩu mới để đăng nhập</p>
 									</div>
 
 									<form action="admin/login.htm" method="post"
 										class="row g-3 needs-validation" novalidate>
-										<div class="col-12">
-											<label for="yourUsername" class="form-label">Tên đăng
-												nhập</label> <input type="text" name="username" value="${userName }"
-												class="form-control" id="yourUsername" required />
-											<div class="invalid-feedback">Không được bỏ trống</div>
-										</div>
-
-										<div class="col-12">
-											<label for="yourPassword" class="form-label">Mật khẩu</label>
-											<input type="password" name="password" value="${password}"
-												class="form-control" id="yourPassword" required />
+										<div class="col-12 ">
+											<div class="col-12 invisible position-absolute">
+												<label for="yourUsername" class="form-label ">Tên
+													đăng nhập</label> <input type="text" name="username"
+													value="${userName}" class="form-control" id="yourUsername"
+													required />
+												<div class="invalid-feedback">Không được bỏ trống</div>
+											</div>
+											<label for="yourPassword" class="form-label">Mật khẩu
+												mới</label> <input type="password" name="newPassword"
+												value="${password}" class="form-control" required />
 											<div class="text-danger">${matKhau}</div>
 										</div>
-										<div class="col-12 text-end">
-											<button name="btnForgetPass"
-												class="text-info text-decoration-underline outline-none bg-none"
-												style="outline: none; background: none; border: none;">Quên
-												mật khẩu</button>
 
+										<div class="col-12">
+											<label for="yourPassword" class="form-label">Xác nhận
+												mật khẩu</label> <input type="password" name="reNewPassword"
+												value="${password}" class="form-control" required />
+											<div class="text-danger">${matKhau}</div>
 										</div>
 
 										<div class="col-12">
-											<button name="btnLogin" class="btn btn-primary w-100"
-												type="submit">Login</button>
+											<button name="btnChangePassword"
+												class="btn btn-primary w-100" type="submit">Login</button>
 										</div>
 									</form>
 								</div>

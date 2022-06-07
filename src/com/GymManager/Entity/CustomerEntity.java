@@ -1,7 +1,7 @@
 package com.GymManager.Entity;
 
+import java.time.LocalDate;
 import java.util.*;
-import java.util.Collection;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -24,24 +24,25 @@ public class CustomerEntity {
 	@NotEmpty(message = "Ma khach hang khong duoc de trong")
 	@Column(name = "MaKH")
 	private String customerId;
-	@NotEmpty(message = "Ho ten khong duoc de trong")
+	@NotEmpty(message = "Tên không đươc để trống")
 	@Column(name = "HoTen")
 	private String name;
 	@Column(name = "Phai")
 	private boolean gender;
-	@NotEmpty(message = "Dia chi khong duoc de trong")
+	@NotEmpty(message = "Địa chỉ không được để trống")
 	@Column(name = "DiaChi")
 	private String address;
-	@NotEmpty(message = "Email khong duoc de trong")
-	@Email(message = "Vui long nhap dung dinh dang email")
+	@NotEmpty(message = "Email không được để trống")
+	@Email(message = "Vui lòng nhập đúng định dạng email")
 	@Column(name = "Email")
 	private String email;
-	@NotNull(message = "Ngay sinh khong duoc de trong")
+	@NotNull(message = "Ngày sinh không được để trống")
 //	@PastOrPresent(message = "Ngay sinh phai nho hon ngay hien tai")
 	@Column(name = "NgaySinh")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
+	@NotEmpty(message = "Số điện thoại không được để trống")
 	@Column(name = "SDT")
 	private String phone;
 
@@ -123,6 +124,33 @@ public class CustomerEntity {
 
 	public void setRegisterList(Collection<RegisterEntity> registerList) {
 		this.registerList = registerList;
+	}
+
+	public int getCustomerStatus() {
+		int status = 0;
+		RegisterEntity[] registerEntities = this.getRegisterList().toArray(RegisterEntity[]::new);
+
+		for (int i = 0; i < registerEntities.length; i++) {
+			if (registerEntities[i].getStatus() == 0 || registerEntities[i].getStatus() == 1) {
+				status = 2;
+			}
+			if (registerEntities[i].getStatus() == 1) {
+				RegisterDetailEntity[] registerDetailEntities = registerEntities[i].getRegisterDetailList()
+						.toArray(RegisterDetailEntity[]::new);
+				for (int y = 0; y < registerDetailEntities.length; y++) {
+					LocalDate date2 = LocalDate
+							.parse(registerDetailEntities[y].getClassEntity().getDateStart().toString());
+					LocalDate date = date2.plusMonths(
+							registerDetailEntities[y].getClassEntity().getTrainingPackEntity().getPackDuration());
+					Date toDay = new Date();
+					if (toDay.after(registerDetailEntities[y].getClassEntity().getDateStart())
+							&& toDay.before(java.sql.Date.valueOf(date))) {
+						status = 1;
+					}
+				}
+			}
+		}
+		return status;
 	}
 
 }

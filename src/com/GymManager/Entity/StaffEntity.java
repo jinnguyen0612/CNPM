@@ -19,7 +19,7 @@ public class StaffEntity {
 	@Column(name = "MaNV")
 	private String staffId;
 
-	@NotEmpty(message = "Ho ten ko duoc bo trong")
+	@NotEmpty(message = "Tên không được để trống")
 	@Column(name = "HoTen")
 	private String name;
 
@@ -34,11 +34,7 @@ public class StaffEntity {
 	@NotEmpty(message = "email khong duoc bo trong")
 	@Column(name = "Email")
 	private String email;
-<<<<<<< Updated upstream
-	@PastOrPresent(message = "ngay sinh nho hon ngay hien tai")
-=======
 	@NotEmpty(message="Ngay sinh khong duoc bo trong")
->>>>>>> Stashed changes
 	@Column(name = "NgaySinh")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -51,9 +47,9 @@ public class StaffEntity {
 	@OneToOne
 	@JoinColumn(name = "TaiKhoan")
 	private AccountEntity account;
+
 	@OneToMany(mappedBy = "staff")
 	@LazyCollection(LazyCollectionOption.FALSE)
-	private Collection<BillEntity> billList;
 
 	public String getStaffId() {
 		return staffId;
@@ -133,14 +129,6 @@ public class StaffEntity {
 
 	public void setAccount(AccountEntity account) {
 		this.account = account;
-	}
-
-	public Collection<BillEntity> getBillList() {
-		return billList;
-	}
-
-	public void setBillList(Collection<BillEntity> billList) {
-		this.billList = billList;
 	}
 
 }
