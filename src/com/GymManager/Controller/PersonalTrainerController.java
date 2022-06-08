@@ -50,7 +50,7 @@ public class PersonalTrainerController extends MethodAdminController {
 //	public String index(ModelMap model) {
 //		return "admin/personal-trainer";
 //	}
-	
+
 	@RequestMapping(method = RequestMethod.GET)
 	public String index(ModelMap model) {
 		PTEntity pt = newPT();
@@ -59,137 +59,149 @@ public class PersonalTrainerController extends MethodAdminController {
 		model.addAttribute("cList", getAllPT());
 		return "admin/personal-trainer";
 	}
-	
-	//detail
-		@RequestMapping(value="detail/{id}.htm", method = RequestMethod.GET)
-		public String getDetail(ModelMap model, @PathVariable("id") String id) {
-			model.addAttribute("pt", newPT());
-			model.addAttribute("ptUpdate", newPT());
-			model.addAttribute("ptDetail", getPT(id));
-			model.addAttribute("idModal", "modal-detail");
-			model.addAttribute("cList", getAllPT());
-			return "admin/personal-trainer";
-			
+
+	// detail
+	@RequestMapping(value = "detail/{id}.htm", method = RequestMethod.GET)
+	public String getDetail(ModelMap model, @PathVariable("id") String id) {
+		model.addAttribute("pt", newPT());
+		model.addAttribute("ptUpdate", newPT());
+		model.addAttribute("ptDetail", getPT(id));
+		model.addAttribute("idModal", "modal-detail");
+		model.addAttribute("cList", getAllPT());
+
+		return "admin/personal-trainer";
+
+	}
+
+	// get view create pt
+
+	@RequestMapping(value = "add.htm", method = RequestMethod.GET)
+	public String getCreate(ModelMap model, RedirectAttributes redirectAttributes) {
+		redirectAttributes.addFlashAttribute("idModal", "modal-create");
+		redirectAttributes.addFlashAttribute("cFormAttribute",
+				new FormAttribute("Thêm huấn luyện viên", "admin/personal-trainer.htm", "btnCreate"));
+		return "redirect:/admin/personal-trainer.htm";
+
+	}
+
+	// create PT
+	@RequestMapping(method = RequestMethod.POST, params = "btnCreate")
+	public String createPT(ModelMap model, @Validated @ModelAttribute("pt") PTEntity pt, BindingResult result,
+			RedirectAttributes redirectAttributes, HttpServletRequest request) {
+		if (!result.hasErrors()) {
+			Session session = factory.openSession();
+
+			Transaction t = session.beginTransaction();
+			try {
+				pt.setStatus(0);
+				session.save(pt);
+
+				t.commit();
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Thêm thành công !!!"));
+
+				return "redirect:/admin/personal-trainer.htm";
+
+			} catch (Exception e) {
+
+				t.rollback();
+				System.out.println(e);
+
+				if (e.getCause().toString().contains("UNIQUE_PT_SDT")) {
+					result.rejectValue("phoneNumber", "pt", "Số điện thoại này đã được sử dung");
+				}
+
+				if (e.getCause().toString().contains("UCHECK_PT_SDT")) {
+					result.rejectValue("phoneNumber", "pt", "Số điện thoại không đúng định dạng");
+				}
+				if (e.getCause().toString().contains("CK_PT_NGAYSINH")) {
+					result.rejectValue("birthday", "pt", "Tuổi nhân viên phải trên 18");
+				}
+				if (e.getCause().toString().contains("UNIQUE_PT_EMAIL")) {
+					result.rejectValue("email", "pt", "Email đã được sử dụng");
+				}
+				if (e.getCause().toString().contains("UNIQUE_PT_CMND")) {
+					result.rejectValue("identityCard", "pt", "CMND đã tồn tại");
+				}
+				if (e.getCause().toString().contains("String or binary data would be truncated")) {
+					result.rejectValue("ptID", "pt", "Ma khong qua 8 ky tu");
+				}
+			}
+
+			finally {
+				session.close();
+			}
 		}
+		model.addAttribute("idModal", "modal-create");
+		model.addAttribute("cFormAttribute",
+				new FormAttribute("Thêm huấn luyện viên", "admin/personal-trainer.htm", "btnCreate"));
+		model.addAttribute("ptUpdate", pt);
+		model.addAttribute("cList", getAllPT());
+		return "admin/personal-trainer";
+	}
 
-		// get view create pt
+	// return views update
+	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.GET)
+	public String getUpdate(ModelMap model, @PathVariable("id") String id) {
 
-				@RequestMapping(value = "add.htm", method = RequestMethod.GET)
-				public String getCreate(ModelMap model, RedirectAttributes redirectAttributes) {
-					redirectAttributes.addFlashAttribute("idModal", "modal-create");
-					return "redirect:/admin/personal-trainer.htm";
+		model.addAttribute("pt", getPT(id));
+		model.addAttribute("idModal", "modal-create");
+		model.addAttribute("cList", getAllPT());
+		model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin PT",
+				"admin/personal-trainer/update/" + id + ".htm", "btnUpdate"));
+		return "admin/personal-trainer";
+	}
 
-				}
-			
-			// create PT
-				@RequestMapping(method = RequestMethod.POST, params = "btnCreate")
-				public String createPT(ModelMap model, @Validated @ModelAttribute("pt") PTEntity pt,
-						BindingResult result, RedirectAttributes redirectAttributes, HttpServletRequest request) {
-						if (!result.hasErrors()) {
-							Session session = factory.openSession();
-	
-							Transaction t = session.beginTransaction();
-						try {
-							pt.setStatus(0);
-							session.save(pt);
+	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
+	public String updatePT(ModelMap model, @Validated @ModelAttribute("ptUpdate") PTEntity pt, BindingResult result,
+			RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
+		if (!result.hasErrors()) {
+			Session session = factory.openSession();
 
-							t.commit();
-							redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
+			Transaction t = session.beginTransaction();
+			try {
+				PTEntity oldPT = getPT(id);
+				pt.setStatus(oldPT.getStatus());
+				session.update(pt);
 
-							return "redirect:/admin/personal-trainer.htm";
+				t.commit();
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Cập nhật thành công !!!"));
 
-						} catch (Exception e) {
+				return "redirect:/admin/personal-trainer.htm";
 
-							t.rollback();
-							System.out.println(e);
-							
-							if (e.getCause().toString().contains("UNIQUE_PT_SDT")) {
-								result.rejectValue("phoneNumber", "pt", "So dien thoai nay da duoc su dung");
-							}
+			} catch (Exception e) {
 
-							if (e.getCause().toString().contains("UCHECK_PT_SDT")) {
-								result.rejectValue("phoneNumber", "pt", "So dien thoai khong dung dinh dang");
-							}
-							if (e.getCause().toString().contains("CK_PT_NGAYSINH")) {
-								result.rejectValue("birthday", "pt", "Tuoi nhan vien phai tren 18 tuoi");
-							}
-							if (e.getCause().toString().contains("UNIQUE_PT_EMAIL")) {
-								result.rejectValue("email", "pt", "Email nhap sai dinh dang");
-							}
-							if (e.getCause().toString().contains("String or binary data would be truncated")) {
-								result.rejectValue("ptID", "pt", "Ma khong qua 8 ky tu");
-							}
-						}
-
-						finally {
-							session.close();
-						}
-					}
-					model.addAttribute("idModal", "modal-create");
-					model.addAttribute("ptUpdate", pt);
-					return "admin/personal-trainer";
+				t.rollback();
+				System.out.println(e.getCause());
+				if (e.getCause().toString().contains("UNIQUE_PT_SDT")) {
+					result.rejectValue("phoneNumber", "pt", "Số điện thoại này đã được sử dung");
 				}
 
-				// return views update
-				@RequestMapping(value = "update/{id}.htm", method = RequestMethod.GET)
-				public String getUpdate(ModelMap model, @PathVariable("id") String id) {
-
-					model.addAttribute("pt", getPT(id));
-					model.addAttribute("idModal", "modal-create");
-					model.addAttribute("cList", getAllPT());
-					model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin PT",
-							"admin/personal-trainer/update/" + id + ".htm", "btnUpdate"));
-					return "admin/personal-trainer";
+				if (e.getCause().toString().contains("UCHECK_PT_SDT")) {
+					result.rejectValue("phoneNumber", "pt", "Số điện thoại không đúng định dạng");
 				}
-
-				@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
-				public String updatePT(ModelMap model, @Validated @ModelAttribute("ptUpdate") PTEntity pt,
-						BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
-					if (!result.hasErrors()) {
-						Session session = factory.openSession();
-
-						Transaction t = session.beginTransaction();
-						try {
-							session.update(pt);
-
-							t.commit();
-							redirectAttributes.addFlashAttribute("message", new Message("success", "Sua thanh cong !!!"));
-
-							return "redirect:/admin/personal-trainer.htm";
-
-						} catch (Exception e) {
-
-							t.rollback();
-							System.out.println(e.getCause());
-							if (e.getCause().toString().contains("UNIQUE_PT_SDT")) {
-								result.rejectValue("phoneNumber", "pt", "So dien thoai nay da duoc su dung");
-							}
-
-							if (e.getCause().toString().contains("UCHECK_PT_SDT")) {
-								result.rejectValue("phoneNumber", "pt", "So dien thoai khong dung dinh dang");
-							}
-							if (e.getCause().toString().contains("CK_PT_NGAYSINH")) {
-								result.rejectValue("birthday", "pt", "Tuoi nhan vien phai tren 18 tuoi");
-							}
-							if (e.getCause().toString().contains("UNIQUE_PT_EMAIL")) {
-								result.rejectValue("email", "pt", "Email nhap sai dinh dang");
-							}
-							if (e.getCause().toString().contains("String or binary data would be truncated")) {
-								result.rejectValue("ptID", "pt", "Ma khong qua 8 ky tu");
-							}
-						}
-
-						finally {
-							session.close();
-						}
-					}
-					model.addAttribute("idModal", "modal-update");
-					model.addAttribute("pt", newPT());
-					model.addAttribute("cList", getAllPT());
-					return "admin/personal-trainer";
+				if (e.getCause().toString().contains("CK_PT_NGAYSINH")) {
+					result.rejectValue("birthday", "pt", "Tuổi nhân viên phải trên 18");
 				}
+				if (e.getCause().toString().contains("UNIQUE_PT_EMAIL")) {
+					result.rejectValue("email", "pt", "Email đã được sử dụng");
+				}
+				if (e.getCause().toString().contains("UNIQUE_PT_CMND")) {
+					result.rejectValue("identityCard", "pt", "CMND đã tồn tại");
+				}
+				if (e.getCause().toString().contains("String or binary data would be truncated")) {
+					result.rejectValue("ptID", "pt", "Ma khong qua 8 ky tu");
+				}
+			}
 
-
+			finally {
+				session.close();
+			}
+		}
+		model.addAttribute("idModal", "modal-update");
+		model.addAttribute("pt", newPT());
+		model.addAttribute("cList", getAllPT());
+		return "admin/personal-trainer";
+	}
 
 	// filter
 
@@ -242,6 +254,5 @@ public class PersonalTrainerController extends MethodAdminController {
 		pt.setPtID(this.toPK("PT", "PTEntity", "ptID"));
 		return pt;
 	}
-
 
 }

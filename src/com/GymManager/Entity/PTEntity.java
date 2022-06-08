@@ -3,59 +3,61 @@ package com.GymManager.Entity;
 import java.util.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
-@Table(name="PT")
-public class PTEntity {	
+@Table(name = "PT")
+public class PTEntity {
 	@Id
 	@Column(name = "MaPT")
 	private String ptID;
-	
+	@NotEmpty(message = "Tên không đươc để trống")
 	@Column(name = "HoTen")
 	private String ptName;
-	
+
 	@Column(name = "Phai")
 	private int gender;
-	
+
 	@Column(name = "CMND")
+	@NotEmpty(message = "CMND không đươc để trống")
 	private String identityCard;
-	
+	@NotEmpty(message = "Địa chỉ không được để trống")
 	@Column(name = "DiaChi")
 	private String address;
-	
+	@NotEmpty(message = "Email không được để trống")
 	@Column(name = "Email")
 	private String email;
-	
+
 	@Column(name = "NgaySinh")
+	@NotNull(message = "Ngày sinh không được để trống")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
-	
+
 	@Column(name = "SDT")
+	@NotEmpty(message = "Số điện thoại không được để trống")
 	private String phoneNumber;
-	
+
 	@Column(name = "TrangThai")
 	private int status;
-	
-	@OneToMany(mappedBy ="ptEntity", fetch = FetchType.EAGER)
+
+	@OneToMany(mappedBy = "ptEntity", fetch = FetchType.EAGER)
 	private Collection<ClassEntity> classEntity;
 
 	public Collection<ClassEntity> getClassEntity() {
 		return classEntity;
 	}
 
-
 	public void setClassEntity(Collection<ClassEntity> classEntity) {
 		this.classEntity = classEntity;
 	}
 
-
 	public PTEntity(Collection<ClassEntity> classEntities) {
 		super();
 	}
-
 
 	public String getPtID() {
 		return ptID;
@@ -129,9 +131,6 @@ public class PTEntity {
 		this.status = status;
 	}
 
-
-	
-
 	public PTEntity(String ptID, String ptName, int gender, String identityCard, String address, String email,
 			Date birthday, String phoneNumber, int status, Collection<ClassEntity> classEntity) {
 		super();
@@ -147,12 +146,8 @@ public class PTEntity {
 		this.classEntity = classEntity;
 	}
 
-
 	public PTEntity() {
 		super();
 	}
 
-
-	
-	
 }

@@ -240,7 +240,6 @@ public class CustomerController extends MethodAdminController {
 			} catch (Exception e) {
 
 				t.rollback();
-				System.out.println(e);
 				if (e.getCause().toString().contains("duplicate key")) {
 					redirectAttributes.addFlashAttribute("error", "Tên tài khoản đã tồn tại");
 				}
