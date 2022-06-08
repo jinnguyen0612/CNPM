@@ -27,20 +27,19 @@ public class HomeController {
 	public String index(HttpServletRequest request, ModelMap model) {
 		Date today = new Date();
 
-//		model.addAttribute("numOfBill", getNumOfBillFilter("day", today.getDate()));
-//		model.addAttribute("revenue", getRevenue("day", today.getDate()));
-
 		Long mumOfCustomer = getNumberEntity("CustomerEntity");
 		Long mumOfStaff = getNumberEntity("StaffEntity");
 		Long mumOfRegister = getNumberEntity("RegisterEntity");
 		Long mumOfClass = getNumberEntity("ClassEntity");
 		Long mumOfPack = getNumberEntity("TrainingPackEntity");
+		Long mumOfPT = getNumberEntity("PTEntity");
 
 		model.addAttribute("numOfCustomer", mumOfCustomer);
 		model.addAttribute("mumOfStaff", mumOfStaff);
 		model.addAttribute("mumOfRegister", mumOfRegister);
 		model.addAttribute("mumOfClass", mumOfClass);
 		model.addAttribute("mumOfPack", mumOfPack);
+		model.addAttribute("mumOfPT", mumOfPT);
 
 		model.addAttribute("billFilter", "day");
 		model.addAttribute("revenueFilter", "day");

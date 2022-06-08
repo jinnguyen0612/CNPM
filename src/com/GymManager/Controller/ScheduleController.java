@@ -41,10 +41,13 @@ public class ScheduleController {
 				List<RegisterDetailEntity> registerDetailEntities = (List<RegisterDetailEntity>) scheduleEntity
 						.getClassEntity().getRegisterDetailEntities();
 				for (RegisterDetailEntity registerDetailEntity : registerDetailEntities) {
-					CustomerToday customerToday = new CustomerToday(
-							registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
-							registerDetailEntity.getClassEntity());
-					customerTodays.add(customerToday);
+					if (registerDetailEntity.getRegisterEntity().getStatus() == 1) {
+						CustomerToday customerToday = new CustomerToday(
+								registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
+								registerDetailEntity.getClassEntity());
+						customerTodays.add(customerToday);
+					}
+
 				}
 			}
 		}
@@ -72,30 +75,32 @@ public class ScheduleController {
 				List<RegisterDetailEntity> registerDetailEntities = (List<RegisterDetailEntity>) scheduleEntity
 						.getClassEntity().getRegisterDetailEntities();
 				for (RegisterDetailEntity registerDetailEntity : registerDetailEntities) {
-					if (type.equals("0")) {
-						if (registerDetailEntity.getClassEntity().getMaxPP() == 1) {
+					if (registerDetailEntity.getRegisterEntity().getStatus() == 1) {
+						if (type.equals("0")) {
+							if (registerDetailEntity.getClassEntity().getMaxPP() == 1) {
+								CustomerToday customerToday = new CustomerToday(
+										registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
+										registerDetailEntity.getClassEntity());
+								customerTodays.add(customerToday);
+							}
+
+						} else if (type.equals("1")) {
+
+							if (registerDetailEntity.getClassEntity().getMaxPP() > 1) {
+								CustomerToday customerToday = new CustomerToday(
+										registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
+										registerDetailEntity.getClassEntity());
+								customerTodays.add(customerToday);
+							}
+
+						} else {
 							CustomerToday customerToday = new CustomerToday(
 									registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
 									registerDetailEntity.getClassEntity());
 							customerTodays.add(customerToday);
 						}
 
-					} else if (type.equals("1")) {
-
-						if (registerDetailEntity.getClassEntity().getMaxPP() > 1) {
-							CustomerToday customerToday = new CustomerToday(
-									registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
-									registerDetailEntity.getClassEntity());
-							customerTodays.add(customerToday);
-						}
-
-					} else {
-						CustomerToday customerToday = new CustomerToday(
-								registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
-								registerDetailEntity.getClassEntity());
-						customerTodays.add(customerToday);
 					}
-
 				}
 			}
 		}

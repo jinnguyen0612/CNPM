@@ -62,12 +62,7 @@
 
 								<div class="card-body">
 									<h5 class="card-title">
-										Đăng ký <span>| <c:choose>
-												<c:when test="${billFilter=='day'}">Hôm nay</c:when>
-												<c:when test="${billFilter=='month'}">Tháng này</c:when>
-												<c:otherwise>Năm này</c:otherwise>
-											</c:choose>
-										</span>
+										Đăng ký <span>| Tất cả</span>
 									</h5>
 
 									<div class="d-flex align-items-center">
@@ -76,7 +71,7 @@
 											<i class="fa-light fa-ballot"></i>
 										</div>
 										<div class="ps-3">
-											<h6>${numOfBill}</h6>
+											<h6>${mumOfRegister}</h6>
 										</div>
 									</div>
 								</div>
@@ -123,10 +118,7 @@
 											<i class="bi bi-currency-dollar"></i>
 										</div>
 										<div class="ps-3">
-											<h6>
-												<fmt:formatNumber pattern="###,### đ" value="${revenue}"
-													type="currency" />
-											</h6>
+											<h6>${ mumOfPT}</h6>
 
 										</div>
 									</div>

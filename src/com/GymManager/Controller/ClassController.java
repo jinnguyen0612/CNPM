@@ -27,6 +27,7 @@ import com.GymManager.Entity.CustomerEntity;
 import com.GymManager.Entity.PTEntity;
 import com.GymManager.Entity.ScheduleEntity;
 import com.GymManager.Entity.TrainingPackEntity;
+import com.GymManager.ExtraClass.Message;
 import com.GymManager.Service.ClassService;
 import com.GymManager.Service.PTService;
 import com.GymManager.Service.TrainingPackService;
@@ -72,20 +73,7 @@ public class ClassController extends MethodAdminController {
 		// Thêm thời khóa biểu
 		boolean check = classService.insertClass(classer);
 		if (check) {
-			model.addAttribute("trainingPackEntity", listTP);
-			model.addAttribute("ptEntity", listPT);
-			model.addAttribute("classer", new ClassEntity());
-			model.addAttribute("classUpdate", newClass());
-//	            model.addAttribute("success_message", "Thêm mới thành công!");
-		} else {
-			model.addAttribute("trainingPackEntity", listTP);
-			model.addAttribute("ptEntity", listPT);
-			model.addAttribute("classer", new ClassEntity());
-			model.addAttribute("classUpdate", newClass());
-		}
-		Session session = factory.openSession();
-		if (true) {
-
+			Session session = factory.openSession();
 			Transaction transaction = session.beginTransaction();
 
 			for (int i = 2; i < 9; i++) {
@@ -97,8 +85,15 @@ public class ClassController extends MethodAdminController {
 				}
 			}
 			transaction.commit();
+			redirectAttributes.addFlashAttribute("message", new Message("success", "Thêm mới thành công !!!"));
+			return "redirect:/admin/class.htm";
+		} else {
+			model.addAttribute("trainingPackEntity", listTP);
+			model.addAttribute("ptEntity", listPT);
+			model.addAttribute("classer", new ClassEntity());
+			model.addAttribute("classUpdate", newClass());
 		}
-
+		model.addAttribute("classEntity", getAllClass());
 		return "admin/class";
 	}
 

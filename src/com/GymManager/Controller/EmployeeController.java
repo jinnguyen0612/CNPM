@@ -6,15 +6,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -101,17 +104,20 @@ public class EmployeeController extends MethodAdminController {
 				System.out.println(e);
 
 				if (e.getCause().toString().contains("UNIQUE_NHANVIEN_SDT")) {
-					result.rejectValue("phone", "staff", "So dien thoai nay da duoc su dung");
+					result.rejectValue("phone", "staff", "số điện thoại này đã được sử dụng");
 				}
 
 				if (e.getCause().toString().contains("UCHECK_NHANVIEN_SDT")) {
-					result.rejectValue("phone", "staff", "So dien thoai khong dung dinh dang");
+					result.rejectValue("phone", "staff", "số điện thoại không đúng định dạng");
 				}
 				if (e.getCause().toString().contains("CK_NHANVIEN_NGAYSINH")) {
-					result.rejectValue("birthday", "staff", "Tuoi nhan vien phai tren 18 tuoi");
+					result.rejectValue("birthday", "staff", "Tuổi nhân viên phải trên 18 ");
 				}
-				if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
-					result.rejectValue("email", "staff", "Email nhap sai dinh dang");
+				if (e.getCause().toString().contains("UNIQUE_NHANVIEN_EMAIL")) {
+					result.rejectValue("email", "staff", "Email đã được sử dụng");
+				}
+				if (e.getCause().toString().contains("UNIQUE_NHANVIEN_CMND")) {
+					result.rejectValue("identityCard", "pt", "CMND đã tồn tại");
 				}
 				if (e.getCause().toString().contains("String or binary data would be truncated")) {
 					result.rejectValue("staffId", "staff", "Ma khong qua 8 ky tu");
@@ -126,6 +132,7 @@ public class EmployeeController extends MethodAdminController {
 		model.addAttribute("cFormAttribute",
 				new FormAttribute("Them moi nhan vien", "admin/employee.htm", "btnCreate"));
 		model.addAttribute("staffUpdate", staff);
+		model.addAttribute("cList", getAllStaff());
 		return "admin/employee";
 	}
 
@@ -149,11 +156,16 @@ public class EmployeeController extends MethodAdminController {
 
 			Transaction t = session.beginTransaction();
 			try {
-				staff.setAccount(getStaff(id).getAccount());
+				AccountEntity accountEntity = getStaff(id).getAccount();
+//				if (staff.getStatus() == 0) {
+//					accountEntity.setStatus(0);
+//				}
+
+				staff.setAccount(accountEntity);
 				session.update(staff);
 
 				t.commit();
-				redirectAttributes.addFlashAttribute("message", new Message("success", "Sua thanh cong !!!"));
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Cập nhật thành công !!!"));
 
 				return "redirect:/admin/employee.htm";
 
@@ -162,17 +174,20 @@ public class EmployeeController extends MethodAdminController {
 				t.rollback();
 				System.out.println(e.getCause());
 				if (e.getCause().toString().contains("UNIQUE_NHANVIEN_SDT")) {
-					result.rejectValue("phone", "staff", "So dien thoai nay da duoc su dung");
+					result.rejectValue("phone", "staff", "số điện thoại này đã được sử dụng");
 				}
 
 				if (e.getCause().toString().contains("UCHECK_NHANVIEN_SDT")) {
-					result.rejectValue("phone", "staff", "So dien thoai khong dung dinh dang");
+					result.rejectValue("phone", "staff", "số điện thoại không đúng định dạng");
 				}
 				if (e.getCause().toString().contains("CK_NHANVIEN_NGAYSINH")) {
-					result.rejectValue("birthday", "staff", "Tuoi nhan vien phai tren 18 tuoi");
+					result.rejectValue("birthday", "staff", "Tuổi nhân viên phải lớn hơn 18");
 				}
-				if (e.getCause().toString().contains("UNIQUE_KHACHHANG_EMAIL")) {
-					result.rejectValue("email", "staff", "Email nhap sai dinh dang");
+				if (e.getCause().toString().contains("UNIQUE_NHANVIEN_EMAIL")) {
+					result.rejectValue("email", "staff", "email này đã được sử dụng");
+				}
+				if (e.getCause().toString().contains("UNIQUE_NHANVIEN_CMND")) {
+					result.rejectValue("identityCard", "pt", "CMND đã tồn tại");
 				}
 				if (e.getCause().toString().contains("String or binary data would be truncated")) {
 					result.rejectValue("staffId", "staff", "Ma khong qua 8 ky tu");
@@ -186,6 +201,8 @@ public class EmployeeController extends MethodAdminController {
 		model.addAttribute("idModal", "modal-update");
 		model.addAttribute("staff", newStaff());
 		model.addAttribute("cList", getAllStaff());
+		model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin khach hang",
+				"admin/employee/update/" + id + ".htm", "btnUpdate"));
 		return "admin/employee";
 	}
 
@@ -207,22 +224,22 @@ public class EmployeeController extends MethodAdminController {
 
 				RandomPassword radomPassword = new RandomPassword(8);
 
-				AccountEntity accountEntity = new AccountEntity(userName, radomPassword.getPassword(), 1, 2, new Date(),
-						staff);
-
+				AccountEntity accountEntity = new AccountEntity(userName,
+						DigestUtils.md5Hex(radomPassword.getPassword()).toUpperCase(), 1, 2, new Date(), staff);
+				accountEntity.setStatus(2);
 				session.save(accountEntity);
 
-//						String mailMessage = "Mật khẩu cho tài khoản PTITGYM của bạn là: " + radomPassword.getPassword();
-				//
-//						MimeMessage mail = mailer.createMimeMessage();
-//						MimeMessageHelper helper = new MimeMessageHelper(mail, true);
-//						helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
-//						helper.setTo(customer.getEmail());
-//						helper.setReplyTo("nguyenminhnhat301101@gmail.com");
-//						helper.setSubject("Tai khoản PTITGYM");
-//						helper.setText(mailMessage);
-//						mailer.send(mail);
-				//
+				String mailMessage = "Mật khẩu cho tài khoản PTITGYM của bạn là: " + radomPassword.getPassword();
+
+				MimeMessage mail = mailer.createMimeMessage();
+				MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+				helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
+				helper.setTo(staff.getEmail());
+				helper.setReplyTo("nguyenminhnhat301101@gmail.com");
+				helper.setSubject("Tai khoản PTITGYM");
+				helper.setText(mailMessage);
+				mailer.send(mail);
+
 				staff.setAccount(accountEntity);
 				session.merge(staff);
 				t.commit();

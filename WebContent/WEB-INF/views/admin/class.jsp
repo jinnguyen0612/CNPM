@@ -506,8 +506,8 @@
 			</div>
 		</div>
 		<!-- end time table -->
-		
-		<!-- Time-table edit -->
+
+		<%-- 	<!-- Time-table edit -->
 		<c:forEach var="t"
 			items="${classUpdate.scheduleEntity}">
 			<input type="text"
@@ -650,7 +650,7 @@
 				</div>
 			</div>
 		</div>
-
+ --%>
 
 		<!-- Time-table detail -->
 		<div class="modal fade" id="time-table-detail" tabindex="-1">
