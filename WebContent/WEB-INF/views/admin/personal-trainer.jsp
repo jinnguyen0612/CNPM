@@ -59,7 +59,8 @@
 											<td>${p.ptID }</td>
 											<td>${p.ptName }</td>
 											<td>${p.gender == 0? 'Nữ':'Nam'}</td>
-											<td>${p.birthday}</td>
+											<td><fmt:formatDate value="${p.birthday}"
+													pattern="dd/MM/yyyy" /></td>
 
 
 											<c:choose>
@@ -81,8 +82,7 @@
 														<i class="fa-solid fa-pen-to-square"></i>
 													</button></a> <a href="admin/personal-trainer/detail/${p.ptID}.htm"><button
 														class="btn btn-outline-info btn-light btn-sm"
-														title="Chi tiết" data-bs-toggle="modal"
-														data-bs-target="#detail" data-bs-placement="top">
+														title="Chi tiết" data-bs-placement="top">
 														<i class="fa-solid fa-circle-exclamation"></i>
 													</button></a></td>
 										</tr>
@@ -113,8 +113,9 @@
 							<div class="col-md-12">
 								<label for="input-id" class="form-label ">Mã: <span
 									class="employeeId text-danger customerId"></span> <form:input
-										path="ptID" type="text" class="form-control" id="input-id" readonly="true" />
-									<span class="text-danger"><form:errors path="ptID"></form:errors></span>
+										path="ptID" type="text" class="form-control" id="input-id"
+										readonly="true" /> <span class="text-danger"><form:errors
+											path="ptID"></form:errors></span>
 								</label>
 							</div>
 
@@ -175,8 +176,8 @@
 							</div>
 
 							<div class="text-end mt-3">
-								<button type="submit" name="${cFormAttribute.btnAction}" class="btn btn-primary">Xác
-									nhận</button>
+								<button type="submit" name="${cFormAttribute.btnAction}"
+									class="btn btn-primary">Xác nhận</button>
 								<button type="button" class="btn btn-secondary close-form"
 									data-bs-dismiss="modal">Đóng</button>
 							</div>
@@ -189,7 +190,7 @@
 
 
 		<!-- detail -->
-		<div class="modal fade" id="detail" tabindex="-1">
+		<div class="modal fade" id="modal-detail" tabindex="-1">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
@@ -214,7 +215,10 @@
 							</div>
 							<div class="row">
 								<div class="col-lg-4 col-md-4 label">Ngày sinh</div>
-								<div class="col-lg-8 col-md-8">${ptDetail.birthday }</div>
+								<div class="col-lg-8 col-md-8">
+									<fmt:formatDate value="${ptDetail.birthday }"
+										pattern="dd/MM/yyyy" />
+								</div>
 							</div>
 							<div class="row">
 								<div class="col-lg-4 col-md-4 label">Email</div>
@@ -226,11 +230,22 @@
 							</div>
 							<div class="row">
 								<div class="col-lg-4 col-md-4 label">Địa chỉ</div>
-								<div class="col-lg-8 col-md-8">${ptDetail.address }</div>
+								<div class="col-lg-8 col-md-8">${ptDetail.address}</div>
 							</div>
 							<div class="row">
 								<div class="col-lg-4 col-md-4 label">Lớp đang dạy</div>
-								<div class="col-lg-8 col-md-8">ptttp</div>
+								<div class="col-lg-8 col-md-8">
+									<c:choose>
+										<c:when test="${ptDetail.status == 0}">Chưa có lớp</c:when>
+										<c:otherwise>
+											<c:forEach var="c" items="${ptDetail.classEntity}">
+												<c:if test="${c.getClassPeriod() != 2 }">
+										${c.classId }
+										</c:if>
+											</c:forEach>
+										</c:otherwise>
+									</c:choose>
+								</div>
 							</div>
 
 							<div class="text-end mt-3">
@@ -278,20 +293,20 @@
                           <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 22rem;">
                               <div class="card-header py-2 text-secondary bg-info text-black fs-6">Bộ lọc</div>
                               <div class="card-body">
-                                  <form class="row g-3 mt-1" id="form-filter">
+                                  <form class="row g-3 mt-1" action="admin/personal-trainer.htm" id="form-filter">
                                       <div class="col-12">
                                           <label for="input-birthday" class="form-label">Ngày sinh</label>
 
                                           <div class="col-12 d-flex gap-1 justify-content-around align-items-stretch">
                                               <div class="input-group">
-                                                  <input id="input-birthday" type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
+                                                  <input id="input-birthday" name="dateLeft" type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
                                               </div>
                                               <button type="button" class="btn btn-primary btn-sm btn-range-filter" data-bs-toggle="collapse" data-bs-target="#input-birthday-right">
                                                   Đến
                                               </button>
 
                                               <div class="input-group collapse" id="input-birthday-right">
-                                                  <input type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
+                                                  <input type="date" name="dateRight" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
                                               </div>
                                           </div>
                                       </div>
@@ -299,20 +314,15 @@
                                       <div class="col-md-12">
                                           <label for="gender" class="form-label">Giới tính</label>
                                           <div class="col-md-12 d-flex">
+                     
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-allGender" value="" checked />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-allGender">
-                                                      Tất cả
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-female" value="0" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="gender" id="filter-female" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-female">
                                                       Nữ
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-male" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="gender" id="filter-male" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-male">
                                                       Nam
                                                   </label>
@@ -322,20 +332,15 @@
                                       <div class="col-md-12">
                                           <label for="status" class="form-label">Trạng thái</label>
                                           <div class="col-md-12 d-flex">
+                                      
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-allStatus" value="" checked />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-allStatus">
-                                                      Tất cả
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="0" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-0" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-0">
                                                       Có lớp
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-1" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-1">
                                                       Chưa có lớp
                                                   </label>
@@ -345,12 +350,9 @@
                                   </form>
                               </div>
                               <div class="card-footer py-2 text-end">
-                                  <button type="submit" form="form-filter" class="btn btn-primary">
+                                  <button type="submit" form="form-filter" name="btnFilter" class="btn btn-primary">
                                       Lọc
-                                  </button>
-                                  <button type="reset" class="btn btn-secondary">
-                                      Đặt lại
-                                  </button>
+                                  </button>                           
                               </div>
                           </div>
                       </div>
@@ -363,7 +365,7 @@
       
       
     </script>
-    
-    
+
+
 </body>
 </html>

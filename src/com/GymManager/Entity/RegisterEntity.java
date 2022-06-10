@@ -32,6 +32,9 @@ public class RegisterEntity {
 	@ManyToOne
 	@JoinColumn(name = "NguoiTao")
 	private AccountEntity account;
+	@ManyToOne
+	@JoinColumn(name = "NhanVienThanhToan")
+	private StaffEntity staffEntity;
 
 	@OneToMany(mappedBy = "registerEntity")
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -83,6 +86,14 @@ public class RegisterEntity {
 
 	public void setAccount(AccountEntity account) {
 		this.account = account;
+	}
+
+	public StaffEntity getStaffEntity() {
+		return staffEntity;
+	}
+
+	public void setStaffEntity(StaffEntity staffEntity) {
+		this.staffEntity = staffEntity;
 	}
 
 	public Collection<RegisterDetailEntity> getRegisterDetailList() {

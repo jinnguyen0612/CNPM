@@ -85,12 +85,21 @@ public class MethodAdminController {
 		return hql;
 	}
 
+	public String toHqlSingleColumOr(String columName, String[] list) {
+		String hql = " (" + columName + " = '" + list[0] + "'";
+		for (int i = 1; i < list.length; i++) {
+
+			hql += " OR " + columName + " = '" + list[i] + "'";
+
+		}
+		hql += " )";
+		return hql;
+	}
+
 	public AccountEntity getAccount(String username) {
 		Session session = factory.getCurrentSession();
 		return (AccountEntity) session.get(AccountEntity.class, username);
 	}
-
-
 
 	public String hashPass(String matKhau) {
 		String hashpw = DigestUtils.md5Hex(matKhau).toUpperCase();

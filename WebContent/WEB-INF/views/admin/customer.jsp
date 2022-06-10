@@ -783,7 +783,8 @@
 
 		<!-- table detail -->
 		<div class="modal fade" id="modal-detail" tabindex="-1">
-			<div class="modal-dialog modal-lg modal-dialog-centered">
+			<div class="modal-dialog modal-lg modal-dialog-centered"
+				style="max-width: 1024px">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
 						<h5 class="modal-title">Chi tiết thông tin khách hàng</h5>
@@ -854,7 +855,8 @@
 														<div class="col-2">Mã</div>
 														<div class="col-2">Ngày đăng ký</div>
 														<div class="col-2">Trạng thái</div>
-														<div class="col-3">Tài khoản đăng ký</div>
+														<div class="col-2">Tài khoản đăng ký</div>
+														<div class="col-2">Thành tiền</div>
 													</div>
 
 													<c:forEach var="r" items="${customerDetail.registerList}">
@@ -880,8 +882,12 @@
 																</c:if>
 
 															</div>
-															<div class="col-3">${r.account.username}</div>
-															<div class="col-3 text-primary text-end"
+															<div class="col-2">${r.account.username}</div>
+															<div class="col-2">
+																<fmt:formatNumber pattern="###,### đ" value="${r.money}"
+																	type="currency" />
+															</div>
+															<div class="col-2 text-primary text-end"
 																style="cursor: pointer">
 																<button class="btn btn-outline-info btn-light btn-sm"
 																	title="Chi tiết" data-bs-toggle="collapse"
@@ -1123,8 +1129,10 @@
 	<script type="text/javascript">
 		
       $(document).ready(function () {
-    	  $(".btnCheckout").click(function() {
-    		  confirm("Xác nhận thanh toán");
+    	  $(".btnCheckout").click(function(e) {
+    		  if(!confirm("Xác nhận thanh toán")) {
+    			  e.preventDefault();
+    		  };
     	  })
     	  // wrap create c btn 
     	  $(".btn-create").wrap("<a href='admin/customer/add.htm'></a>")
@@ -1413,7 +1421,7 @@
                               <span class="text-white"></span>
                           </button>
                           <!-- filter table -->
-                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 28rem;">
+                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 23rem;">
                               <div class="card-header py-2 text-secondary bg-info text-black fs-6">Bộ lọc</div>
                               <div class="card-body">
                                   <form action="admin/customer.htm" class="row g-3 mt-1" id="form-filter">
@@ -1422,14 +1430,14 @@
 
                                           <div class="col-12 d-flex gap-1 justify-content-around align-items-stretch">
                                               <div class="input-group">
-                                                  <input id="input-birthday" type="date" name="birthdayLeft" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
+                                                  <input id="input-birthday" type="date" name="dateLeft" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
                                               </div>
                                               <button type="button" class="btn btn-primary btn-sm btn-range-filter" data-bs-toggle="collapse" data-bs-target="#input-birthday-right">
                                                   Đến
                                               </button>
 
                                               <div class="input-group collapse" id="input-birthday-right">
-                                                  <input type="date" name="birthdayRight" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
+                                                  <input type="date" name="dateRight" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
                                               </div>
                                           </div>
                                       </div>
@@ -1438,19 +1446,13 @@
                                           <label for="gender" class="form-label">Giới tính</label>
                                           <div class="col-md-12 d-flex">
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-allGender" value="" checked />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-allGender">
-                                                      Tất cả
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-female" value="0" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="gender" id="filter-female" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-female">
                                                       Nữ
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-male" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="gender" id="filter-male" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-male">
                                                       Nam
                                                   </label>
@@ -1460,26 +1462,21 @@
                                       <div class="col-md-12">
                                           <label for="status" class="form-label">Trạng thái</label>
                                           <div class="col-md-12 d-flex">
+         
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-allStatus" value="" checked />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-allStatus">
-                                                      Tất cả
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-0" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-0">
                                                       Đang tập
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="0" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-1" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-1">
                                                       Chưa đăng ký
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                              <input class="form-check-input-filter" type="radio" name="status" id="filter-status-2" value="2" />
+                                              <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-2" value="2" />
                                               <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-2">
                                                   Đã đăng ký
                                               </label>
@@ -1492,9 +1489,7 @@
                                   <button type="submit" name="btnFilter" form="form-filter" class="btn btn-primary">
                                       Lọc
                                   </button>
-                                  <button type="reset" class="btn btn-secondary">
-                                      Đặt lại
-                                  </button>
+                               
                               </div>
                           </div>
                       </div>

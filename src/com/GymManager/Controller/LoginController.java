@@ -1,5 +1,6 @@
 package com.GymManager.Controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.GymManager.Entity.AccountEntity;
+import com.GymManager.Entity.ClassEntity;
+import com.GymManager.Entity.PTEntity;
 import com.GymManager.Entity.RegisterEntity;
 import com.GymManager.ExtraClass.Message;
 import com.GymManager.ExtraClass.RandomPassword;
@@ -93,6 +96,16 @@ public class LoginController {
 		}
 
 		List<RegisterEntity> registerEntities2 = getExpireRegister2(7);
+
+		if (ss.getAttribute("cancelRegisters") != null) {
+			List<RegisterEntity> registerEntitiesSS = (List<RegisterEntity>) ss.getAttribute("cancelRegisters");
+			for (RegisterEntity registerEntity : registerEntities2) {
+				registerEntitiesSS.add(registerEntity);
+
+			}
+			ss.setAttribute("cancelRegisters", registerEntitiesSS);
+		} else
+			ss.setAttribute("cancelRegisters", registerEntities2);
 		for (RegisterEntity registerEntity : registerEntities2) {
 			updateStatusRegister(registerEntity, 2);
 			String mailMessage = "Hợp hợp đồng đăng ký PTITGYM với mã " + registerEntity.getRegisterId()
@@ -110,6 +123,9 @@ public class LoginController {
 				// TODO: handle exception
 			}
 		}
+
+		updatePTStatus();
+
 		return "redirect:/admin/customer.htm";
 	}
 
@@ -244,6 +260,39 @@ public class LoginController {
 		} finally {
 			session.close();
 		}
+		return true;
+	}
+
+	public List<ClassEntity> getAllClass() {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM ClassEntity where maxPP > 1";
+		Query query = session.createQuery(hql);
+		List<ClassEntity> list = query.list();
+		return list;
+	}
+
+	public boolean updatePTStatus() {
+		Session session = factory.openSession();
+		Transaction t = session.beginTransaction();
+		try {
+			for (ClassEntity classEntity : getAllClass()) {
+				if (classEntity.getClassPeriod() == 2 && classEntity.getMaxPP() > 1
+						&& classEntity.getPtEntity().getStatus() == 1) {
+					PTEntity ptEntity = classEntity.getPtEntity();
+					ptEntity.setStatus(0);
+					System.out.println(ptEntity.getPtName());
+					session.update(ptEntity);
+				}
+			}
+			t.commit();
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			t.rollback();
+		} finally {
+			session.close();
+		}
+
 		return true;
 	}
 

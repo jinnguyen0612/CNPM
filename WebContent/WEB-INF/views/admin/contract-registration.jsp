@@ -174,6 +174,15 @@
 																</c:if>
 															</div>
 														</div>
+
+														<c:if test="${registerDetail.staffEntity != null}">
+															<div class="row">
+																<div class="col-lg-5 col-md-4 label">NV thanh toán</div>
+																<div class="col-lg-7 col-md-8">${registerDetail.staffEntity.name}
+																	(${registerDetail.staffEntity.staffId })</div>
+															</div>
+														</c:if>
+
 														<div class="row">
 															<div class="col-lg-5 col-md-4 label">Thanh tiền</div>
 															<div class="col-lg-7 col-md-8">
@@ -379,8 +388,10 @@
 	<script type="text/javascript">
       $(document).ready(function () {
     	  $(".btn-create").remove();
-    	  $(".btnCheckout").click(function() {
-    		  alert("Xác nhận thanh toán");
+    	  $(".btnCheckout").click(function(e) {
+    		  if(!confirm("Xác nhận thanh toán")) {
+    			  e.preventDefault();
+    		  };
     	  })
     	  let id = $(".modal-flag").attr("idModal")
     	  if(id) {
@@ -403,7 +414,7 @@
                               <span class="text-white"></span>
                           </button>
                           <!-- filter table -->
-                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 22rem;">
+                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 25rem;">
                           <div class="card-header py-2 text-secondary bg-info text-black fs-6">Bộ lọc</div>
                               <div class="card-body">
                                   <form class="row g-3 mt-1" action="admin/contract-registration.htm" id="form-filter">
@@ -423,29 +434,41 @@
                                               </div>
                                           </div>
                                       </div>
+                                      <div class="col-12">
+                                      <label for="input-birthday" class="form-label">Giá</label>
+
+                                      <div class="col-12 d-flex gap-1 justify-content-around align-items-stretch">
+                                          <div class="input-group">
+                                              <input id="input-package-limit-time" name="priceLeft" type="number" class="form-control" aria-label="Username" aria-describedby="basic-addon1" />
+                                              <span class="input-group-text" id="basic-addon1">VND</span>
+                                          </div>
+                                          <button type="button" class="btn btn-primary btn-sm btn-range-filter">
+                                              Đến
+                                          </button>
+
+                                          <div class="input-group d-none range-filter-right">
+                                              <input id="input-package-limit-time" name="priceRight" type="number" class="form-control" aria-label="Username" aria-describedby="basic-addon1" />
+                                              <span class="input-group-text" id="basic-addon1">VND</span>
+                                          </div>
+                                      </div>
+                                  </div>
                                       <div class="col-md-12">
                                           <label for="status" class="form-label">Trạng thái</label>
-                                          <div class="d-flex" style="flex-wrap: wrap">
+                                          <div class="col-md-12 d-flex">
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-allStatus" value="" checked />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-allStatus">
-                                                      Tất cả
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                              <input class="form-check-input-filter" type="radio" name="status" id="filter-status-2" value="2" />
+                                              <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-2" value="2" />
                                               <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-2">
                                                   Đã huỷ
                                               </label>
                                           </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-0" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-0">
                                                       Đã thanh toán
                                                   </label>
                                               </div>
-                                              <div class="form-check-filter mt-2">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="0" />
+                                              <div class="form-check-filter">
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-1" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-1">
                                                       Chưa thanh toán
                                                   </label>
@@ -459,9 +482,7 @@
                                   <button type="submit" form="form-filter" name="btnFilter" class="btn btn-primary">
                                       Lọc
                                   </button>
-                                  <button type="reset" class="btn btn-secondary">
-                                      Đặt lại
-                                  </button>
+                                  
                               </div>
                           </div>
                       </div>

@@ -64,7 +64,6 @@ public class PersonalTrainerController extends MethodAdminController {
 	@RequestMapping(value = "detail/{id}.htm", method = RequestMethod.GET)
 	public String getDetail(ModelMap model, @PathVariable("id") String id) {
 		model.addAttribute("pt", newPT());
-		model.addAttribute("ptUpdate", newPT());
 		model.addAttribute("ptDetail", getPT(id));
 		model.addAttribute("idModal", "modal-detail");
 		model.addAttribute("cList", getAllPT());
@@ -146,13 +145,13 @@ public class PersonalTrainerController extends MethodAdminController {
 		model.addAttribute("pt", getPT(id));
 		model.addAttribute("idModal", "modal-create");
 		model.addAttribute("cList", getAllPT());
-		model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin PT",
+		model.addAttribute("cFormAttribute", new FormAttribute("Chỉnh sửa thông tin huấn luyện viên",
 				"admin/personal-trainer/update/" + id + ".htm", "btnUpdate"));
 		return "admin/personal-trainer";
 	}
 
 	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
-	public String updatePT(ModelMap model, @Validated @ModelAttribute("ptUpdate") PTEntity pt, BindingResult result,
+	public String updatePT(ModelMap model, @Validated @ModelAttribute("pt") PTEntity pt, BindingResult result,
 			RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
 		if (!result.hasErrors()) {
 			Session session = factory.openSession();
@@ -198,7 +197,6 @@ public class PersonalTrainerController extends MethodAdminController {
 			}
 		}
 		model.addAttribute("idModal", "modal-update");
-		model.addAttribute("pt", newPT());
 		model.addAttribute("cList", getAllPT());
 		return "admin/personal-trainer";
 	}
@@ -206,31 +204,33 @@ public class PersonalTrainerController extends MethodAdminController {
 	// filter
 
 	@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
-	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model) {
+	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model, HttpServletRequest request) {
 
 		Session session = factory.getCurrentSession();
 
 		String whereClause = "";
+		String hqlGender = "";
+		String dateCreate = toHqlRangeCondition(allParams.get("dateLeft"), allParams.get("dateRight"), "birthday");
+		if (request.getParameterValues("gender") != null) {
+			hqlGender = toHqlSingleColumOr("gender", request.getParameterValues("gender"));
+		}
 
-		String birthday = toHqlRangeCondition(allParams.get("birthdayLeft"), allParams.get("birthdayRight"),
-				"birthday");
-
-		String gender = allParams.get("gender");
-		if (gender.equals("1") || gender.equals("0")) {
-			gender = "gender = " + gender;
-		} else
-			gender = "";
+		String hqlStatus = "";
+		if (request.getParameterValues("status") != null) {
+			hqlStatus = toHqlSingleColumOr("status", request.getParameterValues("status"));
+		}
 
 		List<String> conditionCluaseList = new ArrayList<>();
-		conditionCluaseList.addAll(Arrays.asList(birthday, gender));
+		conditionCluaseList.addAll(Arrays.asList(dateCreate, hqlGender, hqlStatus));
 		whereClause = toHqlWhereClause(conditionCluaseList);
 		String hql = "from PTEntity " + whereClause;
+		System.out.println(hql);
 		Query query = session.createQuery(hql);
 		List<PTEntity> list = query.list();
 		model.addAttribute("cList", list);
-		PTEntity customer = newPT();
-		model.addAttribute("pt", customer);
-		model.addAttribute("customerUpdate", customer);
+		PTEntity pt = newPT();
+		model.addAttribute("pt", pt);
+		model.addAttribute("ptUpdate", pt);
 		return "admin/personal-trainer";
 	}
 

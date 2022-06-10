@@ -1,5 +1,6 @@
 package com.GymManager.Entity;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import javax.persistence.Column;
@@ -13,6 +14,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -26,25 +30,29 @@ public class ClassEntity {
 	private String classId;
 
 	@Column(name = "NgayMoDK")
+	@NotNull(message = "Ngày mở đăng ký không được để trống")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateOpen;
 
 	@Column(name = "NgayDongDK")
+	@NotNull(message = "Ngày đóng đăng ký không được để trống")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateClose;
 
 	@Column(name = "NgayBatDauLop")
+	@NotNull(message = "Ngày bắt đầu lớp không được để trống")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateStart;
-
+	@Min(value = 2, message = "Số lượng người đăng ký tối đa phải lớn 1")
 	@Column(name = "SoLuongNguoiToiDa")
 	private int maxPP;
 
 	// join to column
 	@Column(name = "PT", insertable = false, updatable = false)
+	@NotEmpty(message = "Huấn luyện viên không được để trống")
 	private String PT;
 
 	@ManyToOne
@@ -171,20 +179,44 @@ public class ClassEntity {
 		super();
 	}
 
+	public Date getDateEnd() {
+		LocalDate localDateStart = LocalDate.parse(this.getDateStart().toString());
+		LocalDate localDateEnd = localDateStart.plusMonths(this.getTrainingPackEntity().getPackDuration());
+		return java.sql.Date.valueOf(localDateEnd);
+	}
+
 	public int getClassStatus() {
 		RegisterDetailEntity[] registerDetailEntities = this.getRegisterDetailEntities()
 				.toArray(RegisterDetailEntity[]::new);
-		if (registerDetailEntities.length == this.maxPP) {
-			return 2;
+		if (this.getRegisterDetailEntitiesAvailable().size() == this.maxPP) {
+			return 2; // đã đạt số người đăng ký tối đa;
 		}
 		if (this.maxPP > 1) {
 			Date toDay = new Date();
 			if (toDay.after(this.dateOpen) && toDay.before(this.dateClose)) {
-				return 1;
+				return 1;// có thế đăng ký;
 			}
 		}
+		return 0; // hết hạn dk;
+	}
 
-		return 0;
+	public int getClassPeriod() {
+		Date today = new Date();
+		if (today.after(this.dateStart) && today.before(this.getDateEnd())) {
+			return 1; // đang dạy;
+		} else if (today.after(this.getDateEnd()))
+			return 2; // kết thúc
+		return 0; // chưa bắt đầu;
+	}
+
+	public List<RegisterDetailEntity> getRegisterDetailEntitiesAvailable() {
+		List<RegisterDetailEntity> list = new ArrayList<RegisterDetailEntity>();
+		for (RegisterDetailEntity registerDetailEntity : this.getRegisterDetailEntities()) {
+			if (registerDetailEntity.getRegisterEntity().getStatus() != 2) {
+				list.add(registerDetailEntity);
+			}
+		}
+		return list;
 	}
 
 }

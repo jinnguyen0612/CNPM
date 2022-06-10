@@ -28,7 +28,7 @@ import com.GymManager.ExtraClass.FormAttribute;
 @Controller
 @RequestMapping("admin/schedule")
 @Transactional
-public class ScheduleController {
+public class ScheduleController extends MethodAdminController {
 	@Autowired
 	SessionFactory factory;
 
@@ -37,7 +37,7 @@ public class ScheduleController {
 		List<ScheduleEntity> scheduleEntities = getAllOfDay("");
 		List<CustomerToday> customerTodays = new ArrayList<CustomerToday>();
 		for (ScheduleEntity scheduleEntity : scheduleEntities) {
-			if (scheduleEntity.getScheduleStatus() == 1) {
+			if (scheduleEntity.getClassEntity().getClassPeriod() == 1) {
 				List<RegisterDetailEntity> registerDetailEntities = (List<RegisterDetailEntity>) scheduleEntity
 						.getClassEntity().getRegisterDetailEntities();
 				for (RegisterDetailEntity registerDetailEntity : registerDetailEntities) {
@@ -59,14 +59,13 @@ public class ScheduleController {
 
 	@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
 	public String saleFilter(HttpServletRequest request, ModelMap model) {
-		String type = request.getParameter("type");
-		String session = request.getParameter("status");
-
+		String[] type = request.getParameterValues("type");
+		String[] session = request.getParameterValues("status");
 		String condition = "";
-		if (!session.equals("")) {
-			condition = "and session = " + session;
+		if (session != null) {
+			condition = " and " + toHqlSingleColumOr("session", session);
 		}
-		;
+		System.out.println(condition);
 
 		List<ScheduleEntity> scheduleEntities = getAllOfDay(condition);
 		List<CustomerToday> customerTodays = new ArrayList<CustomerToday>();
@@ -76,28 +75,38 @@ public class ScheduleController {
 						.getClassEntity().getRegisterDetailEntities();
 				for (RegisterDetailEntity registerDetailEntity : registerDetailEntities) {
 					if (registerDetailEntity.getRegisterEntity().getStatus() == 1) {
-						if (type.equals("0")) {
-							if (registerDetailEntity.getClassEntity().getMaxPP() == 1) {
-								CustomerToday customerToday = new CustomerToday(
-										registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
-										registerDetailEntity.getClassEntity());
-								customerTodays.add(customerToday);
-							}
 
-						} else if (type.equals("1")) {
-
-							if (registerDetailEntity.getClassEntity().getMaxPP() > 1) {
-								CustomerToday customerToday = new CustomerToday(
-										registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
-										registerDetailEntity.getClassEntity());
-								customerTodays.add(customerToday);
-							}
-
-						} else {
+						if (type == null) {
 							CustomerToday customerToday = new CustomerToday(
 									registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
 									registerDetailEntity.getClassEntity());
 							customerTodays.add(customerToday);
+						} else if (type.length == 2) {
+							CustomerToday customerToday = new CustomerToday(
+									registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
+									registerDetailEntity.getClassEntity());
+							customerTodays.add(customerToday);
+						} else {
+
+							if (type[0].equals("0")) {
+								if (registerDetailEntity.getClassEntity().getMaxPP() == 1) {
+									CustomerToday customerToday = new CustomerToday(
+											registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
+											registerDetailEntity.getClassEntity());
+									customerTodays.add(customerToday);
+								}
+
+							} else if (type[0].equals("1")) {
+
+								if (registerDetailEntity.getClassEntity().getMaxPP() > 1) {
+									CustomerToday customerToday = new CustomerToday(
+											registerDetailEntity.getRegisterEntity().getCustomer(), scheduleEntity,
+											registerDetailEntity.getClassEntity());
+									customerTodays.add(customerToday);
+								}
+
+							}
+
 						}
 
 					}
@@ -119,6 +128,7 @@ public class ScheduleController {
 	public List<ScheduleEntity> getAllOfDay(String condition) {
 		Session session = factory.getCurrentSession();
 		String hql = "from ScheduleEntity WHERE day = DATEPART(WEEKDAY, GETDATE()) " + condition;
+		System.out.println(hql);
 		Query query = session.createQuery(hql);
 		List<ScheduleEntity> list = query.list();
 		return list;

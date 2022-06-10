@@ -35,8 +35,7 @@
 						<div class="col-xxl-4 col-md-6">
 							<div class="card info-card sales-card">
 								<div class="filter">
-									<a class="icon" href="#" data-bs-toggle="dropdown"><i
-										class="bi bi-three-dots"></i></a>
+
 									<ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
 										<li class="dropdown-header text-start">
 											<h6>Lọc</h6>
@@ -68,7 +67,7 @@
 									<div class="d-flex align-items-center">
 										<div
 											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-											<i class="fa-light fa-ballot"></i>
+											<i class="fa-solid fa-ballot-check"></i>
 										</div>
 										<div class="ps-3">
 											<h6>${mumOfRegister}</h6>
@@ -81,10 +80,9 @@
 
 						<!-- Revenue Card -->
 						<div class="col-xxl-4 col-md-6">
-							<div class="card info-card revenue-card">
+							<div class="card info-card sales-card">
 								<div class="filter">
-									<a class="icon" href="#" data-bs-toggle="dropdown"><i
-										class="bi bi-three-dots"></i></a>
+
 									<ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
 										<li class="dropdown-header text-start">
 											<h6>Lọc</h6>
@@ -115,7 +113,7 @@
 									<div class="d-flex align-items-center">
 										<div
 											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-											<i class="bi bi-currency-dollar"></i>
+											<i class="fa-solid fa-chalkboard-user"></i>
 										</div>
 										<div class="ps-3">
 											<h6>${ mumOfPT}</h6>
@@ -129,7 +127,7 @@
 
 						<!-- Customers Card -->
 						<div class="col-xxl-4 col-xl-12">
-							<div class="card info-card customers-card">
+							<div class="card info-card sales-card">
 								<div class="card-body">
 									<h5 class="card-title">
 										Khách hàng <span>| tất cả</span>
@@ -138,7 +136,7 @@
 									<div class="d-flex align-items-center">
 										<div
 											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-											<i class="bi bi-people"></i>
+											<i class="fa-solid fa-user-group"></i>
 										</div>
 										<div class="ps-3">
 											<h6>${numOfCustomer}</h6>
@@ -149,7 +147,7 @@
 							</div>
 						</div>
 						<div class="col-xxl-4 col-xl-12">
-							<div class="card info-card customers-card">
+							<div class="card info-card sales-card">
 								<div class="card-body">
 									<h5 class="card-title">
 										Nhân viên <span>| Tất cả</span>
@@ -158,7 +156,7 @@
 									<div class="d-flex align-items-center">
 										<div
 											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-											<i class="bi bi-people"></i>
+											<i class="fa-solid fa-user"></i>
 										</div>
 										<div class="ps-3">
 											<h6>${mumOfStaff}</h6>
@@ -169,7 +167,7 @@
 							</div>
 						</div>
 						<div class="col-xxl-4 col-xl-12">
-							<div class="card info-card customers-card">
+							<div class="card info-card sales-card">
 								<div class="card-body">
 									<h5 class="card-title">
 										Lớp <span>| Tất cả</span>
@@ -178,7 +176,7 @@
 									<div class="d-flex align-items-center">
 										<div
 											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-											<i class="bi bi-people"></i>
+											<i class="fa-solid fa-screen-users"></i>
 										</div>
 										<div class="ps-3">
 											<h6>${mumOfClass}</h6>
@@ -189,7 +187,7 @@
 							</div>
 						</div>
 						<div class="col-xxl-4 col-xl-12">
-							<div class="card info-card customers-card">
+							<div class="card info-card sales-card">
 								<div class="card-body">
 									<h5 class="card-title">
 										Gói tập <span>| Tất cả</span>
@@ -198,7 +196,7 @@
 									<div class="d-flex align-items-center">
 										<div
 											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-											<i class="bi bi-people"></i>
+											<i class="fa-solid fa-briefcase-blank"></i>
 										</div>
 										<div class="ps-3">
 											<h6>${mumOfPack}</h6>

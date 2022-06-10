@@ -24,6 +24,38 @@
 					class="bi bi-search"></i>
 			</a></li>
 			<!-- End Search Icon-->
+			<li class="nav-item dropdown"><a class="nav-link nav-icon"
+				href="#" data-bs-toggle="dropdown"> <i class="bi bi-bell"></i> <span
+					class="badge bg-primary badge-number">${cancelRegisters.size()}</span>
+			</a> <!-- End Notification Icon -->
+
+				<ul
+					class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
+					<li class="dropdown-header">Có <span class="text-primary">${cancelRegisters.size()}</span>
+						đăng ký đã bị huỷ do hết hạn thanh toán
+					</li>
+					<li>
+						<hr class="dropdown-divider" />
+					</li>
+
+					<c:forEach var="r" items="${cancelRegisters}">
+						<a href="admin/contract-registration/detail/${r.registerId}.htm">
+							<li class="notification-item"><i
+								class="bi bi-x-circle text-danger"></i>
+								<div>
+									<h4>${r.registerId}</h4>
+									<p>Tên khách hàng: ${r.customer.name }</p>
+									<p>Mã khách hàng: ${r.customer.customerId}</p>
+								</div></li>
+						</a>
+
+						<li>
+							<hr class="dropdown-divider" />
+						</li>
+
+					</c:forEach>
+				</ul> <!-- End Notification Dropdown Items --></li>
+			<!-- End Notification Nav -->
 
 
 

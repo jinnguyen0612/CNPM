@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -46,7 +47,8 @@
 												<th scope="row" class="text-center">${count=count+1}</th>
 												<td>${a.username }</td>
 
-												<td>${a.dateCreate }</td>
+												<td><fmt:formatDate value="${a.dateCreate }"
+														pattern="dd/MM/yyyy" /></td>
 
 												<c:choose>
 													<c:when test="${a.status=='0' }">
@@ -102,12 +104,25 @@
 															</button>
 														</c:otherwise>
 													</c:choose> <c:choose>
-														<c:when test="${a.status == 2}">
-															<a href="admin/account/clock/${a.username}.htm"><button
-																	class="btn btn-outline-warning btn-light btn-sm"
-																	title="Khoá tài khoản">
-																	<i class="fa-solid fa-lock"></i>
-																</button></a>
+														<c:when test="${a.policyId == 2}">
+															<c:choose>
+																<c:when test="${a.status == 0}">
+																	<a class="btnClock"
+																		href="admin/account/clock/${a.username}.htm"><button
+																			class="btn btn-outline-warning btn-light btn-sm"
+																			title="Mở khoá tài khoản">
+																			<i class="fa-solid fa-unlock"></i>
+																		</button></a>
+																</c:when>
+																<c:otherwise>
+																	<a class="btnClock"
+																		href="admin/account/clock/${a.username}.htm"><button
+																			class="btn btn-outline-warning btn-light btn-sm"
+																			title="Khoá tài khoản">
+																			<i class="fa-solid fa-lock"></i>
+																		</button></a>
+																</c:otherwise>
+															</c:choose>
 														</c:when>
 														<c:otherwise>
 															<button disabled="disabled"
@@ -129,46 +144,6 @@
 			</div>
 		</section>
 
-		<!-- modal  -->
-
-		<div class="modal fade" id="create" tabindex="-1">
-			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content">
-					<div class="modal-header bg-primary text-white px-3 py-2">
-						<h5 class="modal-title">Thêm mới tài khoản</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal"
-							aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<form class="row g-3">
-							<div class="col-md-12">
-								<label for="inputEmail5" class="form-label">Tên tài
-									khoản</label> <input type="email" class="form-control" id="inputEmail5" />
-							</div>
-							<div class="col-md-12">
-								<label for="inputPassword5" class="form-label">Mật khẩu</label>
-								<input type="password" class="form-control" id="inputPassword5" />
-							</div>
-							<div class="col-md-12">
-								<label for="inputState" class="form-label">Loại tài
-									khoản</label> <select id="inputState" class="form-select">
-									<option selected>Choose...</option>
-									<option>...</option>
-								</select>
-							</div>
-
-							<div class="text-end">
-								<button type="submit" class="btn btn-primary">Xác nhận
-								</button>
-								<button type="button" class="btn btn-secondary"
-									data-bs-dismiss="modal">Đóng</button>
-							</div>
-						</form>
-						<!-- End Multi Columns Form -->
-					</div>
-				</div>
-			</div>
-		</div>
 	</main>
 	<!-- End #main -->
 
@@ -188,23 +163,23 @@
                               <span class="text-white"></span>
                           </button>
                           <!-- filter table -->
-                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 20rem;">
+                          <div id="filter-block" class="card position-absolute end-100 top-0 collapse" style="z-index: 100; min-width: 22rem;">
                               <div class="card-header py-2 text-secondary bg-info text-black fs-6">Bộ lọc</div>
                               <div class="card-body">
-                                  <form class="row g-3 mt-1" id="form-filter">
+                                  <form class="row g-3 mt-1" action="admin/account.htm" id="form-filter">
                                       <div class="col-12">
                                           <label for="input-birthday" class="form-label">Ngày Tạo</label>
 
                                           <div class="col-12 d-flex gap-1 justify-content-around align-items-stretch">
                                               <div class="input-group">
-                                                  <input id="input-birthday" type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
+                                                  <input id="input-birthday" name="dateLeft" type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
                                               </div>
                                               <button type="button" class="btn btn-primary btn-sm btn-range-filter" data-bs-toggle="collapse" data-bs-target="#input-birthday-right">
                                                   Đến
                                               </button>
 
                                               <div class="input-group collapse" id="input-birthday-right">
-                                                  <input type="date" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
+                                                  <input type="date" name="dateRight" class="form-control" aria-label="input-birthday" aria-describedby="basic-addon1" />
                                               </div>
                                           </div>
                                       </div>
@@ -213,19 +188,13 @@
                                           <label for="gender" class="form-label">Trạng thái</label>
                                           <div class="col-md-12 d-flex">
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-allGender" value="" checked />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-allGender">
-                                                      Tất cả
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-female" value="0" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-female" value="1"  />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-female">
                                                       Hoạt động
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="gender" id="filter-male" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-male" value="0"  />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-male">
                                                       Khoá
                                                   </label>
@@ -236,21 +205,22 @@
                                           <label for="status" class="form-label">Loại tài khoản</label>
                                           <div class="col-md-12 d-flex">
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-allStatus" value="" checked />
+                                                  <input class="form-check-input-filter" type="checkbox" name="type" id="filter-allStatus" value="0"  />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-allStatus">
-                                                      Tất cả
+                                                      Quản lý
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="0" />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-0">
-                                                      Nhân viên
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="type" id="filter-status-1" value="1"  />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-1">
-                                                      Khách hàng
+                                                  Khách hàng
+                                                  </label>
+                                              </div>
+                                              <div class="form-check-filter">
+                                                  <input class="form-check-input-filter" type="checkbox" name="type" id="filter-status-2" value="2"  />
+                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-2">
+                                                      
+                                                      Nhân viên
                                                   </label>
                                               </div>
                                           </div>
@@ -258,11 +228,8 @@
                                   </form>
                               </div>
                               <div class="card-footer py-2 text-end">
-                                  <button type="submit" form="form-filter" class="btn btn-primary">
+                                  <button type="submit" name="btnFilter" form="form-filter" class="btn btn-primary">
                                       Lọc
-                                  </button>
-                                  <button type="reset" class="btn btn-secondary">
-                                      Đặt lại
                                   </button>
                               </div>
                           </div>

@@ -19,9 +19,9 @@
 					<i class="fa-light fa-file-user"></i><span>Tài Khoản</span>
 			</a></li>
 			<!-- End Employee Nav -->
-			<li class="nav-item"><a class="nav-link collapsed"
-				data="employee" data-bs-target="#employee" href="admin/employee.htm">
-					<i class="fa-light fa-user"></i><span>Nhân Viên</span>
+			<li class="nav-item"><a class="nav-link collapsed" data="staff"
+				data-bs-target="#employee" href="admin/employee.htm"> <i
+					class="fa-light fa-user"></i><span>Nhân Viên</span>
 			</a></li>
 			<!-- End Employee Nav -->
 
