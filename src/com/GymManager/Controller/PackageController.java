@@ -1,12 +1,18 @@
 package com.GymManager.Controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -14,10 +20,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.GymManager.Entity.AccountEntity;
+import com.GymManager.Entity.StaffEntity;
 import com.GymManager.Entity.TrainingPackEntity;
 import com.GymManager.Entity.TrainingPackTypeEntity;
+import com.GymManager.ExtraClass.FormAttribute;
 import com.GymManager.ExtraClass.Message;
 import com.GymManager.Service.TrainingPackService;
 import com.GymManager.Service.TrainingPackTypeService;
@@ -42,7 +52,6 @@ public class PackageController extends MethodAdminController {
 		model.addAttribute("pack", list);
 		model.addAttribute("insertPackage", newPack());
 		model.addAttribute("updatePackage", newPack());
-
 		List<TrainingPackTypeEntity> listT = trainingPackTypeService.getAllPackType(offset, maxResult);
 		model.addAttribute("trainingPackTypeEntity", listT);
 		return "admin/package";
@@ -106,14 +115,6 @@ public class PackageController extends MethodAdminController {
 
 	}
 
-	// THÃŠM Má»šI GÃ“I Táº¬P
-//	@RequestMapping(value="insertP", method=RequestMethod.GET)
-//	public String addPackage(ModelMap model, Integer offset, Integer maxResults) {
-//		List<TrainingPackTypeEntity> LIST = trainingPackTypeService.getAllPackType(offset, maxResults);
-//		model.addAttribute("trainingPackTypeEntity", LIST);
-//		model.addAttribute("insertP", new TrainingPackEntity());
-//		return "admin/addPackage";
-//	}
 	@RequestMapping(value = "insertP", method = RequestMethod.POST)
 	public String addPackage(ModelMap model, @ModelAttribute("insertPackage") TrainingPackEntity trainingPackEntity,
 			Integer offset, Integer maxResults, RedirectAttributes redirectAttributes) {
@@ -169,6 +170,73 @@ public class PackageController extends MethodAdminController {
 			List<TrainingPackEntity> listP = trainingPackService.getAllPack(offset, maxResult);
 			model.addAttribute("pack", listP);
 		}
+		return "admin/package";
+	}
+
+	@RequestMapping(value = "clock/{id}.htm")
+	public String clockAccount(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+		Session session = factory.openSession();
+		Transaction t = session.beginTransaction();
+		TrainingPackEntity trainingPackEntity = trainingPackService.getPackByPackId(id);
+
+		try {
+			String message = "";
+			if (trainingPackEntity.getStatus().equals("0")) {
+
+				message = "Mở khoá  gói tập thành công thành công";
+				trainingPackEntity.setStatus("1");
+			} else if (trainingPackEntity.getStatus().equals("1")) {
+				trainingPackEntity.setStatus("0");
+				message = "Khoá gói tập thành công";
+			}
+			session.merge(trainingPackEntity);
+			redirectAttributes.addFlashAttribute("message", new Message("success", message));
+
+			t.commit();
+			return "redirect:/admin/package.htm";
+
+		}
+
+		finally {
+			session.close();
+		}
+
+	}
+
+	@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
+	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model, HttpServletRequest request,
+			Integer offset, Integer maxResults) {
+
+		Session session = factory.getCurrentSession();
+
+		String whereClause = "";
+		String hqlGender = "";
+		String price = toHqlRangeCondition(allParams.get("priceLeft"), allParams.get("priceRight"), "money");
+		String packDuration = toHqlRangeCondition(allParams.get("limitLeft"), allParams.get("limitRight"),
+				"packDuration");
+//		if (request.getParameterValues("gender") != null) {
+//			hqlGender = toHqlSingleColumOr("gender", request.getParameterValues("gender"));
+//		}
+
+		String hqlStatus = "";
+		if (request.getParameterValues("status") != null) {
+			hqlStatus = toHqlSingleColumOr("status", request.getParameterValues("status"));
+		}
+
+		List<String> conditionCluaseList = new ArrayList<>();
+		conditionCluaseList.addAll(Arrays.asList(price, packDuration, hqlGender, hqlStatus));
+		whereClause = toHqlWhereClause(conditionCluaseList);
+		String hql = "from TrainingPackEntity " + whereClause;
+		System.out.println(hql);
+		Query query = session.createQuery(hql);
+		List<TrainingPackEntity> list = query.list();
+
+		List<TrainingPackTypeEntity> LIST = trainingPackTypeService.getAllPackType(offset, maxResults);
+		model.addAttribute("updatePackage", newPack());
+		model.addAttribute("trainingPackTypeEntity", LIST);
+		model.addAttribute("pack", list);
+		model.addAttribute("insertPackage", newPack());
+
 		return "admin/package";
 	}
 

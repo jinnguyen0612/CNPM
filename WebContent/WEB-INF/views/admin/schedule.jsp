@@ -108,20 +108,15 @@
                                       <div class="col-md-12">
                                           <label for="gender" class="form-label">Hình thức</label>
                                           <div class="col-md-12 d-flex">
+                                              
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="type" id="filter-allGender" value="" checked />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-allGender">
-                                                      Tất cả
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="type" id="filter-female" value="0" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="type" id="filter-female" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-female">
                                                       Cá nhân
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="type" id="filter-male" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="type" id="filter-male" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-male">
                                                       Lớp
                                                   </label>
@@ -131,26 +126,21 @@
                                       <div class="col-md-12">
                                           <label for="status" class="form-label">Buổi</label>
                                           <div class="col-md-12 d-flex">
+                                              
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-allStatus" value="" checked />
-                                                  <label class="form-check-label py-1 px-2 rounded-1" for="filter-allStatus">
-                                                      Tất cả
-                                                  </label>
-                                              </div>
-                                              <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-0" value="0" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-0" value="0" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-0">
                                                       Sáng
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                                  <input class="form-check-input-filter" type="radio" name="status" id="filter-status-1" value="1" />
+                                                  <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-1" value="1" />
                                                   <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-1">
                                                       Chiều
                                                   </label>
                                               </div>
                                               <div class="form-check-filter">
-                                              <input class="form-check-input-filter" type="radio" name="status" id="filter-status-2" value="2" />
+                                              <input class="form-check-input-filter" type="checkbox" name="status" id="filter-status-2" value="2" />
                                               <label class="form-check-label py-1 px-2 rounded-1" for="filter-status-2">
                                                   Tối
                                               </label>
@@ -163,9 +153,7 @@
                                   <button type="submit" name="btnFilter" form="form-filter" class="btn btn-primary">
                                       Lọc
                                   </button>
-                                  <button type="reset" class="btn btn-secondary">
-                                      Đặt lại
-                                  </button>
+                                 
                               </div>
                           </div>
                       </div>

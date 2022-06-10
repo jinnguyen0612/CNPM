@@ -52,6 +52,7 @@ public class EmployeeController extends MethodAdminController {
 	@RequestMapping(method = RequestMethod.GET)
 	public String index(ModelMap model) {
 		StaffEntity staff = newStaff();
+		staff.setStatus(1);
 		model.addAttribute("staff", staff);
 		model.addAttribute("cFormAttribute",
 				new FormAttribute("Them moi nhan vien", "admin/employee.htm", "btnCreate"));
@@ -63,7 +64,6 @@ public class EmployeeController extends MethodAdminController {
 	@RequestMapping(value = "detail/{id}.htm", method = RequestMethod.GET)
 	public String getDetail(ModelMap model, @PathVariable("id") String id) {
 		model.addAttribute("staff", newStaff());
-		model.addAttribute("staffUpdate", newStaff());
 		model.addAttribute("staffDetail", getStaff(id));
 		model.addAttribute("idModal", "modal-detail");
 		model.addAttribute("cList", getAllStaff());
@@ -94,7 +94,7 @@ public class EmployeeController extends MethodAdminController {
 				session.save(staff);
 
 				t.commit();
-				redirectAttributes.addFlashAttribute("message", new Message("success", "Them thanh cong !!!"));
+				redirectAttributes.addFlashAttribute("message", new Message("success", "Thêm mới thành công !!!"));
 
 				return "redirect:/admin/employee.htm";
 
@@ -130,7 +130,7 @@ public class EmployeeController extends MethodAdminController {
 		}
 		model.addAttribute("idModal", "modal-create");
 		model.addAttribute("cFormAttribute",
-				new FormAttribute("Them moi nhan vien", "admin/employee.htm", "btnCreate"));
+				new FormAttribute("Thêm mới nhân viên", "admin/employee.htm", "btnCreate"));
 		model.addAttribute("staffUpdate", staff);
 		model.addAttribute("cList", getAllStaff());
 		return "admin/employee";
@@ -143,13 +143,13 @@ public class EmployeeController extends MethodAdminController {
 		model.addAttribute("staff", getStaff(id));
 		model.addAttribute("idModal", "modal-create");
 		model.addAttribute("cList", getAllStaff());
-		model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin khach hang",
+		model.addAttribute("cFormAttribute", new FormAttribute("Chỉnh sửa thông tin nhân viên",
 				"admin/employee/update/" + id + ".htm", "btnUpdate"));
 		return "admin/employee";
 	}
 
 	@RequestMapping(value = "update/{id}.htm", method = RequestMethod.POST, params = "btnUpdate")
-	public String updateStaff(ModelMap model, @Validated @ModelAttribute("staffUpdate") StaffEntity staff,
+	public String updateStaff(ModelMap model, @Validated @ModelAttribute("staff") StaffEntity staff,
 			BindingResult result, RedirectAttributes redirectAttributes, @PathVariable("id") String id) {
 		if (!result.hasErrors()) {
 			Session session = factory.openSession();
@@ -157,13 +157,13 @@ public class EmployeeController extends MethodAdminController {
 			Transaction t = session.beginTransaction();
 			try {
 				AccountEntity accountEntity = getStaff(id).getAccount();
-//				if (staff.getStatus() == 0) {
-//					accountEntity.setStatus(0);
-//				}
 
 				staff.setAccount(accountEntity);
-				session.update(staff);
-
+				session.merge(staff);
+				if (staff.getStatus() == 0) {
+					accountEntity.setStatus(0);
+					session.merge(accountEntity);
+				}
 				t.commit();
 				redirectAttributes.addFlashAttribute("message", new Message("success", "Cập nhật thành công !!!"));
 
@@ -198,10 +198,9 @@ public class EmployeeController extends MethodAdminController {
 				session.close();
 			}
 		}
-		model.addAttribute("idModal", "modal-update");
-		model.addAttribute("staff", newStaff());
+		model.addAttribute("idModal", "modal-create");
 		model.addAttribute("cList", getAllStaff());
-		model.addAttribute("cFormAttribute", new FormAttribute("Chinh sua thong tin khach hang",
+		model.addAttribute("cFormAttribute", new FormAttribute("Chỉnh sửa thông tin nhân viên",
 				"admin/employee/update/" + id + ".htm", "btnUpdate"));
 		return "admin/employee";
 	}
@@ -218,7 +217,7 @@ public class EmployeeController extends MethodAdminController {
 		System.out.println(userName);
 
 		StaffEntity staff = getStaff(id);
-		redirectAttributes.addFlashAttribute("error", "Tai khoan khong duoc bo trong");
+		redirectAttributes.addFlashAttribute("error", "Tài khoản không được bỏ trống");
 		if (!userName.equals("")) {
 			try {
 
@@ -265,34 +264,37 @@ public class EmployeeController extends MethodAdminController {
 		return "redirect:/admin/employee.htm";
 	}
 
-	// filter
-
 	@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
-	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model) {
+	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model, HttpServletRequest request) {
 
 		Session session = factory.getCurrentSession();
 
 		String whereClause = "";
+		String hqlGender = "";
+		String dateCreate = toHqlRangeCondition(allParams.get("dateLeft"), allParams.get("dateRight"), "birthday");
+		if (request.getParameterValues("gender") != null) {
+			hqlGender = toHqlSingleColumOr("gender", request.getParameterValues("gender"));
+		}
 
-		String birthday = toHqlRangeCondition(allParams.get("birthdayLeft"), allParams.get("birthdayRight"),
-				"birthday");
-
-		String gender = allParams.get("gender");
-		if (gender.equals("1") || gender.equals("0")) {
-			gender = "gender = " + gender;
-		} else
-			gender = "";
+		String hqlStatus = "";
+		if (request.getParameterValues("status") != null) {
+			hqlStatus = toHqlSingleColumOr("status", request.getParameterValues("status"));
+		}
 
 		List<String> conditionCluaseList = new ArrayList<>();
-		conditionCluaseList.addAll(Arrays.asList(birthday, gender));
+		conditionCluaseList.addAll(Arrays.asList(dateCreate, hqlGender, hqlStatus));
 		whereClause = toHqlWhereClause(conditionCluaseList);
 		String hql = "from StaffEntity " + whereClause;
+		System.out.println(hql);
 		Query query = session.createQuery(hql);
 		List<StaffEntity> list = query.list();
 		model.addAttribute("cList", list);
 		StaffEntity staff = newStaff();
+		staff.setStatus(1);
 		model.addAttribute("staff", staff);
-		model.addAttribute("staffUpdate", staff);
+		model.addAttribute("cFormAttribute",
+				new FormAttribute("Them moi nhan vien", "admin/employee.htm", "btnCreate"));
+
 		return "admin/employee";
 	}
 

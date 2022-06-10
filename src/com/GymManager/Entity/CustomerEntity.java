@@ -126,29 +126,24 @@ public class CustomerEntity {
 	}
 
 	public int getCustomerStatus() {
-		int status = 0;
-		RegisterEntity[] registerEntities = this.getRegisterList().toArray(RegisterEntity[]::new);
-
-		for (int i = 0; i < registerEntities.length; i++) {
-			if (registerEntities[i].getStatus() == 0 || registerEntities[i].getStatus() == 1) {
-				status = 2;
+		int status = 0; // chưa đăng ký
+		List<RegisterEntity> registerEntities = (List<RegisterEntity>) this.getRegisterList();
+		for (RegisterEntity registerEntity : registerEntities) {
+			if (registerEntity.getStatus() == 0 || registerEntity.getStatus() == 1) {
+				status = 2; // đã đăng ký
 			}
-			if (registerEntities[i].getStatus() == 1) {
-				RegisterDetailEntity[] registerDetailEntities = registerEntities[i].getRegisterDetailList()
-						.toArray(RegisterDetailEntity[]::new);
-				for (int y = 0; y < registerDetailEntities.length; y++) {
-					LocalDate date2 = LocalDate
-							.parse(registerDetailEntities[y].getClassEntity().getDateStart().toString());
-					LocalDate date = date2.plusMonths(
-							registerDetailEntities[y].getClassEntity().getTrainingPackEntity().getPackDuration());
-					Date toDay = new Date();
-					if (toDay.after(registerDetailEntities[y].getClassEntity().getDateStart())
-							&& toDay.before(java.sql.Date.valueOf(date))) {
-						status = 1;
+			if (registerEntity.getStatus() == 1) {
+				List<RegisterDetailEntity> registerDetailEntities = (List<RegisterDetailEntity>) registerEntity
+						.getRegisterDetailList();
+				for (RegisterDetailEntity registerDetailEntity : registerDetailEntities) {
+					if (registerDetailEntity.getClassEntity().getClassPeriod() == 1) {
+						status = 1; // đang tập
 					}
 				}
 			}
+
 		}
+
 		return status;
 	}
 

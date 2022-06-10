@@ -1,12 +1,14 @@
 package com.GymManager.Controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import org.hibernate.Query;
@@ -24,8 +26,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.GymManager.Entity.AccountEntity;
 import com.GymManager.Entity.CustomerEntity;
 import com.GymManager.Entity.RegisterEntity;
+import com.GymManager.Entity.StaffEntity;
 import com.GymManager.ExtraClass.Message;
 
 @Controller
@@ -46,9 +50,27 @@ public class ContractRegistrationController extends MethodAdminController {
 	// checkout
 	@RequestMapping(value = "/checkout/{id}.htm", method = RequestMethod.GET)
 	public String checkout(HttpServletRequest request, ModelMap model, @PathVariable("id") String id,
-			RedirectAttributes redirectAttributes) throws MessagingException {
+			RedirectAttributes redirectAttributes, HttpSession ss) throws MessagingException {
 		RegisterEntity registerEntity = getRegister(id);
-		boolean isSucces = updateStatusRegister(registerEntity, 1);
+
+		if (getRegister(id).getStatus() == 1) {
+			redirectAttributes.addFlashAttribute("message",
+					new Message("error", "Đăng ký này đã thanh toán đừng vọc phá nữa !!!"));
+			String referer = request.getHeader("Referer");
+			return "redirect:" + referer;
+		}
+		if (getRegister(id).getStatus() == 2) {
+			redirectAttributes.addFlashAttribute("message",
+					new Message("error", "Đăng ký này đã huỷ, không thể thanh toán !!!"));
+			String referer = request.getHeader("Referer");
+			return "redirect:" + referer;
+		}
+
+		AccountEntity accountEntity = (AccountEntity) ss.getAttribute("admin");
+
+		StaffEntity staffEntity = accountEntity.getStaff();
+
+		boolean isSucces = updateStatusRegister(registerEntity, 1, staffEntity);
 		if (isSucces) {
 			redirectAttributes.addFlashAttribute("message", new Message("success", "Thanh toán thành công"));
 			String mailMessage = "Bạn đã thanh toán thành công hợp đồng đăng ký tập với mã đăng ký là: " + id;
@@ -76,7 +98,7 @@ public class ContractRegistrationController extends MethodAdminController {
 	// filter
 
 	@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
-	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model) {
+	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model, HttpServletRequest request) {
 
 		Session session = factory.getCurrentSession();
 
@@ -84,30 +106,23 @@ public class ContractRegistrationController extends MethodAdminController {
 
 		String birthday = toHqlRangeCondition(allParams.get("birthdayLeft"), allParams.get("birthdayRight"),
 				"registerDate");
-		String hql = "from RegisterEntity where " + birthday;
-		if (birthday.equals("")) {
-			hql = "from RegisterEntity";
+		String price = toHqlRangeCondition(allParams.get("priceLeft"), allParams.get("priceRight"), "money");
+
+		String hqlStatus = "";
+		if (request.getParameterValues("status") != null) {
+			hqlStatus = toHqlSingleColumOr("status", request.getParameterValues("status"));
 		}
+		;
+
+		List<String> conditionCluaseList = new ArrayList<>();
+		conditionCluaseList.addAll(Arrays.asList(birthday, price, hqlStatus));
+		whereClause = toHqlWhereClause(conditionCluaseList);
+		String hql = "from RegisterEntity " + whereClause;
 
 		System.out.println(hql);
 		Query query = session.createQuery(hql);
 		List<RegisterEntity> list = query.list();
-		String status = allParams.get("status");
-		if (!status.equals("")) {
-			List<RegisterEntity> newList = new ArrayList<RegisterEntity>();
-
-			for (RegisterEntity registerEntity : list) {
-
-				if (registerEntity.getStatus() == Integer.parseInt(status)) {
-					newList.add(registerEntity);
-				}
-
-			}
-			model.addAttribute("registerList", newList);
-
-		} else {
-			model.addAttribute("registerList", list);
-		}
+		model.addAttribute("registerList", list);
 		return "admin/contract-registration";
 	}
 
@@ -134,11 +149,12 @@ public class ContractRegistrationController extends MethodAdminController {
 		return (RegisterEntity) session.get(RegisterEntity.class, id);
 	}
 
-	public boolean updateStatusRegister(RegisterEntity registerEntity, int status) {
+	public boolean updateStatusRegister(RegisterEntity registerEntity, int status, StaffEntity staffEntity) {
 		Session session = factory.openSession();
 		Transaction t = session.beginTransaction();
 		try {
 			registerEntity.setStatus(status);
+			registerEntity.setStaffEntity(staffEntity);
 			session.merge(registerEntity);
 			t.commit();
 		} catch (Exception e) {

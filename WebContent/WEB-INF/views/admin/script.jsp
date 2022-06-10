@@ -22,6 +22,7 @@
 <script src="<c:url value='/resources/admin/js/alertify.min.js'/>"></script>
 <script src="<c:url value='/resources/admin/js/showMessage.js'/>"></script>
 <script src="<c:url value='/resources/admin/js/sidebarmenu.js'/>"></script>
+<script src="<c:url value='/resources/admin/js/confirmUpdate.js'/>"></script>
 
 
 

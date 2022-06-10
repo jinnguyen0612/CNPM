@@ -48,9 +48,9 @@ public class StaffEntity {
 	@OneToOne
 	@JoinColumn(name = "TaiKhoan")
 	private AccountEntity account;
-
-	@OneToMany(mappedBy = "staff")
+	@OneToMany(mappedBy = "staffEntity")
 	@LazyCollection(LazyCollectionOption.FALSE)
+	private Collection<RegisterEntity> registerEntityList;
 
 	public String getStaffId() {
 		return staffId;

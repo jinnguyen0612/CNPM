@@ -261,7 +261,12 @@ public class CustomerController extends MethodAdminController {
 	// ++++++++++++++ Create
 
 	@RequestMapping(value = "register/{id}.htm", method = RequestMethod.GET)
-	public String getRegister(ModelMap model, @PathVariable("id") String id) {
+	public String getRegister(ModelMap model, @PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+		if (getCustomer(id).getCustomerStatus() != 0) {
+			redirectAttributes.addFlashAttribute("message",
+					new Message("error", "Khách hàng này có một đăng ký còn hiệu lực, không thể đăng ký mới !!!"));
+			return "redirect:/admin/customer.htm";
+		}
 		RegisterEntity register = newRegister();
 		register.setCustomer(getCustomer(id));
 		model.addAttribute("pack", getAllPackAvailable());
@@ -362,6 +367,7 @@ public class CustomerController extends MethodAdminController {
 
 			} catch (Exception e) {
 				t.rollback();
+				System.out.println(e.getMessage());
 				if (e.getMessage().contains(
 						"A different object with the same identifier value was already associated with the session")) {
 					errorMessage = "Vui lòng chọn đăng ký hai lớp khác nhau";
@@ -370,8 +376,12 @@ public class CustomerController extends MethodAdminController {
 					errorMessage = "Vui lòng chọn đăng ký hai lớp khác nhau";
 				}
 
-				if (e.getCause().toString().contains("The transaction ended in the trigger")) {
-					errorMessage = "Khách hàng này có đăng ký chưa thanh toán, vui lòng thanh toán trước khi đang ký mới";
+				if (e.getCause() != null) {
+
+					if (e.getCause().toString().contains("The transaction ended in the trigger")) {
+						errorMessage = "Khách hàng này có đăng ký chưa thanh toán, vui lòng thanh toán trước khi đang ký mới";
+					}
+
 				}
 
 			} finally {
@@ -394,7 +404,18 @@ public class CustomerController extends MethodAdminController {
 
 	// ++++++++++++++ Update
 	@RequestMapping(value = "register/update/{id}.htm", method = RequestMethod.GET)
-	public String getUpdateRegister(ModelMap model, @PathVariable("id") String id) {
+	public String getUpdateRegister(ModelMap model, @PathVariable("id") String id,
+			RedirectAttributes redirectAttributes) {
+		if (getRegister(id).getStatus() == 1) {
+			redirectAttributes.addFlashAttribute("message",
+					new Message("error", "Đăng ký này đã thanh toán, không thể chỉnh sửa !!!"));
+			return "redirect:/admin/customer.htm";
+		}
+		if (getRegister(id).getStatus() == 2) {
+			redirectAttributes.addFlashAttribute("message",
+					new Message("error", "Đăng ký này đã huỷ, không thể chỉnh sửa !!!"));
+			return "redirect:/admin/customer.htm";
+		}
 		model.addAttribute("pack", getAllPackAvailable());
 		model.addAttribute("register", getRegister(id));
 		model.addAttribute("customer", newCustomer());
@@ -616,44 +637,41 @@ public class CustomerController extends MethodAdminController {
 	// filter
 
 	@RequestMapping(value = "", params = "btnFilter", method = RequestMethod.GET)
-	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model) {
+	public String saleFilter(@RequestParam Map<String, String> allParams, ModelMap model, HttpServletRequest request) {
 
 		Session session = factory.getCurrentSession();
 
 		String whereClause = "";
 
-		String birthday = toHqlRangeCondition(allParams.get("birthdayLeft"), allParams.get("birthdayRight"),
-				"birthday");
+		String birthday = toHqlRangeCondition(allParams.get("dateLeft"), allParams.get("dateRight"), "birthday");
 
-		String gender = allParams.get("gender");
-		if (gender.equals("1") || gender.equals("0")) {
-			gender = "gender = " + gender;
-		} else
-			gender = "";
+		String hqlGender = "";
+		if (request.getParameterValues("gender") != null) {
+			hqlGender = toHqlSingleColumOr("gender", request.getParameterValues("gender"));
+		}
 
 		List<String> conditionCluaseList = new ArrayList<>();
-		conditionCluaseList.addAll(Arrays.asList(birthday, gender));
+		conditionCluaseList.addAll(Arrays.asList(birthday, hqlGender));
 		whereClause = toHqlWhereClause(conditionCluaseList);
 		String hql = "from CustomerEntity " + whereClause;
 		Query query = session.createQuery(hql);
 		List<CustomerEntity> list = query.list();
-		String status = allParams.get("status");
-		if (!status.equals("")) {
+		String[] status = request.getParameterValues("status");
+		if (status != null) {
 			List<CustomerEntity> newList = new ArrayList<CustomerEntity>();
 
 			for (CustomerEntity customerEntity : list) {
 
-				if (customerEntity.getCustomerStatus() == Integer.parseInt(status)) {
-					newList.add(customerEntity);
+				for (int i = 0; i < status.length; i++) {
+					if (customerEntity.getCustomerStatus() == Integer.parseInt(status[i])) {
+						newList.add(customerEntity);
+					}
+
 				}
-
 			}
-			model.addAttribute("cList", newList);
-
-		} else {
-			model.addAttribute("cList", list);
+			list = newList;
 		}
-
+		model.addAttribute("cList", list);
 		CustomerEntity customer = newCustomer();
 		model.addAttribute("customer", customer);
 		model.addAttribute("customerUpdate", customer);
