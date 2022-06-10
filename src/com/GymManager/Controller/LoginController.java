@@ -28,6 +28,7 @@ import com.GymManager.Entity.AccountEntity;
 import com.GymManager.Entity.ClassEntity;
 import com.GymManager.Entity.PTEntity;
 import com.GymManager.Entity.RegisterEntity;
+import com.GymManager.ExtraClass.GymLimit;
 import com.GymManager.ExtraClass.Message;
 import com.GymManager.ExtraClass.RandomPassword;
 import com.GymManager.Serializer.LoginRequest;
@@ -75,8 +76,8 @@ public class LoginController {
 			ss.removeAttribute("admin");
 			return "admin/login";
 		}
-
-		List<RegisterEntity> registerEntities1 = getExpireRegister(7);
+		GymLimit gymLimit = new GymLimit();
+		List<RegisterEntity> registerEntities1 = getExpireRegister(gymLimit.getExpiredRegister());
 		for (RegisterEntity registerEntity : registerEntities1) {
 			String mailMessage = "Hợp hợp đồng đăng ký PTITGYM với mã " + registerEntity.getRegisterId()
 					+ " của bạn chỉ còn 1 ngày là hết hạn, vui lòng đến trung tâm để thanh toán trong hôm nay";
@@ -95,7 +96,7 @@ public class LoginController {
 
 		}
 
-		List<RegisterEntity> registerEntities2 = getExpireRegister2(7);
+		List<RegisterEntity> registerEntities2 = getExpireRegister2(gymLimit.getExpiredRegister());
 
 		if (ss.getAttribute("cancelRegisters") != null) {
 			List<RegisterEntity> registerEntitiesSS = (List<RegisterEntity>) ss.getAttribute("cancelRegisters");

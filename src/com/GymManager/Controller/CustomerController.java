@@ -285,6 +285,7 @@ public class CustomerController extends MethodAdminController {
 		String classId = request.getParameter("class");
 		RegisterEntity register = newRegister();
 		String typeRegister = request.getParameter("typeRegister");
+		String typeRegister2 = request.getParameter("typeRegister2");
 		register.setCustomer(getCustomer(id));
 		register.setRegisterDate(new Date());
 		register.setStatus(0);
@@ -292,10 +293,91 @@ public class CustomerController extends MethodAdminController {
 		register.setAccount(getAccount(accountEntity.getUsername()));
 		String errorMessage = "Vui lòng chọn lớp hoặc tạo đăng ký cá nhân";
 		boolean isError = false;
-		if (request.getParameter("is-select-course-2").equals("1")
-				&& request.getParameter("typeRegister2").equals("0")) {
-			isError = true;
+		if (request.getParameter("is-select-course-2").equals("1")) {
+
+			if (typeRegister2.equals("0")) {
+				isError = true;
+			} else {
+				if (typeRegister.equals("1")) {
+
+					List<ScheduleEntity> list1 = (List<ScheduleEntity>) getClass(classId).getScheduleEntity();
+
+					if (typeRegister2.equals("1")) {
+						List<ScheduleEntity> list2 = (List<ScheduleEntity>) getClass(request.getParameter("class2"))
+								.getScheduleEntity();
+
+						isError = checkDuplicateShedule(list1, list2);
+						if (isError) {
+							errorMessage = "2 lớp bạn đăng ký bị trùng lịch vui lòng chọn lớp khác";
+						}
+
+					} else if (typeRegister2.equals("2")) {
+						List<ScheduleEntity> list2 = new ArrayList<ScheduleEntity>();
+						ClassEntity personalClass = new ClassEntity();
+						for (int i = 2; i < 9; i++) {
+							String value = request.getParameter("2-T" + i);
+							if (value != null) {
+								ScheduleEntity schedule = new ScheduleEntity(personalClass.getClassId(), personalClass,
+										i, Integer.parseInt(value));
+								list2.add(schedule);
+							}
+						}
+
+						isError = checkDuplicateShedule(list1, list2);
+						if (isError) {
+							errorMessage = "Lớp bạn đăng ký bị trùng lịch với đăng ký cá nhân của bạn";
+						}
+
+					}
+
+				}
+				if (typeRegister.equals("2")) {
+					List<ScheduleEntity> list1 = new ArrayList<ScheduleEntity>();
+					ClassEntity personalClass = new ClassEntity();
+					for (int i = 2; i < 9; i++) {
+						String value = request.getParameter("T" + i);
+						if (value != null) {
+							ScheduleEntity schedule = new ScheduleEntity(personalClass.getClassId(), personalClass, i,
+									Integer.parseInt(value));
+							list1.add(schedule);
+						}
+					}
+
+					if (typeRegister2.equals("1")) {
+
+						List<ScheduleEntity> list2 = (List<ScheduleEntity>) getClass(request.getParameter("class2"))
+								.getScheduleEntity();
+
+						isError = checkDuplicateShedule(list1, list2);
+						if (isError) {
+							errorMessage = "Lớp bạn đăng ký bị trùng lịch với đăng ký cá nhân của bạn";
+						}
+
+					} else if (typeRegister2.equals("2")) {
+
+						List<ScheduleEntity> list2 = new ArrayList<ScheduleEntity>();
+						ClassEntity personalClass2 = new ClassEntity();
+						for (int i = 2; i < 9; i++) {
+							String value = request.getParameter("2-T" + i);
+							if (value != null) {
+								ScheduleEntity schedule = new ScheduleEntity(personalClass2.getClassId(),
+										personalClass2, i, Integer.parseInt(value));
+								list2.add(schedule);
+							}
+						}
+
+						isError = checkDuplicateShedule(list1, list2);
+						if (isError) {
+							errorMessage = "2 đăng ký cá nhân của bạn bị trùng lịch";
+						}
+
+					}
+
+				}
+			}
+
 		}
+
 		if (!typeRegister.equals("0") && !isError) {
 			Session session = factory.openSession();
 			Transaction t = session.beginTransaction();
@@ -324,6 +406,7 @@ public class CustomerController extends MethodAdminController {
 						if (value != null) {
 							ScheduleEntity schedule = new ScheduleEntity(personalClass.getClassId(), personalClass, i,
 									Integer.parseInt(value));
+							checkExceedAtTime(schedule);
 							session.save(schedule);
 
 						}
@@ -331,7 +414,7 @@ public class CustomerController extends MethodAdminController {
 
 				}
 				if (request.getParameter("is-select-course-2").equals("1")) {
-					String typeRegister2 = request.getParameter("typeRegister2");
+
 					String classId2 = request.getParameter("class2");
 					if (typeRegister2.equals("1")) {
 						session.save(new RegisterDetailEntity(register, getClass(classId2)));
@@ -496,6 +579,7 @@ public class CustomerController extends MethodAdminController {
 						if (value != null) {
 							ScheduleEntity schedule = new ScheduleEntity(personalClass.getClassId(), personalClass, i,
 									Integer.parseInt(value));
+
 							session.save(schedule);
 
 						}
@@ -526,6 +610,7 @@ public class CustomerController extends MethodAdminController {
 								if (value != null) {
 									ScheduleEntity schedule = new ScheduleEntity(personalClass.getClassId(),
 											personalClass, i, Integer.parseInt(value));
+
 									session.save(schedule);
 
 								}
