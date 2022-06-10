@@ -1,6 +1,7 @@
 package com.GymManager.Controller;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -12,8 +13,11 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.GymManager.Entity.AccountEntity;
+import com.GymManager.Entity.ClassEntity;
 import com.GymManager.Entity.RegisterEntity;
+import com.GymManager.Entity.ScheduleEntity;
 import com.GymManager.Entity.TrainingPackEntity;
+import com.GymManager.ExtraClass.GymLimit;
 
 @Transactional
 public class MethodAdminController {
@@ -104,6 +108,59 @@ public class MethodAdminController {
 	public String hashPass(String matKhau) {
 		String hashpw = DigestUtils.md5Hex(matKhau).toUpperCase();
 		return hashpw;
+	}
+
+	public boolean checkDuplicateShedule(List<ScheduleEntity> list1, List<ScheduleEntity> list2) {
+
+		for (ScheduleEntity scheduleEntity : list1) {
+			for (ScheduleEntity scheduleEntity2 : list2) {
+				if (scheduleEntity.getDay() == scheduleEntity2.getDay()
+						&& scheduleEntity.getSession() == scheduleEntity2.getSession()) {
+					return true; // trung
+				}
+			}
+		}
+		return false; // khong trung
+	}
+
+	public boolean checkExceedAtTime(ScheduleEntity scheduleEntity) {
+		int num = 0;
+
+		for (ClassEntity classEntity : getAllClass()) {
+
+			for (ScheduleEntity scheduleEntity1 : classEntity.getScheduleEntity()) {
+
+				if (scheduleEntity.getDay() == scheduleEntity1.getDay()
+						&& scheduleEntity.getSession() == scheduleEntity1.getSession()) {
+					num += 1;
+				}
+
+			}
+
+		}
+
+		if (num == new GymLimit().getMaxAtTime()) {
+			return true;
+		}
+
+		System.out.println(num);
+
+		return false;
+	}
+
+	public List<ClassEntity> getAllClass() {
+		Session session = factory.getCurrentSession();
+		String hql = "FROM ClassEntity where maxPP > 1";
+		Query query = session.createQuery(hql);
+		List<ClassEntity> list = query.list();
+		List<ClassEntity> newList = new ArrayList<ClassEntity>();
+		for (ClassEntity classEntity : list) {
+			if (classEntity.getClassPeriod() != 2) {
+				newList.add(classEntity);
+			}
+
+		}
+		return newList;
 	}
 
 }

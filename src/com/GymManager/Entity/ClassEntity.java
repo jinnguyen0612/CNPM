@@ -30,29 +30,24 @@ public class ClassEntity {
 	private String classId;
 
 	@Column(name = "NgayMoDK")
-	@NotNull(message = "Ngày mở đăng ký không được để trống")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateOpen;
 
 	@Column(name = "NgayDongDK")
-	@NotNull(message = "Ngày đóng đăng ký không được để trống")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateClose;
 
 	@Column(name = "NgayBatDauLop")
-	@NotNull(message = "Ngày bắt đầu lớp không được để trống")
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateStart;
-	@Min(value = 2, message = "Số lượng người đăng ký tối đa phải lớn 1")
 	@Column(name = "SoLuongNguoiToiDa")
 	private int maxPP;
 
 	// join to column
 	@Column(name = "PT", insertable = false, updatable = false)
-	@NotEmpty(message = "Huấn luyện viên không được để trống")
 	private String PT;
 
 	@ManyToOne

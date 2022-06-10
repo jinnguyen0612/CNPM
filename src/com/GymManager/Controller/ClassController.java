@@ -75,7 +75,9 @@ public class ClassController extends MethodAdminController {
 		classer.setTrainingPackEntity(trainingPackEntity);
 		classer.setPtEntity(ptEntity);
 
-		if (!result.hasErrors()) {
+		boolean isValid = checkValidClass(classer, result, "classer");
+
+		if (!result.hasErrors() && isValid) {
 			Session session = factory.openSession();
 			Transaction t = session.beginTransaction();
 			try {
@@ -156,6 +158,8 @@ public class ClassController extends MethodAdminController {
 		classEntity.setTrainingPackEntity(trainingPackEntity);
 
 		boolean isValid = true;
+
+		isValid = checkValidClass(classEntity, result, "classUpdate");
 
 		if (oldClass.getRegisterDetailEntities() != null) {
 			if (classEntity.getMaxPP() < getClassEntity(id).getRegisterDetailEntities().size()) {
@@ -331,6 +335,36 @@ public class ClassController extends MethodAdminController {
 			t.rollback();
 		}
 		return true;
+	}
+
+	public boolean checkValidClass(ClassEntity classEntity, BindingResult result, String type) {
+		boolean isValid = true;
+		if (classEntity.getPT().equals("")) {
+			isValid = false;
+			result.rejectValue("PT", type, "Nội dung này không được bỏ trống");
+		}
+		if (classEntity.getPackId().equals("")) {
+			isValid = false;
+			result.rejectValue("packId", type, "Nội dung này không được bỏ trống");
+		}
+		if (classEntity.getDateStart() == null) {
+			isValid = false;
+			result.rejectValue("dateStart", type, "Nội dung này không được bỏ trống");
+		}
+		if (classEntity.getDateClose() == null) {
+			isValid = false;
+			result.rejectValue("dateClose", type, "Nội dung này không được bỏ trống");
+		}
+		if (classEntity.getDateOpen() == null) {
+			isValid = false;
+			result.rejectValue("dateOpen", type, "Nội dung này không được bỏ trống");
+		}
+		if (classEntity.getMaxPP() < 2) {
+			isValid = false;
+			result.rejectValue("maxPP", type, "Số người đăng ký phải lớn hơn 2");
+		}
+
+		return isValid;
 	}
 
 }
