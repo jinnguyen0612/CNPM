@@ -406,7 +406,6 @@ public class CustomerController extends MethodAdminController {
 						if (value != null) {
 							ScheduleEntity schedule = new ScheduleEntity(personalClass.getClassId(), personalClass, i,
 									Integer.parseInt(value));
-							checkExceedAtTime(schedule);
 							session.save(schedule);
 
 						}

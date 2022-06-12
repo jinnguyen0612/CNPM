@@ -784,7 +784,7 @@
 		<!-- table detail -->
 		<div class="modal fade" id="modal-detail" tabindex="-1">
 			<div class="modal-dialog modal-lg modal-dialog-centered"
-				style="max-width: 1024px">
+				style="max-width: 1100px">
 				<div class="modal-content">
 					<div class="modal-header bg-primary text-white px-3 py-2">
 						<h5 class="modal-title">Chi tiết thông tin khách hàng</h5>
@@ -931,6 +931,24 @@
 																		</button>
 																	</c:otherwise>
 																</c:choose>
+																<c:choose>
+																	<c:when test="${r.status == 0}">
+																		<a class="btnCheckout"
+																			href="admin/contract-registration/cancel/${r.registerId}.htm">
+																			<button title="Huỷ đăng ký"
+																				class="btn btn-outline-danger btn-sm">
+																				<i class="fa-solid fa-ban"></i>
+																			</button>
+																		</a>
+
+																	</c:when>
+																	<c:otherwise>
+																		<button title="Huỷ đăng ký" disabled="disabled"
+																			class="btn  btn-sm btn-secondary">
+																			<i class="fa-solid fa-ban"></i>
+																		</button>
+																	</c:otherwise>
+																</c:choose>
 
 															</div>
 
@@ -970,7 +988,35 @@
 																			</div>
 																			<div class="row mt-4">
 																				<div class="col-lg-5 col-md-4 label">Hình thức</div>
-																				<div class="col-lg-7 col-md-8">${d.classEntity.maxPP == 1?'Cá nhân':'Lớp' }
+																				<div class="col-lg-7 col-md-8">
+																					<c:choose>
+																						<c:when test="${d.classEntity.maxPP == 1}">
+																				
+																				Cá nhân
+																				</c:when>
+																						<c:otherwise>
+																				Lớp (${d.classEntity.classId})
+																				</c:otherwise>
+																					</c:choose>
+																				</div>
+																			</div>
+																			<div class="row mt-4">
+																				<div class="col-lg-5 col-md-4 label">Trạng
+																					thái</div>
+																				<div class="col-lg-7 col-md-8">
+																					<c:choose>
+																						<c:when
+																							test="${d.classEntity.getClassPeriod() == 1}">
+																							<span class=" text-success">Đang diễn ra</span>
+																						</c:when>
+																						<c:when
+																							test="${d.classEntity.getClassStatus() == 2}">
+																							<span class="text-secondary"> Kết thúc </span>
+																						</c:when>
+																						<c:otherwise>
+																							<span class="text-danger">Chưa bắt đầu</span>
+																						</c:otherwise>
+																					</c:choose>
 																				</div>
 																			</div>
 

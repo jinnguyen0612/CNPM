@@ -103,6 +103,23 @@
 															<i class="fa-solid fa-ballot"></i>
 														</button>
 													</c:otherwise>
+												</c:choose> <c:choose>
+													<c:when test="${r.status == 0}">
+														<a class="btnCheckout"
+															href="admin/contract-registration/cancel/${r.registerId}.htm">
+															<button title="Huỷ đăng ký"
+																class="btn btn-outline-danger btn-sm">
+																<i class="fa-solid fa-ban"></i>
+															</button>
+														</a>
+
+													</c:when>
+													<c:otherwise>
+														<button title="Huỷ đăng ký" disabled="disabled"
+															class="btn  btn-sm btn-secondary">
+															<i class="fa-solid fa-ban"></i>
+														</button>
+													</c:otherwise>
 												</c:choose></td>
 										</tr>
 									</c:forEach>
@@ -229,8 +246,6 @@
 																	<div class="col-lg-7 col-md-8">${d.classEntity.maxPP == 1?'Cá nhân':'Lớp' }
 																	</div>
 																</div>
-
-
 
 																<button type="button" data=".T-${d.classEntity.classId}"
 																	class="btn-show-time-table-detail btn btn-outline-success btn-light btn-sm">

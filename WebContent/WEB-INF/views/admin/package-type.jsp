@@ -125,7 +125,7 @@
 							<div class="col-md-12">
 								<label class="form-label">Mã: </label>
 								<form:input path="packTypeID" type="text" class="form-control"
-									id="input-package-name" required="text" />
+									id="input-package-name" required="text" readonly="true" />
 							</div>
 
 							<div class="col-md-12">

@@ -56,14 +56,14 @@ public class ContractRegistrationController extends MethodAdminController {
 		if (getRegister(id).getStatus() == 1) {
 			redirectAttributes.addFlashAttribute("message",
 					new Message("error", "Đăng ký này đã thanh toán đừng vọc phá nữa !!!"));
-			String referer = request.getHeader("Referer");
-			return "redirect:" + referer;
+
+			return "redirect:admin/login.htm";
 		}
 		if (getRegister(id).getStatus() == 2) {
 			redirectAttributes.addFlashAttribute("message",
 					new Message("error", "Đăng ký này đã huỷ, không thể thanh toán !!!"));
-			String referer = request.getHeader("Referer");
-			return "redirect:" + referer;
+
+			return "redirect:admin/login.htm";
 		}
 
 		AccountEntity accountEntity = (AccountEntity) ss.getAttribute("admin");
@@ -89,6 +89,53 @@ public class ContractRegistrationController extends MethodAdminController {
 
 		} else {
 			redirectAttributes.addFlashAttribute("message", new Message("success", "Thanh toán thất bại"));
+		}
+		redirectAttributes.addFlashAttribute("registerList", getAllRegister());
+		String referer = request.getHeader("Referer");
+		return "redirect:" + referer;
+	}
+
+	@RequestMapping(value = "/cancel/{id}.htm", method = RequestMethod.GET)
+	public String cancel(HttpServletRequest request, ModelMap model, @PathVariable("id") String id,
+			RedirectAttributes redirectAttributes, HttpSession ss) throws MessagingException {
+		RegisterEntity registerEntity = getRegister(id);
+
+		if (getRegister(id).getStatus() == 1) {
+			redirectAttributes.addFlashAttribute("message",
+					new Message("error", "Đăng ký này đã thanh toán đừng vọc phá nữa !!!"));
+
+			return "redirect:admin/login.htm";
+		}
+		if (getRegister(id).getStatus() == 2) {
+			redirectAttributes.addFlashAttribute("message",
+					new Message("error", "Đăng ký này đã thanh toán đừng vọc phá nữa !!!"));
+
+			return "redirect:admin/login.htm";
+		}
+
+		AccountEntity accountEntity = (AccountEntity) ss.getAttribute("admin");
+
+		StaffEntity staffEntity = accountEntity.getStaff();
+
+		boolean isSucces = updateStatusRegister(registerEntity, 2, staffEntity);
+		if (isSucces) {
+			redirectAttributes.addFlashAttribute("message", new Message("success", "Huỷ thành công"));
+			String mailMessage = "Hợp đồng đăng ký tập với mã đăng ký là: " + id + "của bạn đã huỷ";
+			try {
+				MimeMessage mail = mailer.createMimeMessage();
+				MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+				helper.setFrom("nguyenminhnhat301101@gmail.com", "PTITGYM");
+				helper.setTo(registerEntity.getCustomer().getEmail());
+				helper.setReplyTo("nguyenminhnhat301101@gmail.com");
+				helper.setSubject("Huỷ hợp đồng đăng ký PTITGYM");
+				helper.setText(mailMessage);
+				mailer.send(mail);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+
+		} else {
+			redirectAttributes.addFlashAttribute("message", new Message("success", "Huỷ thất bại"));
 		}
 		redirectAttributes.addFlashAttribute("registerList", getAllRegister());
 		String referer = request.getHeader("Referer");
@@ -154,7 +201,10 @@ public class ContractRegistrationController extends MethodAdminController {
 		Transaction t = session.beginTransaction();
 		try {
 			registerEntity.setStatus(status);
-			registerEntity.setStaffEntity(staffEntity);
+			if (status != 2) {
+				registerEntity.setStaffEntity(staffEntity);
+			}
+
 			session.merge(registerEntity);
 			t.commit();
 		} catch (Exception e) {
